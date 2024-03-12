@@ -152,7 +152,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
     }
 
     public void prepare() throws IOException {
-        System.out.println("prepare to read logs");
+        log.info("prepare to read logs");
         LOG_DIR =
                 PropertiesProvider.getProperty("receiver.otlpLogFileReceiver.logDir");
         if (LOG_DIR == null || LOG_DIR.isEmpty()) {
@@ -160,7 +160,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
         }
         logs = new File(LOG_DIR);
         if (!logs.exists()) {
-            throw new RuntimeException("logs dic does not exists");
+            throw new RuntimeException("logs dic " + LOG_DIR +  " does not exists");
         }
         initCreateTimeFileMap();
         initParamsWithIndex();
@@ -171,7 +171,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
         // 去logs目录下检索是否有index文件
         indexFile = new File(LOG_DIR + "logs.index");
         if (indexFile.exists()) {
-            String line = null;
+            String line;
             try {
                 line = FileUtils.readLines(indexFile, StandardCharsets.UTF_8).get(0);
             } catch (IOException e) {
