@@ -9,7 +9,7 @@
         <version>0.0.1</version>
     </parent>
 
-    <artifactId>arktoutos-collector</artifactId>
+    <artifactId>arktouros-collector</artifactId>
 
     <dependencies>
         <dependency>

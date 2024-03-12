@@ -10,7 +10,7 @@
     <name>arktouros</name>
     <description>an APM system</description>
     <modules>
-        <module>arktoutos-collector</module>
+        <module>arktouros-collector</module>
     </modules>
 
     <packaging>pom</packaging>
