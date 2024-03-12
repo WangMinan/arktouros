@@ -1,16 +1,12 @@
 package edu.npu.cache;
 
-import java.util.Queue;
-
 /**
  * @author : [wangminan]
  * @description : 存储的抽象类
  */
-public abstract class AbstractCache<T> {
+public abstract class AbstractCache {
 
-    public void put(T t) {}
+    public abstract void put(Object object);
 
-    public T get() {
-        return null;
-    }
+    public abstract Object get();
 }

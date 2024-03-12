@@ -42,11 +42,18 @@
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <antlr.version>4.13.1</antlr.version>
         <lombok.version>1.18.30</lombok.version>
+        <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
+        <snakeyaml.version>2.2</snakeyaml.version>
+
+        <!-- commons -->
+        <commons-lang3.version>3.14.0</commons-lang3.version>
+        <commons-io.version>2.15.1</commons-io.version>
+        <!-- commons -->
+
+        <!-- log4j2 -->
         <slf4j.version>2.0.7</slf4j.version>
         <log4j2.version>2.20.0</log4j2.version>
-        <junit-jupiter.version>5.10.2</junit-jupiter.version>
-        <mockito.version>5.11.0</mockito.version>
-        <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
+        <!-- log4j2 -->
 
         <!-- grpc -->
         <grpc.version>1.62.2</grpc.version>
@@ -57,6 +64,8 @@
         <!-- grpc -->
 
         <!-- UT -->
+        <junit-jupiter.version>5.10.2</junit-jupiter.version>
+        <mockito.version>5.11.0</mockito.version>
         <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <skipUTs>false</skipUTs>
@@ -69,7 +78,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -84,38 +92,27 @@
                 <version>${lombok.version}</version>
             </dependency>
 
-            <!-- Log4j2 -->
-            <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-slf4j2-impl -->
+            <!-- commons -->
             <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-slf4j2-impl</artifactId>
-                <version>${log4j2.version}</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
             <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-api</artifactId>
-                <version>${log4j2.version}</version>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
             </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                <version>${log4j2.version}</version>
-            </dependency>
-            <!-- Log4j2 -->
+            <!-- commons -->
 
             <!-- Unit Test -->
-            <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
@@ -123,7 +120,6 @@
                 <scope>test</scope>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
@@ -131,7 +127,6 @@
                 <scope>test</scope>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-junit-jupiter</artifactId>
@@ -141,21 +136,18 @@
             <!-- Unit Test -->
 
             <!-- grpc全家桶 -->
-            <!-- https://mvnrepository.com/artifact/io.grpc/grpc-netty -->
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-netty</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/io.grpc/grpc-protobuf -->
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-protobuf</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/io.grpc/grpc-stub -->
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-stub</artifactId>
@@ -169,6 +161,32 @@
                 <version>${javax.annotation-api.version}</version>
                 <scope>provided</scope>
             </dependency>
+
+            <!-- log4j2全家桶 -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j2-impl</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <!-- log4j2全家桶 -->
         </dependencies>
     </dependencyManagement>
 

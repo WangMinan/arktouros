@@ -1,0 +1,7 @@
+instance:
+  cache: LogQueueCache
+  receiver: OtlpLogFileReceiver
+
+receiver:
+  otlpLogFileReceiver:
+    logDir: /var/log/arktouros
