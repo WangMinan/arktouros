@@ -73,18 +73,17 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
     }
 
     private void readFile() throws InterruptedException {
-        log.info("start reading log: {}, current position: {}",
+        log.info("continuing reading log: {}, current position: {}",
                 currentFile.getName(), currentPos);
         // 存在逐步写入情况 使用buffer读
         readCurrentFileWithChannel();
         // readCurrentFileWithStream();
-        log.info("read complete, start switching, current file: {}, current position: {}",
-                currentFile.getName(), currentPos);
-        // 如果当前文件读完 确认是否切换
+        // 如果当前文件读完 尝试切换
         if (currentPos == currentFile.length()) {
+            log.info("read complete, start switching, current file: {}, current position: {}",
+                    currentFile.getName(), currentPos);
             // 重置映射关系
             initCreateTimeFileMap();
-            readCurrentFileWithStream();
             // 找出比当前文件更新的文件
             long gap = Long.MAX_VALUE;
             File lastFile = currentFile;
@@ -102,11 +101,13 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
             currentFile = tmpFile;
             currentFileCreateTime = tmpCreateTime;
             if (currentFile.equals(lastFile)) {
+                // 没有找到比当前文件更新的文件
                 log.info("All files have been read. Waiting for new input.");
                 Thread.sleep(2000);
+            } else {
+                log.info("switch to file: {}, current position: {}", currentFile.getName(), currentPos);
             }
         }
-        log.info("switch to file: {}, current position: {}", currentFile.getName(), currentPos);
     }
 
     // 定义一个方法，用于读取当前的输入流
@@ -129,7 +130,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
         }
     }
 
-    private static void readCurrentFileWithChannel() {
+    private void readCurrentFileWithChannel() {
         try (FileInputStream fis = new FileInputStream(currentFile);
              FileChannel channel = fis.getChannel()) {
             ByteBuffer buffer = ByteBuffer.allocate(8 * 1024 * 1024);
@@ -139,7 +140,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
                 byte[] bytes = new byte[bytesRead];
                 buffer.get(bytes);
                 String line = new String(bytes);
-                // System.out.print(line);
+                this.outputCache.put(line);
                 currentPos += bytesRead;
                 String indexLine = currentFileCreateTime + ":" + currentPos;
                 Files.write(indexFile.toPath(), List.of(indexLine),

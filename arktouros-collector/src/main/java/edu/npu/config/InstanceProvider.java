@@ -17,6 +17,8 @@ public class InstanceProvider {
 
     private static String receiverClassName;
 
+    private static AbstractCache receiverOutputCache;
+
     public static void init() {
         cacheClassName =
                 PropertiesProvider.getProperty("instance.cache");
@@ -26,15 +28,16 @@ public class InstanceProvider {
 
 
     public static AbstractReceiver getReceiver() {
-        AbstractCache cache = getNewCache();
+        receiverOutputCache = getNewCache();
         // 避免反射 手动加载
         if (StringUtils.isNotEmpty(receiverClassName) &&
                 receiverClassName.equals("OtlpLogFileReceiver")) {
-            return new OtlpLogFileReceiver(cache);
+            return new OtlpLogFileReceiver(receiverOutputCache);
         } else {
             throw new IllegalArgumentException("Unknown receiver class: " + receiverClassName);
         }
     }
+
 
     public static AbstractCache getNewCache() {
         // 避免反射 手动加载

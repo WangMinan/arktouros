@@ -11,6 +11,7 @@ public abstract class AbstractReceiver extends Thread {
 
     public AbstractReceiver(AbstractCache outputCache) {
         super();
+        this.setName("receiver-thread");
         this.outputCache = outputCache;
     }
 }
