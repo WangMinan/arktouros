@@ -18,7 +18,7 @@ public class PropertiesProvider {
     public static void init() {
         // 从resources目录下读取配置文件 application.yaml
         try (InputStream propertiesFileInputStream =
-                     PropertiesProvider.class.getResourceAsStream("/application.yaml")) {
+                     PropertiesProvider.class.getResourceAsStream("/application.properties")) {
             properties = new Properties();
             properties.load(propertiesFileInputStream);
         } catch (IOException e) {

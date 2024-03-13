@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 public class LogQueueCache extends AbstractCache {
 
     private static final int DEFAULT_CAPACITY = 1000;
-    private static final int TAKE_TIMEOUT = 3;
 
     private final BlockingQueue<String> queue =
             new ArrayBlockingQueue<>(DEFAULT_CAPACITY);
@@ -26,10 +25,6 @@ public class LogQueueCache extends AbstractCache {
     }
 
     public String get() {
-        try {
-            return queue.poll(TAKE_TIMEOUT, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return queue.poll();
     }
 }
