@@ -1,20 +1,17 @@
----
 name: Lint
 
-on:  # yamllint disable-line rule:truthy
-  push: null
-  pull_request: null
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     name: Lint
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      packages: read
-      # To report GitHub Actions status checks
-      statuses: write
+    permissions: read-all
 
     steps:
       - name: Checkout code
