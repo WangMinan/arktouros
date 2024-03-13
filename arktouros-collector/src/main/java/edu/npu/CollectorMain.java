@@ -2,6 +2,7 @@ package edu.npu;
 
 import edu.npu.config.InstanceProvider;
 import edu.npu.emit.AbstractEmitter;
+import edu.npu.emit.grpc.GrpcEmitter;
 import edu.npu.preHandler.AbstractPreHandler;
 import edu.npu.properties.PropertiesProvider;
 import edu.npu.receiver.AbstractReceiver;
@@ -28,12 +29,6 @@ public class CollectorMain {
         PropertiesProvider.init();
         InstanceProvider.init();
 
-        Runtime.getRuntime().addShutdownHook(
-                new Thread(() -> {
-                    executorService.shutdown();
-                    log.info("Collector shutdown");
-                })
-        );
         AbstractReceiver receiver = InstanceProvider.getReceiver();
         // 启动receiver
         executorService.submit(receiver);
@@ -45,6 +40,16 @@ public class CollectorMain {
         AbstractEmitter emitter = InstanceProvider.getEmitter();
         // 启动emitter
         executorService.submit(emitter);
+
+        Runtime.getRuntime().addShutdownHook(
+                new Thread(() -> {
+                    if (emitter instanceof GrpcEmitter) {
+                        ((GrpcEmitter) emitter).getChannel().shutdown();
+                    }
+                    executorService.shutdown();
+                    log.info("Collector shutdown");
+                })
+        );
 
         // 阻塞主线程
         runningLatch.await();

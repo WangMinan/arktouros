@@ -18,61 +18,11 @@
     </properties>
 
     <dependencies>
-        <!-- grpc全家桶 -->
-        <!-- https://mvnrepository.com/artifact/io.grpc/grpc-netty -->
         <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty</artifactId>
-            <version>${grpc.version}</version>
+            <groupId>edu.npu</groupId>
+            <artifactId>arktouros-base</artifactId>
+            <version>0.0.1</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/io.grpc/grpc-protobuf -->
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-protobuf</artifactId>
-            <version>${grpc.version}</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/io.grpc/grpc-stub -->
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-stub</artifactId>
-            <version>${grpc.version}</version>
-        </dependency>
-        <!-- grpc全家桶 -->
-
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>${javax.annotation-api.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- log4j2全家桶 -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j2-impl</artifactId>
-            <version>${log4j2.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${log4j2.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j2.version}</version>
-        </dependency>
-        <!-- log4j2全家桶 -->
     </dependencies>
 
     <build>

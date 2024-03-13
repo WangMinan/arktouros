@@ -18,13 +18,10 @@ import org.apache.commons.lang3.StringUtils;
 public class InstanceProvider {
 
     private static String cacheClassName;
-
     private static String receiverClassName;
-
+    private static String preHandlerClassName;
     private static String emitterClassName;
-
     private static AbstractCache receiverOutputCache; // 也是 preHandler的inputCache
-
     private static AbstractCache preHandlerOutputCache; // 也是 emitter的inputCache
 
     public static void init() {
@@ -32,6 +29,8 @@ public class InstanceProvider {
                 PropertiesProvider.getProperty("instance.cache");
         receiverClassName =
                 PropertiesProvider.getProperty("instance.receiver");
+        preHandlerClassName =
+                PropertiesProvider.getProperty("instance.preHandler");
         emitterClassName =
                 PropertiesProvider.getProperty("instance.emitter");
     }
@@ -51,8 +50,8 @@ public class InstanceProvider {
     public static AbstractPreHandler getPreHandler() {
         preHandlerOutputCache = getNewCache();
         // 避免反射 手动加载
-        if (StringUtils.isNotEmpty(receiverClassName) &&
-                receiverClassName.equals("OtlpLogPreHandler")) {
+        if (StringUtils.isNotEmpty(preHandlerClassName) &&
+                preHandlerClassName.equals("OtlpLogPreHandler")) {
             return new OtlpLogPreHandler(receiverOutputCache, preHandlerOutputCache);
         } else {
             throw new IllegalArgumentException("Unknown receiver class: " + receiverClassName);
@@ -68,7 +67,7 @@ public class InstanceProvider {
         }
     }
 
-    private static <T> AbstractCache getNewCache() {
+    private static AbstractCache getNewCache() {
         // 避免反射 手动加载
         if (StringUtils.isNotEmpty(cacheClassName) &&
                 cacheClassName.equals("LogQueueCache")) {

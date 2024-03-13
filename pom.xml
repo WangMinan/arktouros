@@ -13,6 +13,7 @@
         <module>arktouros-collector</module>
         <module>arktouros-apm</module>
         <module>arktouros-protocol</module>
+        <module>arktouros-base</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -146,6 +147,12 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-stub</artifactId>
                 <version>${grpc.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>${com.google.protobuf.protoc.version}</version>
             </dependency>
             <!-- grpc全家桶 -->
 
