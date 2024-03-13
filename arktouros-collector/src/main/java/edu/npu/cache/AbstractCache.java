@@ -6,7 +6,7 @@ package edu.npu.cache;
  */
 public abstract class AbstractCache {
 
-    public abstract void put(Object object);
+    public abstract void put(String line);
 
-    public abstract Object get();
+    public abstract String get();
 }

@@ -155,7 +155,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
     public void prepare() throws IOException {
         log.info("prepare to read logs");
         LOG_DIR =
-                PropertiesProvider.getProperty("receiver.otlpLogFileReceiver.logDir");
+                PropertiesProvider.getProperty("receiver.otlpLogFile.logDir");
         if (LOG_DIR == null || LOG_DIR.isEmpty()) {
             throw new IllegalArgumentException("log dir in config file is empty");
         }

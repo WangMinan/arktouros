@@ -15,21 +15,23 @@ public class LogQueueCache extends AbstractCache {
     private static final int DEFAULT_CAPACITY = 1000;
     private static final int TAKE_TIMEOUT = 3;
 
-    private final BlockingQueue<Object> queue =
+    private final BlockingQueue<String> queue =
             new ArrayBlockingQueue<>(DEFAULT_CAPACITY);
 
-    @Override
-    @SneakyThrows(InterruptedException.class)
-    public void put(Object object) {
-        if (object == null) {
-            return;
+
+    public void put(String object) {
+        try {
+            queue.put(object);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
-        queue.put(object);
     }
 
-    @Override
-    @SneakyThrows(InterruptedException.class)
-    public Object get() {
-        return queue.poll(TAKE_TIMEOUT, TimeUnit.SECONDS);
+    public String get() {
+        try {
+            return queue.poll(TAKE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
