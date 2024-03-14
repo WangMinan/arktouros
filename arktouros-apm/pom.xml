@@ -43,7 +43,7 @@
                         <configuration>
                             <fallback>false</fallback>
                             <imageName>${project.artifactId}</imageName>
-                            <mainClass>edu.npu.arktouros.CollectorMain</mainClass>
+                            <mainClass>edu.npu.arktouros.ApmMain</mainClass>
                             <buildArgs>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                             </buildArgs>
@@ -58,18 +58,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- Spring Boot 集成 log4j2 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
 
         <dependency>
