@@ -60,6 +60,8 @@ jobs:
           java-version: '21'      # See 'Options' section below for all supported versions
           distribution: 'graalvm' # See 'Options' section below for all available distributions
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
+          native-image-job-reports: 'true'
 
       - name: Build with Maven
         run: mvn -Dmaven.test.skip=true clean install
