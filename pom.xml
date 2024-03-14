@@ -30,47 +30,6 @@
                 <maven.compiler.compilerVersion>21</maven.compiler.compilerVersion>
             </properties>
         </profile>
-        <profile>
-            <id>native-image</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>${native-maven-plugin.version}</version>
-                        <extensions>true</extensions>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <goals>
-                                    <goal>compile-no-fork</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                            <execution>
-                                <id>test-native</id>
-                                <goals>
-                                    <goal>test</goal>
-                                </goals>
-                                <phase>test</phase>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <verbose>true</verbose>
-                            <!-- For Quick Build (22.1+) -->
-                            <!-- <quickBuild>true</quickBuild> -->
-                            <buildArgs>
-                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
-                                <!-- For mostly static native image (only on Linux AMD64 systems) -->
-                                <!-- <buildArg>-H:+StaticExecutableWithDynamicLibC</buildArg> -->
-                                <!-- To generate the Native Image build output JSON (22.3+) -->
-                                <!-- <buildArg>-H:BuildOutputJSONFile=build.json</buildArg> -->
-                            </buildArgs>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
 
     <properties>
@@ -81,7 +40,7 @@
         <!-- maven plugin -->
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <native-maven-plugin.version>0.10.1</native-maven-plugin.version>
-        <maven-shade-plugin.version>3.5.2</maven-shade-plugin.version>
+        <maven-assembly-plugin.version>3.7.0</maven-assembly-plugin.version>
         <!-- maven plugin -->
 
         <springboot.version>3.2.3</springboot.version>
@@ -292,10 +251,9 @@
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>${maven-shade-plugin.version}</version>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven-assembly-plugin.version}</version>
                 </plugin>
-
             </plugins>
         </pluginManagement>
         <plugins>
