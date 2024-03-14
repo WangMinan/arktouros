@@ -64,7 +64,7 @@ jobs:
           native-image-job-reports: 'true'
 
       - name: Build with Maven
-        run: mvn -Dmaven.test.skip=true clean install
+        run: mvn -Pnative -Dmaven.test.skip=true clean install
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
