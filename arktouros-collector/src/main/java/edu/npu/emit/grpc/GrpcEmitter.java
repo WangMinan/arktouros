@@ -3,6 +3,7 @@ package edu.npu.emit.grpc;
 import edu.npu.cache.AbstractCache;
 import edu.npu.commons.ProtoBufJsonUtils;
 import edu.npu.emit.AbstractEmitter;
+import edu.npu.emit.EmitterFactory;
 import edu.npu.properties.PropertiesProvider;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -109,5 +110,13 @@ public class GrpcEmitter extends AbstractEmitter {
                         .build();
         ExportTraceServiceResponse response = traceServiceBlockingStub.export(request);
         log.debug("response from apm: {}", response);
+    }
+
+    public static class Factory implements EmitterFactory {
+
+        @Override
+        public AbstractEmitter createEmitter(AbstractCache inputCache) {
+            return new GrpcEmitter(inputCache);
+        }
     }
 }

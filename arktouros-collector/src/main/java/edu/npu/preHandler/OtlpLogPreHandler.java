@@ -47,4 +47,12 @@ public class OtlpLogPreHandler extends AbstractPreHandler{
             }
         }
     }
+
+    public static class Factory implements PreHandlerFactory {
+
+        @Override
+        public AbstractPreHandler createPreHandler(AbstractCache inputCache, AbstractCache outputCache) {
+            return new OtlpLogPreHandler(inputCache, outputCache);
+        }
+    }
 }

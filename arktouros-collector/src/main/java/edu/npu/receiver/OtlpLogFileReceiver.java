@@ -238,4 +238,12 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
             }
         }
     }
+
+    public static class Factory implements ReceiverFactory {
+
+        @Override
+        public AbstractReceiver createReceiver(AbstractCache outputCache) {
+            return new OtlpLogFileReceiver(outputCache);
+        }
+    }
 }

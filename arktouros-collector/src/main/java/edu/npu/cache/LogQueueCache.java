@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
  * @author : [wangminan]
  * @description : [一句话描述该类的功能]
  */
-public class LogQueueCache extends AbstractCache {
+public class LogQueueCache implements AbstractCache {
 
     private static final int DEFAULT_CAPACITY = 1000;
 
@@ -26,5 +26,12 @@ public class LogQueueCache extends AbstractCache {
 
     public String get() {
         return queue.poll();
+    }
+
+    public static class Factory implements CacheFactory{
+        @Override
+        public AbstractCache createCache() {
+            return new LogQueueCache();
+        }
     }
 }

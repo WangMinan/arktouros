@@ -42,8 +42,10 @@
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <antlr.version>4.13.1</antlr.version>
         <lombok.version>1.18.30</lombok.version>
+        <snakeyaml.verison>2.2</snakeyaml.verison>
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
         <jackson.version>2.17.0-rc1</jackson.version>
+        <druid.version>1.2.21</druid.version>
         <elasticsearch-java.version>8.12.2</elasticsearch-java.version>
         <h2.version>2.2.224</h2.version>
 
@@ -94,6 +96,14 @@
                 <version>${lombok.version}</version>
             </dependency>
 
+            <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.verison}</version>
+            </dependency>
+
+
             <!-- commons -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -108,6 +118,13 @@
             </dependency>
             <!-- commons -->
 
+            <!-- 数据层 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>co.elastic.clients</groupId>
                 <artifactId>elasticsearch-java</artifactId>
@@ -119,6 +136,7 @@
                 <artifactId>h2</artifactId>
                 <version>${h2.version}</version>
             </dependency>
+            <!-- 数据层 -->
 
             <!-- Unit Test -->
             <dependency>

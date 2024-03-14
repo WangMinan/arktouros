@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: arktouros-apm
+  profiles:
+    active: h2

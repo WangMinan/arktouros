@@ -1,14 +1,18 @@
 package edu.npu.config;
 
 import edu.npu.cache.AbstractCache;
+import edu.npu.cache.CacheFactory;
 import edu.npu.cache.LogQueueCache;
 import edu.npu.emit.AbstractEmitter;
+import edu.npu.emit.EmitterFactory;
 import edu.npu.emit.grpc.GrpcEmitter;
 import edu.npu.preHandler.AbstractPreHandler;
 import edu.npu.preHandler.OtlpLogPreHandler;
+import edu.npu.preHandler.PreHandlerFactory;
 import edu.npu.properties.PropertiesProvider;
 import edu.npu.receiver.AbstractReceiver;
 import edu.npu.receiver.OtlpLogFileReceiver;
+import edu.npu.receiver.ReceiverFactory;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -38,42 +42,50 @@ public class InstanceProvider {
 
     public static AbstractReceiver getReceiver() {
         receiverOutputCache = getNewCache();
+        ReceiverFactory factory;
         // 避免反射 手动加载
         if (StringUtils.isNotEmpty(receiverClassName) &&
                 receiverClassName.equals("OtlpLogFileReceiver")) {
-            return new OtlpLogFileReceiver(receiverOutputCache);
+            factory = new OtlpLogFileReceiver.Factory();
         } else {
             throw new IllegalArgumentException("Unknown receiver class: " + receiverClassName);
         }
+        return factory.createReceiver(receiverOutputCache);
     }
 
     public static AbstractPreHandler getPreHandler() {
         preHandlerOutputCache = getNewCache();
+        PreHandlerFactory factory;
         // 避免反射 手动加载
         if (StringUtils.isNotEmpty(preHandlerClassName) &&
                 preHandlerClassName.equals("OtlpLogPreHandler")) {
-            return new OtlpLogPreHandler(receiverOutputCache, preHandlerOutputCache);
+            factory = new OtlpLogPreHandler.Factory();
         } else {
             throw new IllegalArgumentException("Unknown receiver class: " + receiverClassName);
         }
+        return factory.createPreHandler(receiverOutputCache, preHandlerOutputCache);
     }
 
     public static AbstractEmitter getEmitter() {
+        EmitterFactory factory;
         if (StringUtils.isNotEmpty(emitterClassName) &&
                 emitterClassName.equals("GrpcEmitter")) {
-            return new GrpcEmitter(preHandlerOutputCache);
+            factory = new GrpcEmitter.Factory();
         } else {
             throw new IllegalArgumentException("Unknown emitter class: " + emitterClassName);
         }
+        return factory.createEmitter(preHandlerOutputCache);
     }
 
     private static AbstractCache getNewCache() {
+        CacheFactory factory;
         // 避免反射 手动加载
         if (StringUtils.isNotEmpty(cacheClassName) &&
                 cacheClassName.equals("LogQueueCache")) {
-            return new LogQueueCache();
+            factory = new LogQueueCache.Factory();
         } else {
             throw new IllegalArgumentException("Unknown cache class: " + cacheClassName);
         }
+        return factory.createCache();
     }
 }

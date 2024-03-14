@@ -1,0 +1,14 @@
+instance:
+  cache: LogQueueCache
+  receiver: OtlpLogFileReceiver
+  preHandler: OtlpLogPreHandler
+  emitter: GrpcEmitter
+
+receiver:
+  otlpLogFile:
+    logDir: logs
+
+emitter:
+  grpc:
+    host: localhost
+    port: 50051
