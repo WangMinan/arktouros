@@ -2,6 +2,7 @@ package edu.npu.arktouros.sink;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
@@ -9,9 +10,10 @@ import java.util.Locale;
  * @author : [wangminan]
  * @description : 数据库操作工厂
  */
+@Component
 public class DataOperationFactoryBean implements FactoryBean<DataOperation> {
 
-    @Value("${var.active.dataOperation}")
+    @Value("${instance.active.dataOperation}")
     private String activeDataOperation;
 
     @Override

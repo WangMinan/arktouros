@@ -14,6 +14,11 @@ spring:
       max-wait: 500
       validation-query: select 1
 
-var:
+instance:
   active:
+    dataReceiver: otelGrpc
     dataOperation: h2
+
+receiver:
+  grpc:
+    port: 50051
