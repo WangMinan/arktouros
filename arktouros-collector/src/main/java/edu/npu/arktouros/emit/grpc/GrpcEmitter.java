@@ -1,10 +1,10 @@
 package edu.npu.arktouros.emit.grpc;
 
+import edu.npu.arktouros.cache.AbstractCache;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
 import edu.npu.arktouros.emit.AbstractEmitter;
 import edu.npu.arktouros.emit.EmitterFactory;
 import edu.npu.arktouros.properties.PropertiesProvider;
-import edu.npu.arktouros.cache.AbstractCache;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;

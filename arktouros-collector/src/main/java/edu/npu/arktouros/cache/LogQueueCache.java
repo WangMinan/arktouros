@@ -27,6 +27,11 @@ public class LogQueueCache implements AbstractCache {
         return queue.poll();
     }
 
+    @Override
+    public boolean isEmpty() {
+        return queue.isEmpty();
+    }
+
     public static class Factory implements CacheFactory{
         @Override
         public AbstractCache createCache() {

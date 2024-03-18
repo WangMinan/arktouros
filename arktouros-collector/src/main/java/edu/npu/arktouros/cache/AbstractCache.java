@@ -9,4 +9,6 @@ public interface AbstractCache {
     void put(String line);
 
     String get();
+
+    boolean isEmpty();
 }
