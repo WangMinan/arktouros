@@ -34,4 +34,4 @@ build/
 ### Mac OS ###
 .DS_Store
 
-dependency-reduced-pom.xml
+./arktouros-apm/arktouros-apm-api/src/main/resources/application.yaml
