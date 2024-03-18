@@ -1,13 +1,15 @@
 package edu.npu.arktouros;
 
 import edu.npu.arktouros.config.InstanceProvider;
+import edu.npu.arktouros.emit.AbstractEmitter;
+import edu.npu.arktouros.emit.grpc.GrpcEmitter;
 import edu.npu.arktouros.preHandler.AbstractPreHandler;
 import edu.npu.arktouros.properties.PropertiesProvider;
 import edu.npu.arktouros.receiver.AbstractReceiver;
-import edu.npu.arktouros.emit.AbstractEmitter;
-import edu.npu.arktouros.emit.grpc.GrpcEmitter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,6 +45,21 @@ public class CollectorMain {
 
         Runtime.getRuntime().addShutdownHook(
                 new Thread(() -> {
+                    // 先暂停receiver
+                    receiver.interrupt();
+
+                    // 发送完emitter的cache中的所有数据
+                    Timer timer = new Timer();
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            if (emitter.getInputCache().isEmpty()) {
+                                timer.cancel();
+                            }
+                        }
+                    }, 0, 1000);
+
+                    // 停止发送
                     if (emitter instanceof GrpcEmitter) {
                         ((GrpcEmitter) emitter).getChannel().shutdown();
                     }

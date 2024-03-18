@@ -1,11 +1,17 @@
 package edu.npu.arktouros;
 
 import edu.npu.arktouros.receiver.DataReceiver;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author : [wangminan]

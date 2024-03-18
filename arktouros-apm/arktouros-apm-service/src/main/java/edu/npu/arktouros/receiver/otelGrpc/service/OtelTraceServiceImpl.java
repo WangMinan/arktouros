@@ -1,5 +1,6 @@
 package edu.npu.arktouros.receiver.otelGrpc.service;
 
+import edu.npu.arktouros.analyzer.otel.OtelTraceAnalyzer;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
@@ -11,9 +12,20 @@ import io.opentelemetry.proto.collector.trace.v1.TraceServiceGrpc;
  */
 public class OtelTraceServiceImpl extends TraceServiceGrpc.TraceServiceImplBase {
 
+    private final OtelTraceAnalyzer analyzer;
+
+    public OtelTraceServiceImpl() {
+        analyzer = OtelTraceAnalyzer.getInstance();
+        analyzer.start();
+    }
+
     @Override
     public void export(ExportTraceServiceRequest request,
                        StreamObserver<ExportTraceServiceResponse> responseObserver) {
-        super.export(request, responseObserver);
+        request.getResourceSpansList().forEach(resourceSpans -> {
+            analyzer.handle(resourceSpans);
+            responseObserver.onNext(ExportTraceServiceResponse.getDefaultInstance());
+            responseObserver.onCompleted();
+        });
     }
 }

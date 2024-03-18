@@ -15,10 +15,13 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
     @Value("${instance.active.dataReceiver}")
     private String activeDataReceiver;
 
+    @Value("${receiver.grpc.port}")
+    private int grpcPort;
+
     @Override
     public DataReceiver getObject() throws Exception {
         if (activeDataReceiver.equals("otelGrpc")) {
-            return new OtelGrpcReceiver();
+            return new OtelGrpcReceiver(grpcPort);
         } else {
             throw new IllegalArgumentException("can not find data receiver type from profile");
         }

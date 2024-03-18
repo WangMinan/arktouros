@@ -46,6 +46,12 @@ public class OtelLogAnalyzer extends DataAnalyzer {
         }
     }
 
+    @Override
+    public void interrupt() {
+        super.interrupt();
+        // 这个方法要重写 要么需要引入位点机制
+    }
+
     public void analyze() {
         try {
             ResourceLogs resourceLogs = queue.take();
