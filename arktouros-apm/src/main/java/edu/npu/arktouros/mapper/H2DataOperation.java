@@ -1,4 +1,4 @@
-package edu.npu.arktouros.sink;
+package edu.npu.arktouros.mapper;
 
 /**
  * @author : [wangminan]

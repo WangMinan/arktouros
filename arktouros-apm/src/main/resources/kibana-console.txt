@@ -1,0 +1,42 @@
+PUT /resource
+{
+  "mappings": {
+    "properties": {
+      "attributes": {
+        "type": "nested",
+        "properties": {
+          "key": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "text"
+          }
+        }
+      },
+      "dropped_attributes_count": {
+        "type": "integer"
+      }
+    }
+  }
+}
+
+PUT /resource/_mapping
+{
+  "properties": {
+    "attributes": {
+        "type": "nested",
+        "properties": {
+          "key": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "text"
+          }
+        }
+      }
+  }
+}
+
+GET /resource
+
+DELETE /resource

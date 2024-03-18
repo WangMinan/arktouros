@@ -1,16 +1,13 @@
 package edu.npu.arktouros.analyzer;
 
-import edu.npu.arktouros.sink.DataOperation;
+import edu.npu.arktouros.mapper.DataOperation;
 import jakarta.annotation.Resource;
 
 /**
  * @author : [wangminan]
  * @description : 数据处理器
  */
-public abstract class DataAnalyzer {
+public abstract class DataAnalyzer extends Thread{
 
-    @Resource
-    protected DataOperation dataOperation;
 
-    public abstract void analyze();
 }

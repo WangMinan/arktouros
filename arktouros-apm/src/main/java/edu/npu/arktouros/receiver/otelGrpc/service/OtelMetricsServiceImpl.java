@@ -9,7 +9,7 @@ import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
  * @author : [wangminan]
  * @description : OpenTelemetry-Metrics接收器
  */
-public class OtelMetricsHandler extends MetricsServiceGrpc.MetricsServiceImplBase{
+public class OtelMetricsServiceImpl extends MetricsServiceGrpc.MetricsServiceImplBase{
     @Override
     public void export(ExportMetricsServiceRequest request,
                        StreamObserver<ExportMetricsServiceResponse> responseObserver) {

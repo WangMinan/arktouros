@@ -1,4 +1,4 @@
-package edu.npu.arktouros.sink;
+package edu.npu.arktouros.mapper;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;

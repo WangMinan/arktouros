@@ -1,6 +1,4 @@
-package edu.npu.arktouros.sink;
-
-import org.springframework.stereotype.Component;
+package edu.npu.arktouros.mapper;
 
 /**
  * @author : [wangminan]

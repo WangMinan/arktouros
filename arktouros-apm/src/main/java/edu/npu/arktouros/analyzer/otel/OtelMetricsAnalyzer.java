@@ -4,10 +4,10 @@ import edu.npu.arktouros.analyzer.DataAnalyzer;
 
 /**
  * @author : [wangminan]
- * @description : [一句话描述该类的功能]
+ * @description : 数值分析模块
  */
 public class OtelMetricsAnalyzer extends DataAnalyzer {
-    @Override
+
     public void analyze() {
 
     }

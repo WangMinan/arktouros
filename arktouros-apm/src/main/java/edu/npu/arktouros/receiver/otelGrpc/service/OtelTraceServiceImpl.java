@@ -9,7 +9,7 @@ import io.opentelemetry.proto.collector.trace.v1.TraceServiceGrpc;
  * @author : [wangminan]
  * @description : OpenTelemetry-Trace接收器
  */
-public class OtelTraceHandler extends TraceServiceGrpc.TraceServiceImplBase {
+public class OtelTraceServiceImpl extends TraceServiceGrpc.TraceServiceImplBase {
 
     @Override
     public void export(ExportTraceServiceRequest request,
