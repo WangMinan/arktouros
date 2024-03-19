@@ -40,7 +40,9 @@
         <!-- maven plugin -->
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <native-maven-plugin.version>0.10.1</native-maven-plugin.version>
-        <maven-assembly-plugin.version>3.7.0</maven-assembly-plugin.version>
+        <!-- assembly-plugin用最新的3.7.0会报空指针问题 -->
+        <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
+        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
         <!-- maven plugin -->
 
         <springboot.version>3.2.3</springboot.version>
@@ -240,6 +242,12 @@
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>${maven-assembly-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                </plugin>
+
             </plugins>
         </pluginManagement>
         <plugins>
