@@ -3,13 +3,13 @@ spring:
     name: arktouros-apm
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:./db/apm;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:./db/apm;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
     username: sa
     password: sa
   sql:
     init:
-      mode: embedded
-      platform: h2
+      mode: always
+      schema-locations: classpath:db/schema.sql
   h2:
     console:
       enabled: true
@@ -17,7 +17,6 @@ spring:
 instance:
   active:
     dataReceiver: otelGrpc
-    dataOperation: h2
 
 receiver:
   grpc:
