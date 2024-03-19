@@ -1,0 +1,27 @@
+name: "build-test"
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Graal JDK 21
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'      # See 'Options' section below for all supported versions
+          distribution: 'graalvm' # See 'Options' section below for all available distributions
+          version: '21.0.2'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
+
+      - name: Build with Maven without native env
+        run: mvn -Dmaven.test.skip=true clean package
+
+      - name: Build with Maven with native env
+        run: mvn -Dmaven.test.skip=true -Pnative clean package
