@@ -56,7 +56,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
         try {
             ResourceLogs resourceLogs = queue.take();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            log.error("OtelLogAnalyzer is shut down directly without calling method interrupt", e);
         }
     }
 }
