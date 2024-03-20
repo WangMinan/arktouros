@@ -1,12 +1,15 @@
 package edu.npu.arktouros.analyzer.otel;
 
 import edu.npu.arktouros.analyzer.DataAnalyzer;
+import edu.npu.arktouros.commons.ProtoBufJsonUtils;
+import edu.npu.arktouros.model.queue.MetricsQueueItem;
+import edu.npu.arktouros.service.otel.queue.MetricsQueueService;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
+import jakarta.annotation.Resource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.io.IOException;
 
 /**
  * @author : [wangminan]
@@ -15,23 +18,24 @@ import java.util.concurrent.BlockingQueue;
 @Slf4j
 public class OtelMetricsAnalyzer extends DataAnalyzer {
 
-    private final BlockingQueue<ResourceMetrics> queue;
-
-    private static final int QUEUE_SIZE = 100;
+    @Resource
+    private MetricsQueueService queueService;
 
     @Getter
     private static final OtelMetricsAnalyzer instance = new OtelMetricsAnalyzer();
 
 
     public OtelMetricsAnalyzer() {
-        queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     }
 
     public void handle(ResourceMetrics resourceMetrics) {
         try {
-            queue.put(resourceMetrics);
-        } catch (InterruptedException e) {
-            log.error("Failed to put resourceMetrics:{} into queue", resourceMetrics, e);
+            String resourceMetricsJson = ProtoBufJsonUtils.toJSON(resourceMetrics);
+            MetricsQueueItem metricsQueueItem = MetricsQueueItem.builder()
+                    .data(resourceMetricsJson).build();
+            queueService.put(metricsQueueItem);
+        } catch (IOException e) {
+            log.error("Failed to convert resourceMetrics:{} to json", resourceMetrics, e);
             throw new RuntimeException(e);
         }
     }
@@ -45,10 +49,9 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
     }
 
     public void analyze() {
-        try {
-            ResourceMetrics resourceMetrics = queue.take();
-        } catch (InterruptedException e) {
-            log.error("OtelMetricsAnalyzer is shut down directly without calling method interrupt", e);
+        MetricsQueueItem item = queueService.get();
+        if (item != null) {
+            log.info("OtelMetricsAnalyzer start to analyze data");
         }
     }
 }

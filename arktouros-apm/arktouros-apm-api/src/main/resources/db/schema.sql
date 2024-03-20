@@ -1,19 +1,17 @@
-create schema if not exists "apm";
-
-create table if not exists "apm"."apm_metrics_queue"
+create table if not exists APM_METRICS_QUEUE
 (
-    id   bigint primary key auto_increment,
-    data longtext
+    ID   bigint primary key auto_increment(1), -- 标注1是因为我这儿试出来默认自增是32 太逆天了
+    DATA longtext
 );
 
-create table if not exists "apm"."apm_log_queue"
+create table if not exists APM_LOG_QUEUE
 (
-    id   bigint primary key auto_increment,
-    data longtext
+    ID   bigint primary key auto_increment(1),
+    DATA longtext
 );
 
-create table if not exists "apm"."apm_trace_queue"
+create table if not exists APM_TRACE_QUEUE
 (
-    id   bigint primary key auto_increment,
-    data longtext
+    ID   bigint primary key auto_increment(1),
+    DATA longtext
 );

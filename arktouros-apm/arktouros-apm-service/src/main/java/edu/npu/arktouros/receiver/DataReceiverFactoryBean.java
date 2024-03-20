@@ -1,6 +1,6 @@
 package edu.npu.arktouros.receiver;
 
-import edu.npu.arktouros.receiver.otelGrpc.OtelGrpcReceiver;
+import edu.npu.arktouros.receiver.otel.OtelGrpcReceiver;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

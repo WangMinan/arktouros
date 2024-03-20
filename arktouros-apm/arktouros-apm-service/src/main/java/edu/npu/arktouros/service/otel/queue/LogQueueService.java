@@ -1,9 +1,8 @@
-package edu.npu.arktouros.service.queue;
+package edu.npu.arktouros.service.otel.queue;
 
 
-import edu.npu.arktouros.mapper.queue.LogQueueMapper;
+import edu.npu.arktouros.mapper.otel.queue.LogQueueMapper;
 import edu.npu.arktouros.model.queue.LogQueueItem;
-import edu.npu.arktouros.service.QueueService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -15,25 +14,25 @@ import org.springframework.stereotype.Service;
 public class LogQueueService implements QueueService<LogQueueItem> {
 
     @Resource
-    private LogQueueMapper mapper;
+    private LogQueueMapper queueMapper;
 
     @Override
     public void put(LogQueueItem logQueueItem) {
-        mapper.add(logQueueItem);
+        queueMapper.add(logQueueItem);
     }
 
     @Override
-    public void get(LogQueueItem logQueueItem) {
-
+    public LogQueueItem get() {
+        return queueMapper.getTop();
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return queueMapper.isEmpty();
     }
 
     @Override
     public long size() {
-        return 0;
+        return queueMapper.getSize();
     }
 }

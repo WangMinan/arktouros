@@ -1,10 +1,10 @@
-package edu.npu.arktouros.service;
+package edu.npu.arktouros.service.otel.queue;
 
 public interface QueueService <T> {
 
     void put(T t);
 
-    void get(T t);
+    T get();
 
     boolean isEmpty();
 

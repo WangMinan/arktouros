@@ -1,16 +1,14 @@
-package edu.npu.arktouros.receiver.otelGrpc;
+package edu.npu.arktouros.receiver.otel;
 
 import edu.npu.arktouros.analyzer.otel.OtelLogAnalyzer;
 import edu.npu.arktouros.analyzer.otel.OtelMetricsAnalyzer;
 import edu.npu.arktouros.receiver.DataReceiver;
-import edu.npu.arktouros.receiver.otelGrpc.service.OtelLogServiceImpl;
-import edu.npu.arktouros.receiver.otelGrpc.service.OtelMetricsServiceImpl;
-import edu.npu.arktouros.receiver.otelGrpc.service.OtelTraceServiceImpl;
+import edu.npu.arktouros.receiver.otel.service.OtelLogServiceImpl;
+import edu.npu.arktouros.receiver.otel.service.OtelMetricsServiceImpl;
+import edu.npu.arktouros.receiver.otel.service.OtelTraceServiceImpl;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

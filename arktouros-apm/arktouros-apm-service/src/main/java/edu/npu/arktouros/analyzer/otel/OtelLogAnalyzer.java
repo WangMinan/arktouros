@@ -1,12 +1,15 @@
 package edu.npu.arktouros.analyzer.otel;
 
 import edu.npu.arktouros.analyzer.DataAnalyzer;
+import edu.npu.arktouros.commons.ProtoBufJsonUtils;
+import edu.npu.arktouros.model.queue.LogQueueItem;
+import edu.npu.arktouros.service.otel.queue.LogQueueService;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
+import jakarta.annotation.Resource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.io.IOException;
 
 /**
  * @author : [wangminan]
@@ -15,25 +18,25 @@ import java.util.concurrent.BlockingQueue;
 @Slf4j
 public class OtelLogAnalyzer extends DataAnalyzer {
 
-    private final BlockingQueue<ResourceLogs> queue;
-
-    private static final int QUEUE_SIZE = 100;
+    @Resource
+    private LogQueueService logQueueService;
 
     // 单例模式
     @Getter
     private static final OtelLogAnalyzer instance = new OtelLogAnalyzer();
 
     private OtelLogAnalyzer() {
-        // 初始化
-        queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     }
 
     public void handle(ResourceLogs resourceLogs) {
         // 在新线程中进行分析
         try {
-            queue.put(resourceLogs);
-        } catch (InterruptedException e) {
-            log.error("Failed to put resourceLogs:{} into queue", resourceLogs, e);
+            String resourceLogsJson = ProtoBufJsonUtils.toJSON(resourceLogs);
+            LogQueueItem logQueueItem = LogQueueItem.builder()
+                    .data(resourceLogsJson).build();
+            logQueueService.put(logQueueItem);
+        } catch (IOException e) {
+            log.error("Failed to convert resourceLogs:{} to json", resourceLogs, e);
             throw new RuntimeException(e);
         }
     }
@@ -49,14 +52,15 @@ public class OtelLogAnalyzer extends DataAnalyzer {
     @Override
     public void interrupt() {
         super.interrupt();
-        // 这个方法要重写 要么需要引入位点机制
+
     }
 
     public void analyze() {
-        try {
-            ResourceLogs resourceLogs = queue.take();
-        } catch (InterruptedException e) {
-            log.error("OtelLogAnalyzer is shut down directly without calling method interrupt", e);
+        LogQueueItem item = logQueueService.get();
+        if (item != null) {
+            String data = item.getData();
+            ResourceLogs.Builder builder = ResourceLogs.newBuilder();
+            ResourceLogs resourceLogs = builder.build();
         }
     }
 }
