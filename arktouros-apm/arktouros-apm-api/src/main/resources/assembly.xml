@@ -44,6 +44,8 @@
             <outputDirectory>${file.separator}</outputDirectory>
             <includes>
                 <include>*.jar</include>
+                <!-- native编译的windows可执行文件 -->
+                <include>*.exe</include>
             </includes>
         </fileSet>
     </fileSets>
