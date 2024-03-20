@@ -43,6 +43,7 @@
         <!-- assembly-plugin用最新的3.7.0会报空指针问题 -->
         <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+        <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
         <!-- maven plugin -->
 
         <springboot.version>3.2.3</springboot.version>
@@ -53,7 +54,6 @@
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
         <jackson.version>2.17.0-rc1</jackson.version>
         <elasticsearch-java.version>8.12.2</elasticsearch-java.version>
-        <h2.version>2.2.224</h2.version>
 
         <!-- commons -->
         <commons-lang3.version>3.14.0</commons-lang3.version>
@@ -127,12 +127,6 @@
                 <groupId>co.elastic.clients</groupId>
                 <artifactId>elasticsearch-java</artifactId>
                 <version>${elasticsearch-java.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>${h2.version}</version>
             </dependency>
             <!-- 数据层 -->
 
@@ -247,7 +241,6 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${maven-jar-plugin.version}</version>
                 </plugin>
-
             </plugins>
         </pluginManagement>
         <plugins>
@@ -338,6 +331,20 @@
                 <configuration>
                     <skip>${skipUTs}</skip>
                     <argLine>${argLine}</argLine>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>${maven-clean-plugin.version}</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <!-- 删除根目录下的build文件夹 -->
+                            <directory>${project.basedir}/build/</directory>
+                        </fileset>
+                    </filesets>
                 </configuration>
             </plugin>
 
