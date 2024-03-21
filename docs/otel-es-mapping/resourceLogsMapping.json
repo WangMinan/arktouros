@@ -1,0 +1,104 @@
+{
+  "mappings": {
+    "properties": {
+      "resource": {
+        "type": "nested",
+        "properties": {
+          "attributes": {
+            "type": "nested",
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "keyword"
+              }
+            }
+          },
+          "droppedAttributesCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "schemaUrl": {
+        "type": "keyword"
+      },
+      "scopeLogs": {
+        "type": "nested",
+        "properties": {
+          "scope": {
+            "type": "nested",
+            "properties": {
+              "name": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "attributes": {
+                "type": "nested",
+                "properties": {
+                  "key": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "droppedAttributesCount": {
+                "type": "integer"
+              }
+            }
+          },
+          "schemaUrl": {
+            "type": "keyword"
+          },
+          "logRecords": {
+            "type": "nested",
+            "properties": {
+              "timeUnixNano": {
+                "type": "long"
+              },
+              "observedTimeUnixNano": {
+                "type": "long"
+              },
+              "severityNumber": {
+                "type": "integer"
+              },
+              "severityText": {
+                "type": "keyword"
+              },
+              "body": {
+                "type": "text"
+              },
+              "attributes": {
+                "type": "nested",
+                "properties": {
+                  "key": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "droppedAttributesCount": {
+                "type": "integer"
+              },
+              "flags": {
+                "type": "integer"
+              },
+              "traceId": {
+                "type": "integer"
+              },
+              "spanId": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

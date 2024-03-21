@@ -1,42 +1,71 @@
-PUT /resource
+
+PUT /resourceLogs
 {
   "mappings": {
     "properties": {
-      "attributes": {
-        "type": "nested",
+      "resource": {
         "properties": {
-          "key": {
-            "type": "keyword"
+          "attributes": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "keyword"
+              }
+            }
           },
-          "value": {
-            "type": "text"
+          "dropped_attributes_count": {
+            "type": "integer"
           }
         }
       },
-      "dropped_attributes_count": {
-        "type": "integer"
+      "scope_logs": {
+        "properties": {
+          "traceId": {
+            "type": "keyword"
+          },
+          "spanId": {
+            "type": "keyword"
+          },
+          "timeUnixNano": {
+            "type": "long"
+          },
+          "severityNumber": {
+            "type": "integer"
+          },
+          "severityText": {
+            "type": "keyword"
+          },
+          "body": {
+            "properties": {
+              "stringValue": {
+                "type": "text"
+              }
+            }
+          },
+          "attributes": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "properties": {
+                  "stringValue": {
+                    "type": "text"
+                  }
+                }
+              }
+            }
+          },
+          "droppedAttributesCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "schema_url": {
+        "type": "keyword"
       }
     }
   }
 }
-
-PUT /resource/_mapping
-{
-  "properties": {
-    "attributes": {
-        "type": "nested",
-        "properties": {
-          "key": {
-            "type": "keyword"
-          },
-          "value": {
-            "type": "text"
-          }
-        }
-      }
-  }
-}
-
-GET /resource
-
-DELETE /resource
