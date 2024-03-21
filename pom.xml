@@ -206,7 +206,7 @@
             </dependency>
             <!-- logback全家桶 -->
 
-            <!-- jackson全家桶 -->
+            <!-- jackson全家桶 得要 elasticsearch要用到-->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>

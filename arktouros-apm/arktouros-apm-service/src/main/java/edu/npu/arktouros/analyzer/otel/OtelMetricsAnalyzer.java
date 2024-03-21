@@ -8,6 +8,7 @@ import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import jakarta.annotation.Resource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
@@ -15,17 +16,15 @@ import java.io.IOException;
  * @author : [wangminan]
  * @description : 数值分析模块
  */
+@Component
 @Slf4j
 public class OtelMetricsAnalyzer extends DataAnalyzer {
 
     @Resource
     private MetricsQueueService queueService;
 
-    @Getter
-    private static final OtelMetricsAnalyzer instance = new OtelMetricsAnalyzer();
-
-
     public OtelMetricsAnalyzer() {
+        this.setName("OtelMetricsAnalyzer");
     }
 
     public void handle(ResourceMetrics resourceMetrics) {
@@ -43,7 +42,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
     @Override
     public void run() {
         log.info("OtelMetricsAnalyzer start to analyze data");
-        while (true) {
+        while (!isInterrupted()) {
             analyze();
         }
     }
@@ -53,5 +52,11 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
         if (item != null) {
             log.info("OtelMetricsAnalyzer start to analyze data");
         }
+    }
+
+    @Override
+    public void interrupt() {
+        log.info("OtelMetricsAnalyzer is shutting down.");
+        super.interrupt();
     }
 }

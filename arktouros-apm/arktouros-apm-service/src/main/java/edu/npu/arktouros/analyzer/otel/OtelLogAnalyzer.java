@@ -8,6 +8,7 @@ import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import jakarta.annotation.Resource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
@@ -15,17 +16,15 @@ import java.io.IOException;
  * @author : [wangminan]
  * @description : 日志分析模块
  */
+@Component
 @Slf4j
 public class OtelLogAnalyzer extends DataAnalyzer {
 
     @Resource
     private LogQueueService logQueueService;
 
-    // 单例模式
-    @Getter
-    private static final OtelLogAnalyzer instance = new OtelLogAnalyzer();
-
-    private OtelLogAnalyzer() {
+    public OtelLogAnalyzer() {
+        this.setName("OtelLogAnalyzer");
     }
 
     public void handle(ResourceLogs resourceLogs) {
@@ -44,23 +43,29 @@ public class OtelLogAnalyzer extends DataAnalyzer {
     @Override
     public void run() {
         log.info("OtelLogAnalyzer start to analyze data");
-        while (true) {
+        while (!isInterrupted()) {
             analyze();
         }
     }
 
     @Override
     public void interrupt() {
+        log.info("OtelLogAnalyzer is shutting down.");
         super.interrupt();
-
     }
 
     public void analyze() {
         LogQueueItem item = logQueueService.get();
         if (item != null) {
-            String data = item.getData();
-            ResourceLogs.Builder builder = ResourceLogs.newBuilder();
-            ResourceLogs resourceLogs = builder.build();
+            String json = item.getData();
+            try {
+                ResourceLogs.Builder builder = ResourceLogs.newBuilder();
+                ProtoBufJsonUtils.fromJSON(json, builder);
+                ResourceLogs resourceLogs = builder.build();
+            } catch (IOException e) {
+                log.error("Failed to convert json:{} to resourceLogs", json, e);
+            }
+
         }
     }
 }

@@ -1,17 +1,11 @@
 package edu.npu.arktouros;
 
 import edu.npu.arktouros.receiver.DataReceiver;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * @author : [wangminan]
@@ -29,12 +23,15 @@ public class ApmMain implements CommandLineRunner {
         log.info("APM starting");
         // 拉起数据接收器 接收器会自动调用analyzer analyzer会自动调用sinker
         dataReceiver.start();
-        Runtime.getRuntime().addShutdownHook(
-                new Thread(() -> {
-                    // 停止数据接收器
-                    dataReceiver.stop();
-                    log.info("APM shutting down");
-                }));
+        Thread thread = new Thread(
+            () -> {
+                // 停止数据接收器
+                dataReceiver.stop();
+                log.info("APM shutting down");
+            }
+        );
+        thread.setName("APM-shutdown-thread");
+        Runtime.getRuntime().addShutdownHook(thread);
     }
 
     public static void main(String[] args) {

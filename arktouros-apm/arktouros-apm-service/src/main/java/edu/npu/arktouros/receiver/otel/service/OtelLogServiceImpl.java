@@ -16,8 +16,8 @@ public class OtelLogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
     private final OtelLogAnalyzer analyzer;
 
-    public OtelLogServiceImpl() {
-        analyzer = OtelLogAnalyzer.getInstance();
+    public OtelLogServiceImpl(OtelLogAnalyzer analyzer) {
+        this.analyzer = analyzer;
         analyzer.start();
     }
 

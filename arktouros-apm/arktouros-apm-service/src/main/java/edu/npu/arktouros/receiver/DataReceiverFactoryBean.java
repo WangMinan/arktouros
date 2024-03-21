@@ -1,6 +1,10 @@
 package edu.npu.arktouros.receiver;
 
+import edu.npu.arktouros.analyzer.otel.OtelLogAnalyzer;
+import edu.npu.arktouros.analyzer.otel.OtelMetricsAnalyzer;
+import edu.npu.arktouros.analyzer.otel.OtelTraceAnalyzer;
 import edu.npu.arktouros.receiver.otel.OtelGrpcReceiver;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,10 +22,19 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
     @Value("${receiver.grpc.port}")
     private int grpcPort;
 
+    @Resource
+    private OtelLogAnalyzer logAnalyzer;
+
+    @Resource
+    private OtelMetricsAnalyzer metricsAnalyzer;
+
+    @Resource
+    private OtelTraceAnalyzer traceAnalyzer;
+
     @Override
     public DataReceiver getObject() throws Exception {
         if (activeDataReceiver.equals("otelGrpc")) {
-            return new OtelGrpcReceiver(grpcPort);
+            return new OtelGrpcReceiver(grpcPort, logAnalyzer, metricsAnalyzer, traceAnalyzer);
         } else {
             throw new IllegalArgumentException("can not find data receiver type from profile");
         }

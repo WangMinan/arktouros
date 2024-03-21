@@ -5,17 +5,21 @@ import io.grpc.stub.StreamObserver;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * @author : [wangminan]
  * @description : OpenTelemetry-Metrics接收器
  */
+@Slf4j
 public class OtelMetricsServiceImpl extends MetricsServiceGrpc.MetricsServiceImplBase{
 
     private final OtelMetricsAnalyzer analyzer;
 
-    public OtelMetricsServiceImpl() {
-        analyzer = OtelMetricsAnalyzer.getInstance();
+    public OtelMetricsServiceImpl(OtelMetricsAnalyzer analyzer) {
+        this.analyzer = analyzer;
         analyzer.start();
     }
 
