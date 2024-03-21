@@ -9,17 +9,17 @@ import java.util.Locale;
  * @author : [wangminan]
  * @description : 数据持久化工厂
  */
-public class SinkServiceFactoryBean<T> implements FactoryBean<SinkService<T>> {
+public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
 
     @Value("${instance.active.sinker}")
     private String activeSinker;
 
     @Override
-    public SinkService<T> getObject() throws Exception {
+    public SinkService getObject() throws Exception {
         if (activeSinker.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
-            return new ElasticSearchSinkService<>();
+            return new ElasticSearchSinkService();
         } else if (activeSinker.toLowerCase(Locale.ROOT).equals("h2")) {
-            return new H2SinkService<>();
+            return new H2SinkService();
         } else {
             throw new IllegalArgumentException("Invalid sinker type: " + activeSinker);
         }
