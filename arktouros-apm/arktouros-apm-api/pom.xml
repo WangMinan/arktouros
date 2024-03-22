@@ -50,6 +50,7 @@
                             <mainClass>edu.npu.arktouros.ApmMain</mainClass>
                             <buildArgs>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>

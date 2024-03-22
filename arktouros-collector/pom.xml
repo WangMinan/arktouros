@@ -43,6 +43,7 @@
                             <mainClass>edu.npu.arktouros.CollectorMain</mainClass>
                             <buildArgs>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
