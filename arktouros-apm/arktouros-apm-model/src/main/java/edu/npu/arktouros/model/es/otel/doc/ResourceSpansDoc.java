@@ -1,9 +1,13 @@
-package edu.npu.arktouros.model.es.doc;
+package edu.npu.arktouros.model.es.otel.doc;
 
-import edu.npu.arktouros.model.es.base.Resource;
+import edu.npu.arktouros.model.es.otel.base.Resource;
+import edu.npu.arktouros.model.es.otel.doc.trace.ScopeSpan;
+import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author : [wangminan]
@@ -14,5 +18,11 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class ResourceSpansDoc {
+    public ResourceSpansDoc(ResourceSpans resourceSpans) {
+
+    }
+
     private Resource resource;
+    private String schemaUrl;
+    private List<ScopeSpan> scopeSpans;
 }

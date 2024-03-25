@@ -74,62 +74,64 @@
                     "properties": {
                       "dataPoints": {
                         "type": "nested",
-                        "attributes": {
-                          "type": "nested",
-                          "properties": {
-                            "key": {
-                              "type": "keyword"
-                            },
-                            "value": {
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "startTimeUnixNano": {
-                          "type": "long"
-                        },
-                        "timeUnixNano": {
-                          "type": "long"
-                        },
-                        "doubleValue": {
-                          "type": "double"
-                        },
-                        "longValue": {
-                          "type": "long"
-                        },
-                        "exemplars": {
-                          "type": "nested",
-                          "properties": {
-                            "filteredAttributes": {
-                              "type": "nested",
-                              "properties": {
-                                "key": {
-                                  "type": "keyword"
-                                },
-                                "value": {
-                                  "type": "keyword"
-                                }
+                        "properties": {
+                          "attributes": {
+                            "type": "nested",
+                            "properties": {
+                              "key": {
+                                "type": "keyword"
+                              },
+                              "value": {
+                                "type": "keyword"
                               }
-                            },
-                            "timeUnixNano": {
-                              "type": "long"
-                            },
-                            "doubleValue": {
-                              "type": "double"
-                            },
-                            "longValue": {
-                              "type": "long"
-                            },
-                            "spanId": {
-                              "type": "keyword"
-                            },
-                            "traceId": {
-                              "type": "keyword"
                             }
+                          },
+                          "startTimeUnixNano": {
+                            "type": "long"
+                          },
+                          "timeUnixNano": {
+                            "type": "long"
+                          },
+                          "doubleValue": {
+                            "type": "double"
+                          },
+                          "longValue": {
+                            "type": "long"
+                          },
+                          "exemplars": {
+                            "type": "nested",
+                            "properties": {
+                              "filteredAttributes": {
+                                "type": "nested",
+                                "properties": {
+                                  "key": {
+                                    "type": "keyword"
+                                  },
+                                  "value": {
+                                    "type": "keyword"
+                                  }
+                                }
+                              },
+                              "timeUnixNano": {
+                                "type": "long"
+                              },
+                              "doubleValue": {
+                                "type": "double"
+                              },
+                              "longValue": {
+                                "type": "long"
+                              },
+                              "spanId": {
+                                "type": "keyword"
+                              },
+                              "traceId": {
+                                "type": "keyword"
+                              }
+                            }
+                          },
+                          "flags": {
+                            "type": "integer"
                           }
-                        },
-                        "flags": {
-                          "type": "integer"
                         }
                       }
                     }
@@ -139,15 +141,63 @@
                     "properties": {
                       "dataPoints": {
                         "type": "nested",
-                        "attributes": {
-                          "type": "nested",
-                          "properties": {
-                            "key": {
-                              "type": "keyword"
-                            },
-                            "value": {
-                              "type": "keyword"
+                        "properties": {
+                          "attributes": {
+                            "type": "nested",
+                            "properties": {
+                              "key": {
+                                "type": "keyword"
+                              },
+                              "value": {
+                                "type": "keyword"
+                              }
                             }
+                          },
+                          "startTimeUnixNano": {
+                            "type": "long"
+                          },
+                          "timeUnixNano": {
+                            "type": "long"
+                          },
+                          "doubleValue": {
+                            "type": "double"
+                          },
+                          "longValue": {
+                            "type": "long"
+                          },
+                          "exemplars": {
+                            "type": "nested",
+                            "properties": {
+                              "filteredAttributes": {
+                                "type": "nested",
+                                "properties": {
+                                  "key": {
+                                    "type": "keyword"
+                                  },
+                                  "value": {
+                                    "type": "keyword"
+                                  }
+                                }
+                              },
+                              "timeUnixNano": {
+                                "type": "long"
+                              },
+                              "doubleValue": {
+                                "type": "double"
+                              },
+                              "longValue": {
+                                "type": "long"
+                              },
+                              "spanId": {
+                                "type": "keyword"
+                              },
+                              "traceId": {
+                                "type": "keyword"
+                              }
+                            }
+                          },
+                          "flags": {
+                            "type": "integer"
                           }
                         }
                       },
@@ -297,6 +347,46 @@
                                 "type": "long"
                               }
                             }
+                          },
+                          "flags": {
+                            "type": "integer"
+                          },
+                          "exemplars": {
+                            "type": "nested",
+                            "properties": {
+                              "filteredAttributes": {
+                                "type": "nested",
+                                "properties": {
+                                  "key": {
+                                    "type": "keyword"
+                                  },
+                                  "value": {
+                                    "type": "keyword"
+                                  }
+                                }
+                              },
+                              "timeUnixNano": {
+                                "type": "long"
+                              },
+                              "doubleValue": {
+                                "type": "double"
+                              },
+                              "longValue": {
+                                "type": "long"
+                              },
+                              "spanId": {
+                                "type": "keyword"
+                              },
+                              "traceId": {
+                                "type": "keyword"
+                              }
+                            }
+                          },
+                          "min": {
+                            "type": "double"
+                          },
+                          "max": {
+                            "type": "double"
                           }
                         }
                       },

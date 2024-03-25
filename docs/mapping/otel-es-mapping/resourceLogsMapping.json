@@ -90,10 +90,10 @@
                 "type": "integer"
               },
               "traceId": {
-                "type": "integer"
+                "type": "keyword"
               },
               "spanId": {
-                "type": "integer"
+                "type": "keyword"
               }
             }
           }
