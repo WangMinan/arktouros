@@ -6,7 +6,6 @@ import edu.npu.arktouros.model.queue.MetricsQueueItem;
 import edu.npu.arktouros.service.otel.queue.MetricsQueueService;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import jakarta.annotation.Resource;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

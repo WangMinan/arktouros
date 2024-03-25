@@ -1,4 +1,4 @@
-package edu.npu.arktouros.model.es.base;
+package edu.npu.arktouros.model.es.otel.base;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

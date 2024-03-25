@@ -9,7 +9,6 @@ import edu.npu.arktouros.receiver.otel.service.OtelMetricsServiceImpl;
 import edu.npu.arktouros.receiver.otel.service.OtelTraceServiceImpl;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;

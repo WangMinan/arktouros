@@ -1,6 +1,5 @@
 package edu.npu.arktouros.mapper.otel.queue;
 
-import com.jayway.jsonpath.internal.function.text.Concatenate;
 import edu.npu.arktouros.model.queue.TraceQueueItem;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
