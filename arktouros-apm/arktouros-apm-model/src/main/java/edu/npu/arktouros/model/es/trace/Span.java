@@ -1,5 +1,6 @@
-package edu.npu.arktouros.model.es.arktouros;
+package edu.npu.arktouros.model.es.trace;
 
+import edu.npu.arktouros.model.es.Source;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -9,5 +10,5 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Span extends Source{
+public class Span extends Source {
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.npu.arktouros.model.es.arktouros.util;
+package edu.npu.arktouros.model.es.basic;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

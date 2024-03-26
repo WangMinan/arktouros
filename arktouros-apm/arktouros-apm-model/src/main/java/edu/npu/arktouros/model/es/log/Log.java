@@ -1,7 +1,8 @@
-package edu.npu.arktouros.model.es.arktouros;
+package edu.npu.arktouros.model.es.log;
 
-import edu.npu.arktouros.model.es.arktouros.util.SourceType;
-import edu.npu.arktouros.model.es.arktouros.util.Tag;
+import edu.npu.arktouros.model.es.Source;
+import edu.npu.arktouros.model.es.basic.SourceType;
+import edu.npu.arktouros.model.es.basic.Tag;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,9 +15,7 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Log extends Source{
-    private long timestamp;
-    private String id;
+public class Log extends Source {
     private String serviceId;
     private String traceId;
     private int spanId;
@@ -27,4 +26,5 @@ public class Log extends Source{
     private byte[] tagsRawData;
     private List<Tag> tags = new ArrayList<>();
     private boolean error = false;
+    private long timestamp;
 }

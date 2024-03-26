@@ -1,13 +1,14 @@
-package edu.npu.arktouros.model.es.arktouros.util;
+package edu.npu.arktouros.model.es.basic;
 
 import lombok.Getter;
 
 @Getter
 public enum SourceType {
+    NODE,
     SERVICE,
     SPAN,
     LOG,
-    METRICS;
+    METRIC, ENDPOINT;
 
     public static SourceType fromString(String type) {
         return SourceType.valueOf(type.toUpperCase());

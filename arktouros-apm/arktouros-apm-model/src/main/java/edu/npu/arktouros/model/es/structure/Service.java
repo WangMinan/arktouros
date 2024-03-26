@@ -1,7 +1,8 @@
-package edu.npu.arktouros.model.es.arktouros;
+package edu.npu.arktouros.model.es.structure;
 
-import edu.npu.arktouros.model.es.arktouros.util.SourceType;
-import edu.npu.arktouros.model.es.arktouros.util.Tag;
+import edu.npu.arktouros.model.es.Source;
+import edu.npu.arktouros.model.es.basic.SourceType;
+import edu.npu.arktouros.model.es.basic.Tag;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,12 +17,11 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Service extends Source{
+public class Service extends Source {
     private static final String DEFAULT_NAMESPACE = "default";
-    private volatile String id;
+    private String nodeId;
     private SourceType type = SourceType.SERVICE;
     private String nameSpace;
-    private String serviceName;
     // GET_XXX; POST_XXX; RPC_XXX
     private String nodeName;
     private int latency;
@@ -32,20 +32,20 @@ public class Service extends Source{
     // 留作扩展
     private List<Tag> tags = new ArrayList<>();
 
-    public Service(String serviceName) {
+    public Service(String name) {
         this.nameSpace = DEFAULT_NAMESPACE;
-        this.serviceName = serviceName;
+        this.name = name;
         this.id = generateServiceId();
     }
 
-    public Service(String nameSpace, String serviceName) {
+    public Service(String nameSpace, String name) {
         this.nameSpace = nameSpace;
-        this.serviceName = serviceName;
+        this.name = name;
         this.id = generateServiceId();
     }
 
     private String generateServiceId() {
-        String fullName = "service." + nameSpace + "." + serviceName;
+        String fullName = "service." + nameSpace + "." + name;
         return new String(
                 Base64.getEncoder().encode(fullName.getBytes(StandardCharsets.UTF_8)),
                 StandardCharsets.UTF_8);
