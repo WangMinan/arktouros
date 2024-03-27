@@ -1,0 +1,39 @@
+{
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "name": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "serviceId": {
+      "type": "keyword"
+    },
+    "serviceName": {
+      "type": "keyword"
+    },
+    "labels": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "keyword"
+        }
+      }
+    }
+  },
+  "timestamp": {
+    "type": "date"
+  },
+  "type": {
+    "type": "keyword"
+  },
+  "value": {
+    "type": "double"
+  }
+}

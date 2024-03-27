@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "name": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "serviceId": {
+      "type": "keyword"
+    },
+    "traceId": {
+      "type": "keyword"
+    },
+    "spanId": {
+      "type": "integer"
+    },
+    "type": {
+      "type": "keyword"
+    },
+    "content": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "tagsRawData": {
+      "type": "binary"
+    },
+    "tags": {
+      "properties": {
+        "key": {
+          "type": "keyword"
+        },
+        "value": {
+          "type": "keyword"
+        }
+      }
+    },
+    "error": {
+      "type": "boolean"
+    },
+    "timestamp": {
+      "type": "date"
+    }
+  }
+}
