@@ -15,9 +15,10 @@ import java.util.List;
  * @author : [wangminan]
  * @description : 对标otel的resource 表示一个服务 每个trace应该包含多个service
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class Service extends Source {
+public class Service implements Source {
+    private String id;
+    private String name;
     private static final String DEFAULT_NAMESPACE = "default";
     private String nodeId;
     private SourceType type = SourceType.SERVICE;

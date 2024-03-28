@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
@@ -78,9 +79,12 @@ public class OtelLogAnalyzer extends DataAnalyzer {
                     scopeLogs.getLogRecordsList().forEach(
                             logRecord -> {
                                 Log log = Log.builder()
-                                        .name(nodeLabels.get("service_name"))
-                                        .timestamp(logRecord.getTimeUnixNano() / 1_000_000)
+                                        .serviceName(nodeLabels.get("service_name"))
+                                        .timestamp(TimeUnit.NANOSECONDS.toMicros(
+                                                logRecord.getTimeUnixNano()))
                                         .content(logRecord.getBody().getStringValue())
+                                        .spanId(OtelAnalyzerUtil.convertSpanId(logRecord.getSpanId()))
+                                        .traceId(OtelAnalyzerUtil.convertSpanId(logRecord.getTraceId()))
                                         .tags(logRecord
                                                 .getAttributesList()
                                                 .stream()

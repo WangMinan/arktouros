@@ -1,8 +1,10 @@
 package edu.npu.arktouros.analyzer.otel.util;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.ByteString;
 import io.opentelemetry.proto.common.v1.KeyValue;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,5 +32,9 @@ public class OtelAnalyzerUtil {
                 it -> it.getValue().getStringValue(),
                 (v1, v2) -> v1
         ));
+    }
+
+    public static String convertSpanId(ByteString spanId) {
+        return ByteBuffer.wrap(spanId.toByteArray()).getLong() + "";
     }
 }

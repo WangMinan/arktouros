@@ -12,9 +12,9 @@ import java.util.Map;
  * @author : [wangminan]
  * @description : prometheus指标基类
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class Metric extends Source {
+public abstract class Metric implements Source {
+    private String name;
     // serviceId到底要怎么取是待定的
     private String serviceId;
     private String serviceName;

@@ -15,9 +15,10 @@ import java.util.List;
  * @author : [wangminan]
  * @description : 链路中的基础节点
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class Span extends Source {
+public class Span implements Source {
+    private String name;
+    private String id;
     private String serviceName;
     private String traceId;
     private String parentSpanId;
@@ -30,11 +31,11 @@ public class Span extends Source {
     private List<Tag> tags;
 
     @Builder
-    public Span(String serviceName, String id, String name, String traceId,
+    public Span(String id, String serviceName, String name, String traceId,
                 String parentSpanId, EndPoint localEndPoint, EndPoint remoteEndPoint,
                 Long startTime, Long endTime, boolean isRoot, @Singular List<Tag> tags) {
-        this.serviceName = serviceName;
         this.id = id;
+        this.serviceName = serviceName;
         this.name = name;
         this.traceId = traceId;
         this.parentSpanId = parentSpanId;

@@ -11,9 +11,8 @@ import lombok.EqualsAndHashCode;
  * @description : 一条链路的端点
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Builder
-public class EndPoint extends Source {
+public class EndPoint implements Source {
     private String serviceName;
     private int port;
     private int latency;

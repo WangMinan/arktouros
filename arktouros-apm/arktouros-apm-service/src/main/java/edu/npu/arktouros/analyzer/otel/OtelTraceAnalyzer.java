@@ -1,6 +1,5 @@
 package edu.npu.arktouros.analyzer.otel;
 
-import com.google.protobuf.ByteString;
 import edu.npu.arktouros.analyzer.DataAnalyzer;
 import edu.npu.arktouros.analyzer.otel.util.OtelAnalyzerUtil;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
@@ -19,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -125,12 +123,12 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
             throw new IllegalArgumentException("TraceId is empty in span: " + otelSpan.getName());
         }
         builder
-                .traceId(convertSpanId(otelSpan.getTraceId()));
+                .traceId(OtelAnalyzerUtil.convertSpanId(otelSpan.getTraceId()));
         if (otelSpan.getSpanId().isEmpty()) {
             throw new IllegalArgumentException("SpanId is empty in span: " + otelSpan.getName());
         }
-        builder.id(convertSpanId(otelSpan.getSpanId()))
-                .parentSpanId(convertSpanId(otelSpan.getParentSpanId()))
+        builder.id(OtelAnalyzerUtil.convertSpanId(otelSpan.getSpanId()))
+                .parentSpanId(OtelAnalyzerUtil.convertSpanId(otelSpan.getParentSpanId()))
                 .startTime(TimeUnit.NANOSECONDS.toMicros(otelSpan.getStartTimeUnixNano()))
                 .endTime(TimeUnit.NANOSECONDS.toMicros(otelSpan.getStartTimeUnixNano()));
         final Set<String> redundantKeys = new HashSet<>();
@@ -162,7 +160,9 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         }
     }
 
-    private EndPoint convertEndpointFromTags(Map<String, String> resourceTags, String localServiceName, boolean isRemote, Set<String> redundantKeys) {
+    private EndPoint convertEndpointFromTags(
+            Map<String, String> resourceTags,
+            String localServiceName, boolean isRemote, Set<String> redundantKeys) {
         EndPoint.EndPointBuilder builder = EndPoint.builder();
         String serviceName = localServiceName;
         String tmpVal;
@@ -227,10 +227,6 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         result.putAll(resourceTags);
         result.putAll(OtelAnalyzerUtil.convertAttributesToMap(spanAttrs));
         return result;
-    }
-
-    private String convertSpanId(ByteString spanId) {
-        return ByteBuffer.wrap(spanId.toByteArray()).getLong() + "";
     }
 
     private void extractScopeTag(InstrumentationScope scope, Map<String, String> resourceTags) {

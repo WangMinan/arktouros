@@ -14,15 +14,13 @@ import java.util.List;
  * @author : [wangminan]
  * @description : 一条标准链路 trace是一个只有在搜索阶段才会用到的概念 不会被持久化
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class Trace extends Source {
+public class Trace implements Source {
     private SourceType type = SourceType.TRACE;
     private List<Span> spans = new ArrayList<>();
 
     @Builder
-    public Trace(String id, @Singular List<Span> spans) {
-        this.id = id;
+    public Trace(@Singular List<Span> spans) {
         this.spans = spans;
     }
 }

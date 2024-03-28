@@ -12,9 +12,8 @@ import java.util.List;
  * @author : [wangminan]
  * @description : 对标K8S中的node 物理节点
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class Node extends Source {
+public class Node implements Source {
     private String ip;
     private String hostname;
     private OSType osType;
