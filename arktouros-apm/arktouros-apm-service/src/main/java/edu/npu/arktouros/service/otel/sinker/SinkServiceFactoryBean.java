@@ -1,5 +1,7 @@
 package edu.npu.arktouros.service.otel.sinker;
 
+import edu.npu.arktouros.service.otel.sinker.elasticsearch.ElasticSearchSinkService;
+import edu.npu.arktouros.service.otel.sinker.h2.H2SinkService;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 

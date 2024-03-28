@@ -18,6 +18,7 @@
 package edu.npu.arktouros.model.es.basic;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
+@Builder
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor

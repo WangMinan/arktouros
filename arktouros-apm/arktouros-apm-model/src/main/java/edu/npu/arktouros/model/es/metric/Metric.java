@@ -15,15 +15,17 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public abstract class Metric extends Source {
-    private final String serviceId;
+    // serviceId到底要怎么取是待定的
+    private String serviceId;
+    private String serviceName;
     private final Map<String, String> labels;
     private final long timestamp;
     private final SourceType type = SourceType.METRIC;
 
-    protected Metric(String name, String serviceId, Map<String, String> labels, long timestamp) {
-        this.serviceId = serviceId;
+    protected Metric(String name, Map<String, String> labels, long timestamp) {
         this.name = name;
         this.labels = Maps.newHashMap(labels);
+        this.serviceName = labels.get("service_name");
         this.timestamp = timestamp;
     }
 

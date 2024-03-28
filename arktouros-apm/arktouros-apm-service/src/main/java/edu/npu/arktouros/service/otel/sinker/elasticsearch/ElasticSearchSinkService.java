@@ -1,14 +1,20 @@
-package edu.npu.arktouros.service.otel.sinker;
+package edu.npu.arktouros.service.otel.sinker.elasticsearch;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
+import jakarta.annotation.Resource;
 
 /**
  * @author : [wangminan]
- * @description : H2数据持久化
+ * @description : ElasticSearch数据持久化
  */
-public class H2SinkService extends SinkService {
+public class ElasticSearchSinkService extends SinkService {
+
+    @Resource
+    private ElasticsearchClient esClient;
 
     @Override
     public void saveResourceLogs(ResourceLogs resourceLogs) {

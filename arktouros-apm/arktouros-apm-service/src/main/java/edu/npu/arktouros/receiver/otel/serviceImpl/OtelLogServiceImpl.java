@@ -1,4 +1,4 @@
-package edu.npu.arktouros.receiver.otel.service;
+package edu.npu.arktouros.receiver.otel.serviceImpl;
 
 import edu.npu.arktouros.analyzer.otel.OtelLogAnalyzer;
 import io.grpc.stub.StreamObserver;

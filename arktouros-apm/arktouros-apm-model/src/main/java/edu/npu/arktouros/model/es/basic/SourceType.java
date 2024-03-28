@@ -6,9 +6,11 @@ import lombok.Getter;
 public enum SourceType {
     NODE,
     SERVICE,
+    TRACE,
     SPAN,
     LOG,
-    METRIC, ENDPOINT;
+    METRIC,
+    ENDPOINT;
 
     public static SourceType fromString(String type) {
         return SourceType.valueOf(type.toUpperCase());
