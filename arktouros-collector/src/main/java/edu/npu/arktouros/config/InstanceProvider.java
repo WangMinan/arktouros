@@ -9,7 +9,6 @@ import edu.npu.arktouros.emit.grpc.GrpcEmitter;
 import edu.npu.arktouros.preHandler.AbstractPreHandler;
 import edu.npu.arktouros.preHandler.OtlpLogPreHandler;
 import edu.npu.arktouros.preHandler.PreHandlerFactory;
-import edu.npu.arktouros.properties.PropertiesProvider;
 import edu.npu.arktouros.receiver.AbstractReceiver;
 import edu.npu.arktouros.receiver.OtlpLogFileReceiver;
 import edu.npu.arktouros.receiver.ReceiverFactory;

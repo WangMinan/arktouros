@@ -1,7 +1,7 @@
 package edu.npu.arktouros.receiver;
 
 import edu.npu.arktouros.cache.AbstractCache;
-import edu.npu.arktouros.properties.PropertiesProvider;
+import edu.npu.arktouros.config.PropertiesProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
