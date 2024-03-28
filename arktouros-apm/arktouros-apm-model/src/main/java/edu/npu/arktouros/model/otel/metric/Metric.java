@@ -1,8 +1,8 @@
-package edu.npu.arktouros.model.es.metric;
+package edu.npu.arktouros.model.otel.metric;
 
 import com.google.common.collect.Maps;
-import edu.npu.arktouros.model.es.Source;
-import edu.npu.arktouros.model.es.basic.SourceType;
+import edu.npu.arktouros.model.otel.Source;
+import edu.npu.arktouros.model.otel.basic.SourceType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

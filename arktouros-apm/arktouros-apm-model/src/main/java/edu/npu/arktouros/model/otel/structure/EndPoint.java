@@ -1,12 +1,10 @@
-package edu.npu.arktouros.model.es.structure;
+package edu.npu.arktouros.model.otel.structure;
 
-import edu.npu.arktouros.model.es.Source;
-import edu.npu.arktouros.model.es.basic.SourceType;
+import edu.npu.arktouros.model.otel.Source;
+import edu.npu.arktouros.model.otel.basic.SourceType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import javax.annotation.Nullable;
 
 /**
  * @author : [wangminan]

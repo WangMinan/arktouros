@@ -16,8 +16,36 @@
  *
  */
 
-package edu.npu.arktouros.model.es.metric;
+package edu.npu.arktouros.model.otel.metric;
 
-public enum MetricType {
-    COUNTER, GAUGE, SUMMARY, HISTOGRAM
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Singular;
+import lombok.ToString;
+
+import java.util.Map;
+
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@Getter
+public class Counter extends Metric {
+
+    private double value;
+
+    @Builder
+    public Counter(String name, @Singular Map<String, String> labels,
+                   double value, long timestamp) {
+        super(name, labels, timestamp);
+        this.value = value;
+    }
+
+    @Override public Metric sum(Metric m) {
+        this.value = this.value + m.value();
+        return this;
+    }
+
+    @Override public Double value() {
+        return this.value;
+    }
 }

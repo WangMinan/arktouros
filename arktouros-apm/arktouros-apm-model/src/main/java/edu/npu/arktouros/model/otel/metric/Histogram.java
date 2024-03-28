@@ -16,7 +16,7 @@
  *
  */
 
-package edu.npu.arktouros.model.es.metric;
+package edu.npu.arktouros.model.otel.metric;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

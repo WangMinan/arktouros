@@ -1,9 +1,9 @@
-package edu.npu.arktouros.model.es.trace;
+package edu.npu.arktouros.model.otel.trace;
 
-import edu.npu.arktouros.model.es.Source;
-import edu.npu.arktouros.model.es.basic.SourceType;
-import edu.npu.arktouros.model.es.basic.Tag;
-import edu.npu.arktouros.model.es.structure.EndPoint;
+import edu.npu.arktouros.model.otel.Source;
+import edu.npu.arktouros.model.otel.basic.SourceType;
+import edu.npu.arktouros.model.otel.basic.Tag;
+import edu.npu.arktouros.model.otel.structure.EndPoint;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

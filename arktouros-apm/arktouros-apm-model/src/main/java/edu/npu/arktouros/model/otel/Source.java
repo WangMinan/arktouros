@@ -1,4 +1,4 @@
-package edu.npu.arktouros.model.es;
+package edu.npu.arktouros.model.otel;
 
 import lombok.Data;
 

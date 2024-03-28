@@ -13,41 +13,43 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package edu.npu.arktouros.model.es.metric;
+package edu.npu.arktouros.model.otel.basic;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Singular;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
 @Getter
-public class Gauge extends Metric {
-
-    private double value;
-
-    @Builder
-    public Gauge(String name, @Singular Map<String, String> labels,
-                 double value, long timestamp) {
-        super(name, labels, timestamp);
-        this.value = value;
-    }
-
-    @Override
-    public Metric sum(Metric m) {
-        this.value = this.value + m.value();
-        return this;
-    }
+@Setter
+@Builder
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+public class Tag {
+    public static final int TAG_LENGTH = 256;
+    private String key;
+    private String value;
 
     @Override
-    public Double value() {
-        return this.value;
+    public String toString() {
+        return key + "=" + value;
+    }
+
+    public static class Util {
+        public static List<String> toStringList(List<Tag> list) {
+            if (list.isEmpty()) {
+                return Collections.emptyList();
+            }
+            return list.stream().map(Tag::toString).collect(Collectors.toList());
+        }
     }
 }

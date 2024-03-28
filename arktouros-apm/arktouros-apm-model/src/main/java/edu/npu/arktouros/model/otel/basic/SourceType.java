@@ -1,4 +1,4 @@
-package edu.npu.arktouros.model.es.basic;
+package edu.npu.arktouros.model.otel.basic;
 
 import lombok.Getter;
 

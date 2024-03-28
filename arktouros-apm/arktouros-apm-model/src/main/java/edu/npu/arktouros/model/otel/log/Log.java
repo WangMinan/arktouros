@@ -1,14 +1,13 @@
-package edu.npu.arktouros.model.es.log;
+package edu.npu.arktouros.model.otel.log;
 
-import edu.npu.arktouros.model.es.Source;
-import edu.npu.arktouros.model.es.basic.SourceType;
-import edu.npu.arktouros.model.es.basic.Tag;
+import edu.npu.arktouros.model.otel.Source;
+import edu.npu.arktouros.model.otel.basic.SourceType;
+import edu.npu.arktouros.model.otel.basic.Tag;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Singular;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
