@@ -1,8 +1,5 @@
 {
   "properties": {
-    "id": {
-      "type": "keyword"
-    },
     "name": {
       "type": "text",
       "fields": {
@@ -12,14 +9,32 @@
         }
       }
     },
-    "serviceId": {
-      "type": "keyword"
+    "serviceName": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
     },
     "traceId": {
-      "type": "keyword"
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
     },
     "spanId": {
-      "type": "integer"
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
     },
     "type": {
       "type": "keyword"
@@ -33,10 +48,8 @@
         }
       }
     },
-    "tagsRawData": {
-      "type": "binary"
-    },
     "tags": {
+      "type": "nested",
       "properties": {
         "key": {
           "type": "keyword"
