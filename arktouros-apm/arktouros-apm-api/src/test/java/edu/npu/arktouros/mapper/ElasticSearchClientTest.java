@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 @SpringBootTest
 @Slf4j
-@Disabled
+@Disabled // junit4 @Ignore = junit5 @Disabled
 public class ElasticSearchClientTest {
     @Resource
     private ElasticsearchClient esClient;
