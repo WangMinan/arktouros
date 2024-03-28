@@ -1,11 +1,10 @@
 package edu.npu.arktouros.model.otel.metric;
 
-import com.google.common.collect.Maps;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -24,7 +23,7 @@ public abstract class Metric implements Source {
 
     protected Metric(String name, Map<String, String> labels, long timestamp) {
         this.name = name;
-        this.labels = Maps.newHashMap(labels);
+        this.labels = new HashMap<>(labels);
         this.serviceName = labels.get("service_name");
         this.timestamp = timestamp;
     }

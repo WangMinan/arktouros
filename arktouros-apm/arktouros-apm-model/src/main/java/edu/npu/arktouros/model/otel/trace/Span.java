@@ -6,7 +6,6 @@ import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Singular;
 
 import java.util.List;

@@ -4,7 +4,6 @@ import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import edu.npu.arktouros.model.otel.basic.Tag;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

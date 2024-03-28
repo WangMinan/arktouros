@@ -190,6 +190,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
         }
         if (metric.hasExponentialHistogram()) {
             return metric.getExponentialHistogram().getDataPointsList().stream()
+                    // exponential histogram也转成histogram
                     .map(point -> new Histogram(
                             metric.getName(),
                             mergeLabels(

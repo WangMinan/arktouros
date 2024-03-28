@@ -4,7 +4,6 @@ import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * @author : [wangminan]
