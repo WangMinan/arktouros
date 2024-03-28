@@ -31,3 +31,4 @@ receiver:
 elasticsearch:
   serverUrl: https://localhost:9200
   apiKey: gkAetb_uR3-ePhhP5saPPw
+  caPos: D:/code/arktouros/docs/http_ca.crt # 证书位置
