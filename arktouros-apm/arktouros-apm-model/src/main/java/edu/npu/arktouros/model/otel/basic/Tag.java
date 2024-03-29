@@ -47,11 +47,10 @@ public class Tag {
     static {
         documentMap.put("key", Property.of(property ->
                 property.keyword(KeywordProperty.of(
-                        textProperty -> textProperty.ignoreAbove(TAG_LENGTH)))
+                        keywordProperty -> keywordProperty.index(true)))
         ));
         documentMap.put("value", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        textProperty -> textProperty.ignoreAbove(TAG_LENGTH)))
+                property.text(EsProperties.keywordTextProperty)
         ));
     }
 
