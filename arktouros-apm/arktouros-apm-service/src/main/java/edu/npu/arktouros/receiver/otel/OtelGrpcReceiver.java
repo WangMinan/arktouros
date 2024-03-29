@@ -48,7 +48,7 @@ public class OtelGrpcReceiver extends DataReceiver {
     public void start() {
         try {
             server.start();
-            log.info("OtelGrpcReceiver start to start data, listening on port:{}", port);
+            log.info("OtelGrpcReceiver start to receive data, listening on port:{}", port);
         } catch (IOException e) {
             log.error("Grpc receiver start error", e);
             throw new RuntimeException(e);

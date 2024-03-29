@@ -4,6 +4,7 @@ import edu.npu.arktouros.mapper.otel.queue.TraceQueueMapper;
 import edu.npu.arktouros.model.queue.TraceQueueItem;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.locks.Condition;
@@ -14,6 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @description : 链路追踪队列服务
  */
 @Service
+@Slf4j
 public class TraceQueueService implements QueueService<TraceQueueItem> {
 
     @Resource
@@ -45,6 +47,8 @@ public class TraceQueueService implements QueueService<TraceQueueItem> {
                 notEmpty.await();
                 item = traceQueueMapper.getTop();
             }
+        } catch (InterruptedException e) {
+            log.warn("Force traceQueueService shutting down");
         } finally {
             lock.unlock();
         }

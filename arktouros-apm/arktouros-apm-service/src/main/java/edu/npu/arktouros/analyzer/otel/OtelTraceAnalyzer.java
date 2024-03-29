@@ -7,6 +7,7 @@ import edu.npu.arktouros.model.otel.structure.EndPoint;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.queue.TraceQueueItem;
 import edu.npu.arktouros.service.otel.queue.TraceQueueService;
+import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.opentelemetry.proto.common.v1.InstrumentationScope;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
@@ -32,9 +33,11 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class OtelTraceAnalyzer extends DataAnalyzer {
-
     @Resource
     private TraceQueueService queueService;
+
+    @Resource
+    private SinkService sinkService;
 
     public OtelTraceAnalyzer() {
         this.setName("OtelTraceAnalyzer");

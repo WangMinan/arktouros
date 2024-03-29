@@ -1,8 +1,6 @@
 package edu.npu.arktouros.service.otel.sinker.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.IndexRequest;
-import co.elastic.clients.elasticsearch.indices.GetIndexRequest;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;

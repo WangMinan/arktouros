@@ -4,6 +4,7 @@ import edu.npu.arktouros.mapper.otel.queue.MetricsQueueMapper;
 import edu.npu.arktouros.model.queue.MetricsQueueItem;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.locks.Condition;
@@ -14,6 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @description : 数值队列服务
  */
 @Service
+@Slf4j
 public class MetricsQueueService implements QueueService<MetricsQueueItem> {
 
     @Resource
@@ -46,7 +48,9 @@ public class MetricsQueueService implements QueueService<MetricsQueueItem> {
                 notEmpty.await();
                 item = metricsQueueMapper.getTop();
             }
-        } finally {
+        } catch (InterruptedException e) {
+            log.warn("Force traceQueueService shutting down");
+        }  finally {
             lock.unlock();
         }
         return item;
