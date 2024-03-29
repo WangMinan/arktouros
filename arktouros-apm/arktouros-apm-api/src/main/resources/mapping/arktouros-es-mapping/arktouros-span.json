@@ -1,0 +1,120 @@
+{
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "serviceName": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "traceId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "parentSpanId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "localEndPoint": {
+        "type": "nested",
+        "properties": {
+          "serviceName": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "port": {
+            "type": "integer"
+          },
+          "latency": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        }
+      },
+      "remoteEndPoint": {
+        "type": "nested",
+        "properties": {
+          "serviceName": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "port": {
+            "type": "integer"
+          },
+          "latency": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        }
+      },
+      "startTime": {
+        "type": "date"
+      },
+      "endTime": {
+        "type": "date"
+      },
+      "isRoot": {
+        "type": "boolean"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "nested",
+        "properties": {
+          "key": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  }
+}

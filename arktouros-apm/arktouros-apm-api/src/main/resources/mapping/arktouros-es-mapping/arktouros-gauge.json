@@ -1,8 +1,17 @@
 {
   "mappings": {
     "properties": {
-      "name": {
+      "id": {
         "type": "keyword"
+      },
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
       },
       "serviceId": {
         "type": "keyword"
@@ -20,17 +29,17 @@
             "type": "keyword"
           }
         }
-      },
-      "value": {
-        "type": "double"
-      },
-      "timestamp": {
-        "type": "date",
-        "format": "epoch_millis"
-      },
-      "type": {
-        "type": "keyword"
       }
+    },
+    "timestamp": {
+      "type": "date",
+      "format": "epoch_millis"
+    },
+    "type": {
+      "type": "keyword"
+    },
+    "value": {
+      "type": "double"
     }
   }
 }
