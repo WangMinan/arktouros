@@ -4,12 +4,18 @@ import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
+import jakarta.annotation.PostConstruct;
 
 /**
  * @author : [wangminan]
  * @description : H2数据持久化
  */
 public class H2SinkService extends SinkService {
+
+    @Override
+    public void init() {
+
+    }
 
     @Override
     public void saveResourceLogs(ResourceLogs resourceLogs) {

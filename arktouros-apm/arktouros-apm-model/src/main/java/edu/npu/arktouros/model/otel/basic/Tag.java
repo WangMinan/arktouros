@@ -17,6 +17,8 @@
 
 package edu.npu.arktouros.model.otel.basic;
 
+import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
+import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -25,7 +27,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
@@ -38,6 +42,18 @@ public class Tag {
     public static final int TAG_LENGTH = 256;
     private String key;
     private String value;
+    public static Map<String, Property> documentMap = new HashMap<>();
+
+    static {
+        documentMap.put("key", Property.of(property ->
+                property.keyword(KeywordProperty.of(
+                        textProperty -> textProperty.ignoreAbove(TAG_LENGTH)))
+        ));
+        documentMap.put("value", Property.of(property ->
+                property.keyword(KeywordProperty.of(
+                        textProperty -> textProperty.ignoreAbove(TAG_LENGTH)))
+        ));
+    }
 
     @Override
     public String toString() {

@@ -18,12 +18,17 @@
 
 package edu.npu.arktouros.model.otel.metric;
 
+import co.elastic.clients.elasticsearch._types.mapping.DoubleNumberProperty;
+import co.elastic.clients.elasticsearch._types.mapping.LongNumberProperty;
+import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
+import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.ToString;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -38,10 +43,43 @@ public class Histogram extends Metric {
     private double sampleSum;
     private Map<Double, Long> buckets;
 
+    private static final Map<String, Property> bucketsMap = new HashMap<>();
+
+    public static Map<String, Property> documentMap = new HashMap<>();
+
+    static {
+        bucketsMap.put("key", Property.of(property ->
+                property.double_(DoubleNumberProperty.of(
+                        doubleProperty ->
+                                doubleProperty.index(true).store(true)))
+        ));
+        bucketsMap.put("value", Property.of(property ->
+                property.long_(LongNumberProperty.of(
+                        longProperty ->
+                                longProperty.index(true).store(true)))
+        ));
+        documentMap.putAll(metricBaseMap);
+        documentMap.put("sampleCount", Property.of(property ->
+                property.long_(LongNumberProperty.of(
+                        longProperty ->
+                                longProperty.index(true).store(true)))
+        ));
+        documentMap.put("sampleSum", Property.of(property ->
+                property.double_(DoubleNumberProperty.of(
+                        doubleProperty ->
+                                doubleProperty.index(true).store(true)))
+        ));
+        documentMap.put("buckets", Property.of(property ->
+                property.nested(NestedProperty.of(
+                        nestedProperty -> nestedProperty.properties(bucketsMap)
+                ))
+        ));
+    }
+
     @Builder
     public Histogram(String name, @Singular Map<String, String> labels,
                      long sampleCount, double sampleSum,
-        @Singular Map<Double, Long> buckets, long timestamp) {
+                     @Singular Map<Double, Long> buckets, long timestamp) {
         super(name, labels, timestamp);
         getLabels().remove("le");
         this.sampleCount = sampleCount;
@@ -49,16 +87,18 @@ public class Histogram extends Metric {
         this.buckets = buckets;
     }
 
-    @Override public Metric sum(Metric m) {
+    @Override
+    public Metric sum(Metric m) {
         Histogram h = (Histogram) m;
         this.buckets = Stream.concat(getBuckets().entrySet().stream(), h.getBuckets().entrySet().stream())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Long::sum, TreeMap::new));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Long::sum, TreeMap::new));
         this.sampleSum = this.sampleSum + h.sampleSum;
         this.sampleCount = this.sampleCount + h.sampleCount;
         return this;
     }
 
-    @Override public Double value() {
+    @Override
+    public Double value() {
         return this.getSampleSum() * 1000 / this.getSampleCount();
     }
 }

@@ -1,11 +1,13 @@
 package edu.npu.arktouros.model.otel.metric;
 
+import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.ToString;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -19,6 +21,32 @@ public class Summary extends Metric {
     private long sampleCount;
     private double sampleSum;
     private final Map<Double, Double> quantiles;
+
+    public static Map<String, Property> documentMap = new HashMap<>();
+
+    static {
+        documentMap.putAll(metricBaseMap);
+        documentMap.put("sampleCount", Property.of(property ->
+                property.long_(longProperty ->
+                        longProperty.index(true).store(true)))
+        );
+        documentMap.put("sampleSum", Property.of(property ->
+                property.double_(doubleProperty ->
+                        doubleProperty.index(true).store(true)))
+        );
+        documentMap.put("quantiles", Property.of(property ->
+                property.nested(nestedProperty ->
+                        nestedProperty.properties(Map.of(
+                                "key", Property.of(p ->
+                                        p.double_(doubleProperty ->
+                                                doubleProperty.index(true).store(true))),
+                                "value", Property.of(p ->
+                                        p.double_(doubleProperty ->
+                                                doubleProperty.index(true).store(true)))
+                        ))
+                ))
+        );
+    }
 
     @Builder
     public Summary(String name, @Singular Map<String, String> labels,

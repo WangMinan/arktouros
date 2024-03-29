@@ -93,10 +93,12 @@
         }
       },
       "startTime": {
-        "type": "date"
+        "type": "date",
+        "format": "epoch_millis"
       },
       "endTime": {
-        "type": "date"
+        "type": "date",
+        "format": "epoch_millis"
       },
       "isRoot": {
         "type": "boolean"

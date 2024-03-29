@@ -18,12 +18,18 @@
 
 package edu.npu.arktouros.model.otel.metric;
 
+import co.elastic.clients.elasticsearch._types.mapping.DateProperty;
+import co.elastic.clients.elasticsearch._types.mapping.DoubleNumberProperty;
+import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
+import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
+import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.ToString;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
@@ -38,6 +44,16 @@ public class Gauge extends Metric {
                  double value, long timestamp) {
         super(name, labels, timestamp);
         this.value = value;
+    }
+
+    public static Map<String, Property> documentMap = new HashMap<>();
+    static {
+        documentMap.putAll(metricBaseMap);
+        documentMap.put("value", Property.of(property ->
+                property.double_(DoubleNumberProperty.of(
+                        doubleProperty ->
+                                doubleProperty.index(true).store(true)))
+        ));
     }
 
     @Override

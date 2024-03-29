@@ -64,7 +64,8 @@
         "type": "boolean"
       },
       "timestamp": {
-        "type": "date"
+        "type": "date",
+        "format": "epoch_millis"
       }
     }
   }

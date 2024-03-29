@@ -10,7 +10,7 @@ import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.queue.MetricsQueueItem;
 import edu.npu.arktouros.service.otel.queue.MetricsQueueService;
-import edu.npu.arktouros.service.otel.sinker.elasticsearch.ElasticSearchSinkService;
+import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import io.opentelemetry.proto.metrics.v1.ScopeMetrics;
@@ -19,7 +19,6 @@ import io.opentelemetry.proto.metrics.v1.SummaryDataPoint;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -44,9 +43,8 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
     @Resource
     private MetricsQueueService queueService;
 
-    @Lazy
     @Resource
-    private ElasticSearchSinkService elasticSearchSinkService;
+    private SinkService sinkService;
 
     public OtelMetricsAnalyzer() {
         this.setName("OtelMetricsAnalyzer");

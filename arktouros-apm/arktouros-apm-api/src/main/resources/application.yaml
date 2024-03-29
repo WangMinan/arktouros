@@ -30,7 +30,6 @@ receiver:
 
 elasticsearch:
   serverUrl: https://localhost:9200
-  apiKey: gkAetb_uR3-ePhhP5saPPw # 生成方式请参考文档 优先级高于username password组合
   username: elastic
   password: elastic
   caPos: D:/code/arktouros/docs/http_ca.crt # 证书位置 留空或文件不存在则不开启SSL

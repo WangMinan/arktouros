@@ -62,58 +62,49 @@ public class ElasticSearchConfig {
     private ObjectMapper objectMapper;
 
     @Bean
-    public ElasticsearchClient getElasticSearchClient()
-            throws NoSuchAlgorithmException, KeyManagementException,
-            CertificateException, KeyStoreException, IOException {
+    public ElasticsearchClient getElasticSearchClient() throws Exception {
+        validateInputs();
+
+        RestClientBuilder builder = RestClient.builder(HttpHost.create(serverUrl));
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(
+                AuthScope.ANY, new UsernamePasswordCredentials(username, password));
+
+        if (StringUtils.isNotEmpty(caPos)) {
+            SSLContext sslContext = createSSLContext();
+            builder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
+                    .setDefaultCredentialsProvider(credentialsProvider)
+                    .setSSLContext(sslContext));
+        } else {
+            builder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
+                    .setDefaultCredentialsProvider(credentialsProvider));
+        }
+
+        RestClient restClient = builder.build();
+        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper(objectMapper));
+
+        return new ElasticsearchClient(transport);
+    }
+
+    private void validateInputs() {
         if (StringUtils.isEmpty(serverUrl)) {
             throw new IllegalArgumentException("serverUrl must be set");
         } else if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
             throw new IllegalArgumentException("Username and password must be set");
         }
-        RestClientBuilder builder = RestClient
-                .builder(HttpHost.create(serverUrl));
-        if (StringUtils.isNotEmpty(caPos)) {
-            Path caCertificatePath = Paths.get(caPos);
-            CertificateFactory factory =
-                    CertificateFactory.getInstance("X.509");
-            Certificate trustedCa;
-            try (InputStream is = Files.newInputStream(caCertificatePath)) {
-                trustedCa = factory.generateCertificate(is);
-            }
-            KeyStore trustStore = KeyStore.getInstance("pkcs12");
-            trustStore.load(null, null);
-            trustStore.setCertificateEntry("ca", trustedCa);
-            SSLContextBuilder sslContextBuilder = SSLContexts.custom()
-                    .loadTrustMaterial(trustStore, null);
-            final SSLContext sslContext = sslContextBuilder.build();
-            final CredentialsProvider credentialsProvider =
-                    new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY,
-                    new UsernamePasswordCredentials(username, password));
-            builder.setHttpClientConfigCallback(
-                    httpClientBuilder ->
-                            httpClientBuilder
-                                    .setDefaultCredentialsProvider(credentialsProvider)
-                                    .setSSLContext(sslContext));
-        } else {
-            // ssl not enabled
-            final CredentialsProvider credentialsProvider =
-                    new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY,
-                    new UsernamePasswordCredentials(username, password));
-            builder.setHttpClientConfigCallback(
-                    httpClientBuilder ->
-                            httpClientBuilder
-                                    .setDefaultCredentialsProvider(credentialsProvider));
+    }
 
+    private SSLContext createSSLContext() throws Exception {
+        Path caCertificatePath = Paths.get(caPos);
+        Certificate trustedCa;
+        try (InputStream is = Files.newInputStream(caCertificatePath)) {
+            trustedCa = CertificateFactory.getInstance("X.509").generateCertificate(is);
         }
-        RestClient restClient = builder.build();
 
-        // Create the transport with a Jackson mapper
-        ElasticsearchTransport transport = new RestClientTransport(
-                restClient, new JacksonJsonpMapper(objectMapper));
+        KeyStore trustStore = KeyStore.getInstance("pkcs12");
+        trustStore.load(null, null);
+        trustStore.setCertificateEntry("ca", trustedCa);
 
-        // And create the API client
-        return new ElasticsearchClient(transport);
+        return SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
     }
 }

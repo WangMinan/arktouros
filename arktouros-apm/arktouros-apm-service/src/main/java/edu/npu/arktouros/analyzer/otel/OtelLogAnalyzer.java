@@ -7,6 +7,7 @@ import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.queue.LogQueueItem;
 import edu.npu.arktouros.service.otel.queue.LogQueueService;
+import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import io.opentelemetry.proto.logs.v1.ScopeLogs;
@@ -31,6 +32,9 @@ public class OtelLogAnalyzer extends DataAnalyzer {
 
     @Resource
     private LogQueueService logQueueService;
+
+    @Resource
+    private SinkService sinkService;
 
     public OtelLogAnalyzer() {
         this.setName("OtelLogAnalyzer");

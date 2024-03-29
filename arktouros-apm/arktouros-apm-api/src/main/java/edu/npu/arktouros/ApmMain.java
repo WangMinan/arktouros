@@ -1,11 +1,13 @@
 package edu.npu.arktouros;
 
 import edu.npu.arktouros.receiver.DataReceiver;
+import edu.npu.arktouros.service.otel.sinker.SinkService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.retry.annotation.EnableRetry;
 
 /**
  * @author : [wangminan]
@@ -13,14 +15,19 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 @Slf4j
+@EnableRetry
 public class ApmMain implements CommandLineRunner {
 
     @Resource
     private DataReceiver dataReceiver;
 
+    @Resource
+    private SinkService sinkService;
+
     @Override
     public void run(String... args) {
-        log.info("APM starting");
+        log.info("APM starting, adding shutdown hook.");
+        sinkService.init();
         // 拉起数据接收器 接收器会自动调用analyzer analyzer会自动调用sinker
         dataReceiver.start();
         Thread thread = new Thread(

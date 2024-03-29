@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author : [wangminan]
@@ -21,11 +22,33 @@ public class ElasticSearchClientTest {
     @Resource
     private ElasticsearchClient esClient;
 
+    private static final String LOG_INDEX = "arktouros-log";
+    private static final String SPAN_INDEX = "arktouros-span";
+    private static final String GAUGE_INDEX = "arktouros-gauge";
+    private static final String COUNTER_INDEX = "arktouros-counter";
+    private static final String SUMMARY_INDEX = "arktouros-summary";
+    private static final String HISTOGRAM_INDEX = "arktouros-histogram";
+
+    private static final List<String> indexList = List.of(LOG_INDEX, SPAN_INDEX, GAUGE_INDEX,
+            COUNTER_INDEX, SUMMARY_INDEX, HISTOGRAM_INDEX);
+
     @Test
     void testClient() throws IOException {
         log.info("root path:{}", System.getProperty("user.dir"));
         BooleanResponse exists =
                 esClient.indices().exists(builder -> builder.index("arktouros_log"));
         log.info("index exists: {}", exists.value());
+    }
+
+    @Test
+    void deleteMappings() {
+        log.info("start deleting mappings");
+        indexList.forEach(index -> {
+            try {
+                esClient.indices().delete(builder -> builder.index(index));
+            } catch (IOException e) {
+                log.error("delete index:{} failed", index);
+            }
+        });
     }
 }
