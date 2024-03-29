@@ -28,5 +28,11 @@
             <artifactId>arktouros-protocol</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- 构建mapping要用到-->
+        <dependency>
+            <groupId>co.elastic.clients</groupId>
+            <artifactId>elasticsearch-java</artifactId>
+        </dependency>
     </dependencies>
 </project>
