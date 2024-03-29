@@ -7,18 +7,17 @@ import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -41,13 +40,14 @@ import java.security.cert.CertificateFactory;
  * @description : ElasticSearch配置类
  */
 @Configuration
+// 仅当instance.active.sinker=elasticsearch时，才会加载此配置类
+// prefix表示配置前缀 name表示配置名称 havingValue表示配置值
+@ConditionalOnProperty(prefix = "instance.active",
+        name = "sinker", havingValue = "elasticsearch")
 public class ElasticSearchConfig {
 
     @Value("${elasticsearch.serverUrl}")
     private String serverUrl;
-
-    @Value("${elasticsearch.apiKey}")
-    private String apiKey;
 
     @Value("${elasticsearch.username}")
     private String username;
@@ -67,8 +67,8 @@ public class ElasticSearchConfig {
             CertificateException, KeyStoreException, IOException {
         if (StringUtils.isEmpty(serverUrl)) {
             throw new IllegalArgumentException("serverUrl must be set");
-        } else if (StringUtils.isEmpty(apiKey) && (StringUtils.isEmpty(username) || StringUtils.isEmpty(password))) {
-            throw new IllegalArgumentException("apiKey or username and password must be set");
+        } else if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+            throw new IllegalArgumentException("Username and password must be set");
         }
         RestClientBuilder builder = RestClient
                 .builder(HttpHost.create(serverUrl));
@@ -86,39 +86,25 @@ public class ElasticSearchConfig {
             SSLContextBuilder sslContextBuilder = SSLContexts.custom()
                     .loadTrustMaterial(trustStore, null);
             final SSLContext sslContext = sslContextBuilder.build();
-            if (StringUtils.isNotEmpty(apiKey)) {
-                builder.setDefaultHeaders(new Header[]{
-                                new BasicHeader("Authorization", "ApiKey " + apiKey)
-                        })
-                        .setHttpClientConfigCallback(httpClientBuilder ->
-                                httpClientBuilder.setSSLContext(sslContext));
-            } else {
-                final CredentialsProvider credentialsProvider =
-                        new BasicCredentialsProvider();
-                credentialsProvider.setCredentials(AuthScope.ANY,
-                        new UsernamePasswordCredentials(username, password));
-                builder.setHttpClientConfigCallback(
-                        httpClientBuilder ->
-                                httpClientBuilder
-                                        .setDefaultCredentialsProvider(credentialsProvider)
-                                        .setSSLContext(sslContext));
-            }
+            final CredentialsProvider credentialsProvider =
+                    new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY,
+                    new UsernamePasswordCredentials(username, password));
+            builder.setHttpClientConfigCallback(
+                    httpClientBuilder ->
+                            httpClientBuilder
+                                    .setDefaultCredentialsProvider(credentialsProvider)
+                                    .setSSLContext(sslContext));
         } else {
             // ssl not enabled
-            if (StringUtils.isNotEmpty(apiKey)) {
-                builder.setDefaultHeaders(new Header[]{
-                        new BasicHeader("Authorization", "ApiKey " + apiKey)
-                });
-            } else {
-                final CredentialsProvider credentialsProvider =
-                        new BasicCredentialsProvider();
-                credentialsProvider.setCredentials(AuthScope.ANY,
-                        new UsernamePasswordCredentials(username, password));
-                builder.setHttpClientConfigCallback(
-                        httpClientBuilder ->
-                                httpClientBuilder
-                                        .setDefaultCredentialsProvider(credentialsProvider));
-            }
+            final CredentialsProvider credentialsProvider =
+                    new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY,
+                    new UsernamePasswordCredentials(username, password));
+            builder.setHttpClientConfigCallback(
+                    httpClientBuilder ->
+                            httpClientBuilder
+                                    .setDefaultCredentialsProvider(credentialsProvider));
 
         }
         RestClient restClient = builder.build();
