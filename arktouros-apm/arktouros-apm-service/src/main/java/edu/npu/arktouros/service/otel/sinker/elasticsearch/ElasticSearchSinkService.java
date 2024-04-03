@@ -20,10 +20,12 @@ import org.springframework.retry.annotation.Retryable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author : [wangminan]
@@ -55,9 +57,21 @@ public class ElasticSearchSinkService extends SinkService {
         log.info("Check and init mappings in elasticsearch.");
         CountDownLatch createIndexLatch = new CountDownLatch(indexList.size());
         // 先判断各索引是否存在 不存在则创建 并行操作
-        indexList.forEach(indexName ->
-                createIndexThreadPool.execute(
-                        () -> checkAndCreate(indexName, createIndexLatch)));
+        List<Thread> initThreads = new ArrayList<>();
+        indexList.forEach(indexName -> {
+            Thread thread = new Thread(() -> {
+                try {
+                    checkAndCreate(indexName, createIndexLatch);
+                } catch (Exception e) {
+                    log.error("Check and create index" + indexName +" error.", e);
+                    System.exit(1);
+                }
+            });
+            thread.setName("Check and create index: " + indexName);
+
+            initThreads.add(thread);
+        });
+        initThreads.forEach(createIndexThreadPool::submit);
         try {
             createIndexLatch.await();
         } catch (InterruptedException e) {
@@ -68,18 +82,14 @@ public class ElasticSearchSinkService extends SinkService {
         log.info("ElasticSearch sinker init success.");
     }
 
-    public void checkAndCreate(String indexName, CountDownLatch createIndexLatch) {
-        try {
-            BooleanResponse exists =
-                    esClient.indices().exists(builder -> builder.index(indexName));
-            if (!exists.value()) {
-                // spring-retry
-                createIndex(indexName);
-            }
-            createIndexLatch.countDown();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public void checkAndCreate(String indexName, CountDownLatch createIndexLatch) throws IOException {
+        BooleanResponse exists =
+                esClient.indices().exists(builder -> builder.index(indexName));
+        if (!exists.value()) {
+            // spring-retry
+            createIndex(indexName);
         }
+        createIndexLatch.countDown();
     }
 
     /**
@@ -92,10 +102,6 @@ public class ElasticSearchSinkService extends SinkService {
     @Retryable(retryFor = IOException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
     public void createIndex(String indexName) throws IOException {
         log.info("Index not exist, start creating index: {}", indexName);
-        URL resourceUrl = ElasticSearchSinkService.class.getResource("/mapping/arktouros-es-mapping/" + indexName + ".json");
-        if (resourceUrl == null) {
-            throw new FileNotFoundException("Mapping file not found: " + indexName);
-        }
         CreateIndexRequest.Builder createIndexRequestBuilder =
                 getCreateIndexRequestBuilder(indexName);
         CreateIndexRequest createIndexRequest = createIndexRequestBuilder.build();

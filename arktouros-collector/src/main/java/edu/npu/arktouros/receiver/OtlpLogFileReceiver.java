@@ -4,6 +4,7 @@ import edu.npu.arktouros.cache.AbstractCache;
 import edu.npu.arktouros.config.PropertiesProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -19,6 +20,7 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -52,7 +54,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
     public void run() {
         log.info("this is OtlpLogFileReceiver, start working");
         try {
-            Timer timer = new Timer();
+            /*Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -67,19 +69,20 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
                         log.info("No log file found. Waiting for new input.");
                     }
                 }
-            }, 0, 2000);
+            }, 0, 2000);*/
+
+            prepare();
 
             while (true) {
                 readFile();
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private void readFile() throws InterruptedException {
-        log.info("continuing reading log: {}, current position: {}",
-                currentFile.getName(), currentPos);
+        log.info("continuing reading log: {}, current position: {}", currentFile.getName(), currentPos);
         // 存在逐步写入情况 使用buffer读
         readCurrentFileWithChannel();
         // readCurrentFileWithStream();
@@ -177,11 +180,22 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
 
     public void initParamsWithIndex() throws IOException {
         // 去logs目录下检索是否有index文件
-        indexFile = new File(LOG_DIR + File.pathSeparator + "logs.index");
-        if (indexFile.exists()) {
+        indexFile = new File(LOG_DIR + File.separator + "logs.index");
+        // 在执行rename的时候中断程序会出现问题
+        File tmpIndexFile = new File(LOG_DIR + File.separator + "logs.index.tmp");
+        if (tmpIndexFile.exists()) {
+            // 优先级更高 用tmpIndexFile的内容覆盖indexFile
+            indexFile.createNewFile();
+            FileUtils.copyFile(tmpIndexFile, indexFile);
+        } else if (indexFile.exists()) {
             String line;
             try {
-                line = FileUtils.readLines(indexFile, StandardCharsets.UTF_8).getFirst();
+                List<String> lines = FileUtils.readLines(indexFile, StandardCharsets.UTF_8);
+                if (lines.isEmpty() || StringUtils.isNotEmpty(lines.getFirst())) {
+                    initEmptyIndexFile();
+                    return;
+                }
+                line = lines.getFirst();
             } catch (IOException e) {
                 throw new IOException("failed while reading index file", e);
             }
@@ -194,35 +208,37 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
             currentFile = createTimeFileMap.get(currentFileCreateTime);
             currentPos = Long.parseLong(split[1]);
         } else {
-            // 初始化索引文件与变量
-            try {
-                boolean newFile = indexFile.createNewFile();
-                if (!newFile) {
-                    throw new RuntimeException("create index file failed");
-                }
-                createTimeFileMap.entrySet()
-                        .stream()
-                        .min(Map.Entry.comparingByKey())
-                        .ifPresentOrElse(entry -> {
-                            currentFile = entry.getValue();
-                            currentPos = 0L;
-                            currentFileCreateTime = entry.getKey();
-                            List<String> line = List.of(currentFileCreateTime + ":" + currentPos);
-                            File tmpIndex = new File(LOG_DIR + "logs.index.tmp");
-                            try {
-                                tmpIndex.createNewFile();
-                                Files.write(tmpIndex.toPath(), line,
-                                        StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
-                                tmpIndex.renameTo(indexFile);
-                            } catch (IOException e) {
-                                throw new RuntimeException("failed while writing index file", e);
-                            }
-                        }, () -> {
-                            throw new RuntimeException("the log dir is empty");
-                        });
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            initEmptyIndexFile();
+        }
+    }
+
+    private void initEmptyIndexFile() {
+        // 初始化索引文件与变量
+        try {
+            indexFile.createNewFile();
+            createTimeFileMap.entrySet()
+                    .stream()
+                    .min(Map.Entry.comparingByKey())
+                    .ifPresentOrElse(entry -> {
+                        currentFile = entry.getValue();
+                        currentPos = 0L;
+                        currentFileCreateTime = entry.getKey();
+                        List<String> line = List.of(currentFileCreateTime + ":" + currentPos);
+                        File tmpIndex = new File(LOG_DIR + "logs.index.tmp");
+                        try {
+                            tmpIndex.createNewFile();
+                            Files.write(tmpIndex.toPath(), line,
+                                    StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
+                            tmpIndex.renameTo(indexFile);
+                        } catch (IOException e) {
+                            throw new RuntimeException("failed while writing index file", e);
+                        }
+                        log.info("init index file complete");
+                    }, () -> {
+                        throw new RuntimeException("the log dir is empty");
+                    });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -232,7 +248,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
         if (files != null) {
             for (File file : files) {
                 // 需要排除索引文件
-                if (!file.getName().equals("logs.index")) {
+                if (!file.getName().toLowerCase(Locale.ROOT).contains("logs.index")) {
                     try {
                         // 获取创建时间
                         Path path = file.toPath();

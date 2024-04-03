@@ -51,22 +51,33 @@ public class GrpcEmitter extends AbstractEmitter {
             new ScheduledThreadPoolExecutor(1);
     private final AtomicInteger connectRetryTimes = new AtomicInteger(0);
 
-    @SneakyThrows
     public GrpcEmitter(AbstractCache inputCache) {
         super(inputCache);
-        String HOST = PropertiesProvider.getProperty("emitter.grpc.host");
+        String HOST = PropertiesProvider
+                .getProperty("emitter.grpc.host", "127.0.0.1");
         if (StringUtils.isEmpty(HOST) ||
                 PropertiesProvider.getProperty("emitter.grpc.port") == null) {
             throw new IllegalArgumentException("Invalid host or port for grpc emitter");
         }
-        int PORT = Integer.parseInt(Objects.requireNonNull(
-                PropertiesProvider.getProperty("emitter.grpc.port")));
+        int PORT = Integer.parseInt(PropertiesProvider.getProperty("emitter.grpc.port"));
         channel = ManagedChannelBuilder.forAddress(HOST, PORT)
                 .usePlaintext()
                 .build();
-        CountDownLatch waitForFirstConnectLatch = new CountDownLatch(1);
-        startKeepAliveCheck(waitForFirstConnectLatch);
-        waitForFirstConnectLatch.await();
+
+        if (Boolean.parseBoolean(
+                PropertiesProvider.getProperty("emitter.grpc.keepAlive.enabled",
+                        "false")
+        )) {
+            CountDownLatch waitForFirstConnectLatch = new CountDownLatch(1);
+            startKeepAliveCheck(waitForFirstConnectLatch);
+            try {
+                waitForFirstConnectLatch.await();
+            } catch (InterruptedException e) {
+                log.info("Interrupted when waiting for the first connection to apm.");
+                throw new RuntimeException(e);
+            }
+        }
+
         logsServiceBlockingStub = LogsServiceGrpc.newBlockingStub(channel);
         metricsServiceBlockingStub = MetricsServiceGrpc.newBlockingStub(channel);
         traceServiceBlockingStub = TraceServiceGrpc.newBlockingStub(channel);
@@ -142,42 +153,42 @@ public class GrpcEmitter extends AbstractEmitter {
         LogsData.Builder builder = LogsData.newBuilder();
         ProtoBufJsonUtils.fromJSON(inputJson, builder);
         LogsData logsData = builder.build();
-        log.debug("sending logs data to apm: {}", inputJson);
+        log.info("sending logs data to apm");
         ExportLogsServiceRequest request =
                 ExportLogsServiceRequest
                         .newBuilder()
                         .addAllResourceLogs(logsData.getResourceLogsList())
                         .build();
         ExportLogsServiceResponse response = logsServiceBlockingStub.export(request);
-        log.debug("response from apm: {}", response);
+        log.info("response from apm: {}", response);
     }
 
     private void handleMetrics(String inputJson) throws IOException {
         MetricsData.Builder builder = MetricsData.newBuilder();
         ProtoBufJsonUtils.fromJSON(inputJson, builder);
         MetricsData metricsData = builder.build();
-        log.debug("sending metrics data to apm: {}", inputJson);
+        log.info("sending metrics data to apm");
         ExportMetricsServiceRequest request =
                 ExportMetricsServiceRequest
                         .newBuilder()
                         .addAllResourceMetrics(metricsData.getResourceMetricsList())
                         .build();
         ExportMetricsServiceResponse response = metricsServiceBlockingStub.export(request);
-        log.debug("response from apm: {}", response);
+        log.info("response from apm: {}", response);
     }
 
     private void handleTrace(String inputJson) throws IOException {
         TracesData.Builder builder = TracesData.newBuilder();
         ProtoBufJsonUtils.fromJSON(inputJson, builder);
         TracesData tracesData = builder.build();
-        log.debug("sending trace data to apm: {}", inputJson);
+        log.info("sending trace data to apm");
         ExportTraceServiceRequest request =
                 ExportTraceServiceRequest
                         .newBuilder()
                         .addAllResourceSpans(tracesData.getResourceSpansList())
                         .build();
         ExportTraceServiceResponse response = traceServiceBlockingStub.export(request);
-        log.debug("response from apm: {}", response);
+        log.info("response from apm: {}", response);
     }
 
     public static class Factory implements EmitterFactory {

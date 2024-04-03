@@ -31,6 +31,7 @@ public class CollectorMain {
         PropertiesProvider.init();
         InstanceProvider.init();
 
+        log.info("Starting emitter.");
         AbstractEmitter emitter = InstanceProvider.getEmitter();
         emitter.setUncaughtExceptionHandler((t, e) -> {
             log.error("Emitter error", e);
@@ -40,6 +41,7 @@ public class CollectorMain {
         // 启动emitter
         executorService.submit(emitter);
 
+        log.info("Starting preHandler.");
         AbstractPreHandler preHandler = InstanceProvider.getPreHandler();
         preHandler.setUncaughtExceptionHandler((t, e) -> {
             log.error("PreHandler error", e);
@@ -49,6 +51,7 @@ public class CollectorMain {
         // 启动preHandler
         executorService.submit(preHandler);
 
+        log.info("Starting receiver.");
         AbstractReceiver receiver = InstanceProvider.getReceiver();
         receiver.setUncaughtExceptionHandler((t, e) -> {
             log.error("Receiver error", e);

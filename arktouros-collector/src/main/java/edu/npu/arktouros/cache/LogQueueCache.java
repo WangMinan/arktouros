@@ -11,7 +11,7 @@ public class LogQueueCache implements AbstractCache {
 
     private static final int DEFAULT_CAPACITY = 1000;
 
-    private final BlockingQueue<String> queue =
+    private final ArrayBlockingQueue<String> queue =
             new ArrayBlockingQueue<>(DEFAULT_CAPACITY);
 
 
@@ -24,7 +24,11 @@ public class LogQueueCache implements AbstractCache {
     }
 
     public String get() {
-        return queue.poll();
+        try {
+            return queue.take();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
