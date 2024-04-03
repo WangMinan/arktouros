@@ -4,16 +4,15 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
+import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;
 import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.metric.Histogram;
+import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
-import io.opentelemetry.proto.logs.v1.ResourceLogs;
-import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
-import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -21,8 +20,10 @@ import org.springframework.retry.annotation.Retryable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author : [wangminan]
@@ -46,15 +47,28 @@ public class ElasticSearchSinkService extends SinkService {
     private static final List<String> indexList = List.of(LOG_INDEX, SPAN_INDEX, GAUGE_INDEX,
             COUNTER_INDEX, SUMMARY_INDEX, HISTOGRAM_INDEX);
 
+    private final ExecutorService createIndexThreadPool =
+            Executors.newFixedThreadPool(indexList.size());
+
     @Override
     public void init() {
         log.info("Check and init mappings in elasticsearch.");
-        // 先判断各索引是否存在
-        indexList.forEach(this::checkAndCreate);
+        CountDownLatch createIndexLatch = new CountDownLatch(indexList.size());
+        // 先判断各索引是否存在 不存在则创建 并行操作
+        indexList.forEach(indexName ->
+                createIndexThreadPool.execute(
+                        () -> checkAndCreate(indexName, createIndexLatch)));
+        try {
+            createIndexLatch.await();
+        } catch (InterruptedException e) {
+            log.error("Create index interrupted.");
+            throw new RuntimeException(e);
+        }
         this.setReady(true);
+        log.info("ElasticSearch sinker init success.");
     }
 
-    private void checkAndCreate(String indexName) {
+    public void checkAndCreate(String indexName, CountDownLatch createIndexLatch) {
         try {
             BooleanResponse exists =
                     esClient.indices().exists(builder -> builder.index(indexName));
@@ -62,6 +76,7 @@ public class ElasticSearchSinkService extends SinkService {
                 // spring-retry
                 createIndex(indexName);
             }
+            createIndexLatch.countDown();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -75,7 +90,7 @@ public class ElasticSearchSinkService extends SinkService {
      * @throws IOException IO异常
      */
     @Retryable(retryFor = IOException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
-    private void createIndex(String indexName) throws IOException {
+    public void createIndex(String indexName) throws IOException {
         log.info("Index not exist, start creating index: {}", indexName);
         URL resourceUrl = ElasticSearchSinkService.class.getResource("/mapping/arktouros-es-mapping/" + indexName + ".json");
         if (resourceUrl == null) {
@@ -117,17 +132,83 @@ public class ElasticSearchSinkService extends SinkService {
     }
 
     @Override
-    public void saveResourceLogs(ResourceLogs resourceLogs) {
-
-    }
-
-    @Override
-    public void saveResourceSpans(ResourceSpans resourceSpans) {
-
-    }
-
-    @Override
-    public void saveResourceMetrics(ResourceMetrics resourceMetrics) {
-
+    @Retryable(retryFor = IOException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
+    public void sink(Source source) throws IOException {
+        switch (source) {
+            // 模式匹配
+            case Log sourceLog:
+                try {
+                    esClient.index(builder -> builder
+                            .index(LOG_INDEX)
+                            .document(sourceLog)
+                    );
+                } catch (IOException e) {
+                    log.error("Sink log error.", e);
+                    throw e;
+                }
+                break;
+            case Span sourceSpan:
+                try {
+                    esClient.index(builder -> builder
+                            .index(SPAN_INDEX)
+                            .document(sourceSpan)
+                    );
+                } catch (IOException e) {
+                    log.error("Sink span error.", e);
+                    throw e;
+                }
+                break;
+            case Metric sourceMetric:
+                switch (sourceMetric.getMetricType()) {
+                    case COUNTER:
+                        try {
+                            esClient.index(builder -> builder
+                                    .index(COUNTER_INDEX)
+                                    .document(sourceMetric)
+                            );
+                        } catch (IOException e) {
+                            log.error("Sink counter error.", e);
+                            throw e;
+                        }
+                        break;
+                    case GAUGE:
+                        try {
+                            esClient.index(builder -> builder
+                                    .index(GAUGE_INDEX)
+                                    .document(sourceMetric)
+                            );
+                        } catch (IOException e) {
+                            log.error("Sink gauge error.", e);
+                            throw e;
+                        }
+                        break;
+                    case SUMMARY:
+                        try {
+                            esClient.index(builder -> builder
+                                    .index(SUMMARY_INDEX)
+                                    .document(sourceMetric)
+                            );
+                        } catch (IOException e) {
+                            log.error("Sink summary error.", e);
+                            throw e;
+                        }
+                        break;
+                    case HISTOGRAM:
+                        try {
+                            esClient.index(builder -> builder
+                                    .index(HISTOGRAM_INDEX)
+                                    .document(sourceMetric)
+                            );
+                        } catch (IOException e) {
+                            log.error("Sink histogram error.", e);
+                            throw e;
+                        }
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected metric type value: " + sourceMetric.getMetricType());
+                }
+            default:
+                throw new IllegalStateException("Unexpected source type value: " + source);
+        }
     }
 }

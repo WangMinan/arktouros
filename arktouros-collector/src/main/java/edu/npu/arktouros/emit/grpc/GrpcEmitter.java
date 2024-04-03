@@ -5,8 +5,10 @@ import edu.npu.arktouros.commons.ProtoBufJsonUtils;
 import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.emit.AbstractEmitter;
 import edu.npu.arktouros.emit.EmitterFactory;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse;
 import io.opentelemetry.proto.collector.logs.v1.LogsServiceGrpc;
@@ -20,9 +22,16 @@ import io.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.proto.metrics.v1.MetricsData;
 import io.opentelemetry.proto.trace.v1.TracesData;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author : [wangminan]
@@ -37,16 +46,75 @@ public class GrpcEmitter extends AbstractEmitter {
     private final MetricsServiceGrpc.MetricsServiceBlockingStub metricsServiceBlockingStub;
     private final TraceServiceGrpc.TraceServiceBlockingStub traceServiceBlockingStub;
 
+    // 一个探活线程
+    private final ScheduledThreadPoolExecutor keepAliveThreadPool =
+            new ScheduledThreadPoolExecutor(1);
+    private final AtomicInteger connectRetryTimes = new AtomicInteger(0);
+
+    @SneakyThrows
     public GrpcEmitter(AbstractCache inputCache) {
         super(inputCache);
         String HOST = PropertiesProvider.getProperty("emitter.grpc.host");
-        int PORT = Integer.parseInt(PropertiesProvider.getProperty("emitter.grpc.port"));
+        if (StringUtils.isEmpty(HOST) ||
+                PropertiesProvider.getProperty("emitter.grpc.port") == null) {
+            throw new IllegalArgumentException("Invalid host or port for grpc emitter");
+        }
+        int PORT = Integer.parseInt(Objects.requireNonNull(
+                PropertiesProvider.getProperty("emitter.grpc.port")));
         channel = ManagedChannelBuilder.forAddress(HOST, PORT)
                 .usePlaintext()
                 .build();
+        CountDownLatch waitForFirstConnectLatch = new CountDownLatch(1);
+        startKeepAliveCheck(waitForFirstConnectLatch);
+        waitForFirstConnectLatch.await();
         logsServiceBlockingStub = LogsServiceGrpc.newBlockingStub(channel);
         metricsServiceBlockingStub = MetricsServiceGrpc.newBlockingStub(channel);
         traceServiceBlockingStub = TraceServiceGrpc.newBlockingStub(channel);
+    }
+
+    private void startKeepAliveCheck(CountDownLatch waitForFirstConnectLatch) {
+        Thread checkConnectThread = new Thread(() -> {
+            try {
+                if (waitForFirstConnectLatch.getCount() == 1) {
+                    log.info("Waiting for the first connection to apm.");
+                }
+                ConnectivityState state = channel.getState(true);
+                if (state.equals(ConnectivityState.READY) &&
+                        waitForFirstConnectLatch.getCount() == 1
+                ) {
+                    connectRetryTimes.getAndSet(0);
+                    log.info("Grpc emitter successfully connected to apm.");
+                    waitForFirstConnectLatch.countDown();
+                } else if (
+                        state.equals(ConnectivityState.TRANSIENT_FAILURE) ||
+                                state.equals(ConnectivityState.IDLE)
+                ) {
+                    int retryTimes = connectRetryTimes.getAndIncrement();
+                    int maxRetryTimes = Integer.parseInt(
+                            PropertiesProvider.getProperty(
+                                    "emitter.grpc.keepAlive.maxRetryTimes",
+                                    "3"));
+                    if (retryTimes > maxRetryTimes) {
+                        log.error("Failed to connect to apm after {} times, exit.",
+                                maxRetryTimes);
+                        throw new StatusRuntimeException(io.grpc.Status.UNAVAILABLE);
+                    }
+                } else if (state.equals(ConnectivityState.SHUTDOWN)) {
+                    log.error("Grpc emitter has been shutdown, exit.");
+                    throw new StatusRuntimeException(io.grpc.Status.UNAVAILABLE);
+                }
+            } catch (StatusRuntimeException e) {
+                log.error("Failed to connect to apm", e);
+                channel.shutdown();
+                System.exit(1);
+            }
+        });
+        long delay = Long.parseLong(
+                PropertiesProvider.getProperty("emitter.grpc.keepAlive.delay",
+                        "5"));
+        log.info("Start grpc keep-alive check. Delay :{}s", delay);
+        keepAliveThreadPool.scheduleWithFixedDelay(checkConnectThread, 0,
+                delay, TimeUnit.SECONDS);
     }
 
     @Override
@@ -118,5 +186,12 @@ public class GrpcEmitter extends AbstractEmitter {
         public AbstractEmitter createEmitter(AbstractCache inputCache) {
             return new GrpcEmitter(inputCache);
         }
+    }
+
+    @Override
+    public void interrupt() {
+        super.interrupt();
+        channel.shutdown();
+        keepAliveThreadPool.shutdown();
     }
 }

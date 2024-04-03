@@ -28,6 +28,10 @@ public class ApmMain implements CommandLineRunner {
     public void run(String... args) {
         log.info("APM starting, adding shutdown hook.");
         sinkService.init();
+        if (!sinkService.isReady()) {
+            log.error("APM sink service is not ready, shutting down.");
+            return;
+        }
         // 拉起数据接收器 接收器会自动调用analyzer analyzer会自动调用sinker
         dataReceiver.start();
         Thread thread = new Thread(

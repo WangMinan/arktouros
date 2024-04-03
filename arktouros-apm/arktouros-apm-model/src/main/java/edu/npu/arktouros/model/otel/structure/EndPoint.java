@@ -22,9 +22,9 @@ public class EndPoint implements Source {
     private String serviceName;
     private int port;
     private int latency;
-    private SourceType type = SourceType.ENDPOINT;
+    private SourceType type;
 
-    public static Map<String, Property> documentMap = new HashMap<>();
+    public static final Map<String, Property> documentMap = new HashMap<>();
     static {
         documentMap.put("serviceName", Property.of(property ->
                 property.text(EsProperties.keywordTextProperty)

@@ -18,10 +18,7 @@
 
 package edu.npu.arktouros.model.otel.metric;
 
-import co.elastic.clients.elasticsearch._types.mapping.DateProperty;
 import co.elastic.clients.elasticsearch._types.mapping.DoubleNumberProperty;
-import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
-import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -38,7 +35,7 @@ import java.util.Map;
 public class Counter extends Metric {
 
     private double value;
-    public static Map<String, Property> documentMap = new HashMap<>();
+    public static final Map<String, Property> documentMap = new HashMap<>();
     static {
         documentMap.putAll(metricBaseMap);
         documentMap.put("value", Property.of(property ->
@@ -52,6 +49,7 @@ public class Counter extends Metric {
     public Counter(String name, @Singular Map<String, String> labels,
                    double value, long timestamp) {
         super(name, labels, timestamp);
+        this.metricType = MetricType.COUNTER;
         this.value = value;
     }
 

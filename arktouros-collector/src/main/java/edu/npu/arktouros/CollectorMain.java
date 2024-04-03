@@ -31,17 +31,32 @@ public class CollectorMain {
         PropertiesProvider.init();
         InstanceProvider.init();
 
-        AbstractReceiver receiver = InstanceProvider.getReceiver();
-        // 启动receiver
-        executorService.submit(receiver);
+        AbstractEmitter emitter = InstanceProvider.getEmitter();
+        emitter.setUncaughtExceptionHandler((t, e) -> {
+            log.error("Emitter error", e);
+            // 结束程序
+            System.exit(1);
+        });
+        // 启动emitter
+        executorService.submit(emitter);
 
         AbstractPreHandler preHandler = InstanceProvider.getPreHandler();
+        preHandler.setUncaughtExceptionHandler((t, e) -> {
+            log.error("PreHandler error", e);
+            // 结束程序
+            System.exit(1);
+        });
         // 启动preHandler
         executorService.submit(preHandler);
 
-        AbstractEmitter emitter = InstanceProvider.getEmitter();
-        // 启动emitter
-        executorService.submit(emitter);
+        AbstractReceiver receiver = InstanceProvider.getReceiver();
+        receiver.setUncaughtExceptionHandler((t, e) -> {
+            log.error("Receiver error", e);
+            // 结束程序
+            System.exit(1);
+        });
+        // 启动receiver
+        executorService.submit(receiver);
 
         Runtime.getRuntime().addShutdownHook(
                 new Thread(() -> {

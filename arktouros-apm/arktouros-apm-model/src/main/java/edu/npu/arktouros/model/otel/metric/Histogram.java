@@ -45,7 +45,7 @@ public class Histogram extends Metric {
 
     private static final Map<String, Property> bucketsMap = new HashMap<>();
 
-    public static Map<String, Property> documentMap = new HashMap<>();
+    public static final Map<String, Property> documentMap = new HashMap<>();
 
     static {
         bucketsMap.put("key", Property.of(property ->
@@ -82,6 +82,7 @@ public class Histogram extends Metric {
                      @Singular Map<Double, Long> buckets, long timestamp) {
         super(name, labels, timestamp);
         getLabels().remove("le");
+        this.metricType = MetricType.HISTOGRAM;
         this.sampleCount = sampleCount;
         this.sampleSum = sampleSum;
         this.buckets = buckets;

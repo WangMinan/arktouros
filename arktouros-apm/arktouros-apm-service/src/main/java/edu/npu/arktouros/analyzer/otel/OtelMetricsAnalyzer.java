@@ -89,10 +89,16 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
             log.debug("Now OtelMetricsAnalyzer is going to change otel data to arktouros data");
             List<ScopeMetrics> scopeMetricsList = resourceMetrics.getScopeMetricsList();
             for (ScopeMetrics scopeMetrics : scopeMetricsList) {
-                List<? extends Metric> metrics = scopeMetrics.getMetricsList().stream().flatMap(
+                scopeMetrics.getMetricsList().stream().flatMap(
                         metric -> adaptMetrics(attributes, metric)
-                ).toList();
-                // TODO emit
+                ).forEach(metric -> {
+                    try {
+                        sinkService.sink(metric);
+                    } catch (IOException e) {
+                        log.error("Failed to sink metric after retry:{}", metric, e);
+                        throw new RuntimeException(e);
+                    }
+                });
             }
         } catch (IOException e) {
             log.error("OtelMetricsAnalyzer failed to serialize data:{}", item.getData(), e);

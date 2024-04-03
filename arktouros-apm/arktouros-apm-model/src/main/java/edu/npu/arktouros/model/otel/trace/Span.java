@@ -36,7 +36,7 @@ public class Span implements Source {
     private SourceType type = SourceType.SPAN;
     private List<Tag> tags;
 
-    public static Map<String, Property> documentMap = new HashMap<>();
+    public static final Map<String, Property> documentMap = new HashMap<>();
 
     @Builder
     public Span(String id, String serviceName, String name, String traceId,

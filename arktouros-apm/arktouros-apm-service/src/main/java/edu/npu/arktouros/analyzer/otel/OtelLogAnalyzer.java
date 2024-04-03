@@ -82,7 +82,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
                 for (ScopeLogs scopeLogs : resourceLogs.getScopeLogsList()) {
                     scopeLogs.getLogRecordsList().forEach(
                             logRecord -> {
-                                Log log = Log.builder()
+                                Log sourceLog = Log.builder()
                                         .serviceName(nodeLabels.get("service_name"))
                                         .timestamp(TimeUnit.NANOSECONDS.toMicros(
                                                 logRecord.getTimeUnixNano()))
@@ -101,7 +101,12 @@ public class OtelLogAnalyzer extends DataAnalyzer {
                                                         .build())
                                                 .collect(Collectors.toList()))
                                         .build();
-                                // TODO emit log
+                                try {
+                                    sinkService.sink(sourceLog);
+                                } catch (IOException e) {
+                                    log.error("Failed to sink log after retry.", e);
+                                    throw new RuntimeException(e);
+                                }
                             }
                     );
                 }

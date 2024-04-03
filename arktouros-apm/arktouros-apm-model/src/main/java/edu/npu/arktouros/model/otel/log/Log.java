@@ -5,7 +5,6 @@ import co.elastic.clients.elasticsearch._types.mapping.DateProperty;
 import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
-import co.elastic.clients.elasticsearch._types.mapping.TextProperty;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.EsProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
@@ -36,7 +35,7 @@ public class Log implements Source {
     private boolean error = false;
     private Long timestamp;
 
-    public static Map<String, Property> documentMap = new HashMap<>();
+    public static final Map<String, Property> documentMap = new HashMap<>();
 
     @Builder
     public Log(

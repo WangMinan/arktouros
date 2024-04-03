@@ -6,9 +6,12 @@ instance:
 
 receiver:
   otlpLogFile:
-    logDir: logs
+    logDir: otel_logs
 
 emitter:
   grpc:
     host: 127.0.0.1
     port: 50051
+    keepAlive:
+      delay: 5 # timeunit seconds
+      maxRetryTimes: 3

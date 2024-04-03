@@ -28,8 +28,7 @@ public class PropertiesProvider {
                                      "config", "application.yaml"))) {
             map = yaml.load(propertiesFileInputStream);
         } catch (IOException e) {
-            log.warn("Failed to load properties file from config, try to find it from resource dir",
-                    e);
+            log.warn("Failed to load properties file from config, try to find it from resource dir");
             try (InputStream propertiesFileInputStream =
                          PropertiesProvider.class.getResourceAsStream("/application.yaml")) {
                 map = yaml.load(propertiesFileInputStream);
@@ -43,17 +42,20 @@ public class PropertiesProvider {
     }
 
     public static String getProperty(String propertyPath) {
-        String[] keys = propertyPath.split("\\.");
-        Map<String, Object> value = map;
+        return getProperty(propertyPath, null);
+    }
 
-        for (String key : keys) {
-            // Check if the key exists and is not the last key
-            if (value.containsKey(key) && value.get(key) instanceof Map) {
-                value = (Map<String, Object>) value.get(key);
+    public static String getProperty(String propertyPath, String defaultValue) {
+        Map<String, Object> value = map;
+        for (String key : propertyPath.split("\\.")) {
+            if (!value.containsKey(key)) return defaultValue;
+            Object obj = value.get(key);
+            if (obj instanceof Map) {
+                value = (Map<String, Object>) obj;
             } else {
-                return String.valueOf(value.get(key));
+                return String.valueOf(obj);
             }
         }
-        return null; // or throw an exception if the property does not exist
+        return defaultValue;
     }
 }

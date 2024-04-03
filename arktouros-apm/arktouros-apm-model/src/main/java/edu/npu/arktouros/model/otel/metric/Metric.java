@@ -24,9 +24,10 @@ public abstract class Metric implements Source {
     private String serviceName;
     private final Map<String, String> labels;
     private final long timestamp;
-    private final SourceType type = SourceType.METRIC;
+    private final SourceType sourceType = SourceType.METRIC;
+    protected MetricType metricType = MetricType.METRIC;
 
-    private static Map<String, Property> labelProperty =
+    private static final Map<String, Property> labelProperty =
             Map.of("key", Property.of(p ->
                             p.keyword(KeywordProperty.of(
                                     keywordProperty -> keywordProperty.index(true)))),
@@ -48,9 +49,13 @@ public abstract class Metric implements Source {
             "timestamp", Property.of(property ->
                     property.date(DateProperty.of(
                             date -> date.index(true).format("epoch_millis")))),
-            "type", Property.of(property ->
+            "sourceType", Property.of(property ->
                     property.keyword(KeywordProperty.of(
-                            keywordProperty -> keywordProperty.index(true)))));
+                            keywordProperty -> keywordProperty.index(true)))),
+            "metricType", Property.of(property ->
+                    property.keyword(KeywordProperty.of(
+                            keywordProperty -> keywordProperty.index(true))))
+    );
 
 
     protected Metric(String name, Map<String, String> labels, long timestamp) {

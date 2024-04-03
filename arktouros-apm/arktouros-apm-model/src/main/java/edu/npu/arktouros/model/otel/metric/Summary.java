@@ -22,7 +22,7 @@ public class Summary extends Metric {
     private double sampleSum;
     private final Map<Double, Double> quantiles;
 
-    public static Map<String, Property> documentMap = new HashMap<>();
+    public static final Map<String, Property> documentMap = new HashMap<>();
 
     static {
         documentMap.putAll(metricBaseMap);
@@ -54,6 +54,7 @@ public class Summary extends Metric {
                    @Singular Map<Double, Double> quantiles, long timestamp) {
         super(name, labels, timestamp);
         getLabels().remove("quantile");
+        this.metricType = MetricType.SUMMARY;
         this.sampleCount = sampleCount;
         this.sampleSum = sampleSum;
         this.quantiles = quantiles;

@@ -1,8 +1,10 @@
 package edu.npu.arktouros.analyzer.otel;
 
+import com.google.protobuf.ByteString;
 import edu.npu.arktouros.analyzer.DataAnalyzer;
 import edu.npu.arktouros.analyzer.otel.util.OtelAnalyzerUtil;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
+import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.queue.TraceQueueItem;
@@ -19,12 +21,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author : [wangminan]
@@ -143,7 +148,39 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
             tags.remove(key);
         }
         populateStatus(otelSpan.getStatus(), tags);
-        // TODO EMIT
+        convertLink(tags, otelSpan.getLinksList());
+
+        tags.forEach((key, value) -> {
+            Tag tag = Tag.builder().key(key).value(value).build();
+            builder.tag(tag);
+        });
+
+        try {
+            sinkService.sink(builder.build());
+        } catch (IOException e) {
+            log.error("Failed to sink span after retry.", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void convertLink(Map<String, String> tags, List<io.opentelemetry.proto.trace.v1.Span.Link> links) {
+        for (int i = 0; i < links.size(); i++) {
+            final io.opentelemetry.proto.trace.v1.Span.Link link = links.get(i);
+            tags.put("otlp.link." + i,
+                    idToHexString(link.getTraceId()) + "|" + idToHexString(link.getSpanId()) + "|" +
+                            link.getTraceState() + "|" +
+                            link.getAttributesList().stream().flatMap(attr -> {
+                                return Stream.of(attr.getKey() + "=" + attr.getValue().getStringValue());
+                            }).collect(Collectors.joining(",")) + "|" +
+                            link.getDroppedAttributesCount());
+        }
+    }
+
+    private String idToHexString(ByteString id) {
+        if (id == null) {
+            return "";
+        }
+        return new BigInteger(1, id.toByteArray()).toString();
     }
 
     private void populateStatus(Status status, Map<String, String> tags) {

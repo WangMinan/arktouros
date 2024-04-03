@@ -36,11 +36,13 @@ public class InstanceProvider {
                 PropertiesProvider.getProperty("instance.preHandler");
         emitterClassName =
                 PropertiesProvider.getProperty("instance.emitter");
+        receiverOutputCache = getNewCache();
+        preHandlerOutputCache = getNewCache();
     }
 
 
     public static AbstractReceiver getReceiver() {
-        receiverOutputCache = getNewCache();
+
         ReceiverFactory factory;
         // 避免反射 手动加载
         if (StringUtils.isNotEmpty(receiverClassName) &&
@@ -53,7 +55,6 @@ public class InstanceProvider {
     }
 
     public static AbstractPreHandler getPreHandler() {
-        preHandlerOutputCache = getNewCache();
         PreHandlerFactory factory;
         // 避免反射 手动加载
         if (StringUtils.isNotEmpty(preHandlerClassName) &&

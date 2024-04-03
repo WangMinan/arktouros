@@ -19,5 +19,5 @@
 package edu.npu.arktouros.model.otel.metric;
 
 public enum MetricType {
-    COUNTER, GAUGE, SUMMARY, HISTOGRAM
+    METRIC, COUNTER, GAUGE, SUMMARY, HISTOGRAM
 }

@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -30,7 +31,7 @@ import java.util.TimerTask;
 public class OtlpLogFileReceiver extends AbstractReceiver {
     private String LOG_DIR;
 
-    private static File logs;
+    private static File logsDir;
 
     // 我们默认所有文件的创建时间不同
     private static Map<Long, File> createTimeFileMap;
@@ -161,11 +162,13 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
         LOG_DIR =
                 PropertiesProvider.getProperty("receiver.otlpLogFile.logDir");
         if (LOG_DIR == null || LOG_DIR.isEmpty()) {
-            throw new IllegalArgumentException("log dir in config file is empty");
+            log.warn("Log dir: {} is not been set in config file, using default 'otel_logs'",
+                    LOG_DIR);
+            LOG_DIR = "otel_logs";
         }
-        logs = new File(LOG_DIR);
-        if (!logs.exists()) {
-            throw new RuntimeException("logs dic " + LOG_DIR +  " does not exists");
+        logsDir = new File(LOG_DIR);
+        if (!logsDir.exists()) {
+            throw new FileNotFoundException("log dir not found");
         }
         initCreateTimeFileMap();
         initParamsWithIndex();
@@ -174,11 +177,11 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
 
     public void initParamsWithIndex() throws IOException {
         // 去logs目录下检索是否有index文件
-        indexFile = new File(LOG_DIR + "logs.index");
+        indexFile = new File(LOG_DIR + File.pathSeparator + "logs.index");
         if (indexFile.exists()) {
             String line;
             try {
-                line = FileUtils.readLines(indexFile, StandardCharsets.UTF_8).get(0);
+                line = FileUtils.readLines(indexFile, StandardCharsets.UTF_8).getFirst();
             } catch (IOException e) {
                 throw new IOException("failed while reading index file", e);
             }
@@ -225,7 +228,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
 
     public void initCreateTimeFileMap() {
         createTimeFileMap = new HashMap<>();
-        File[] files = logs.listFiles();
+        File[] files = logsDir.listFiles();
         if (files != null) {
             for (File file : files) {
                 // 需要排除索引文件
