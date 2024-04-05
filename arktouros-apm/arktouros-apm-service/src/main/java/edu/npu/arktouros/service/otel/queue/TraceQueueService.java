@@ -37,8 +37,17 @@ public class TraceQueueService implements QueueService<TraceQueueItem> {
     }
 
     @Override
-    @SneakyThrows
     public TraceQueueItem get() {
+        return getItem(true);
+    }
+
+    @Override
+    public TraceQueueItem get(boolean removeAtSameTime) {
+        return getItem(removeAtSameTime);
+    }
+
+    @SneakyThrows
+    public TraceQueueItem getItem(boolean removeAtSameTime) {
         TraceQueueItem item = traceQueueMapper.getTop();
         final ReentrantLock lock = this.lock;
         lock.lock();
@@ -46,6 +55,9 @@ public class TraceQueueService implements QueueService<TraceQueueItem> {
             while (item == null) {
                 notEmpty.await();
                 item = traceQueueMapper.getTop();
+            }
+            if (removeAtSameTime) {
+                traceQueueMapper.removeTop();
             }
         } catch (InterruptedException e) {
             log.warn("Force traceQueueService shutting down");

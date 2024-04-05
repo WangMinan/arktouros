@@ -60,7 +60,7 @@ public class ElasticSearchSinkService extends SinkService {
                 try {
                     checkAndCreate(indexName, createIndexLatch);
                 } catch (Exception e) {
-                    log.error("Check and create index" + indexName +" error.", e);
+                    log.error("Check and create index" + indexName + " error.", e);
                     System.exit(1);
                 }
             });
@@ -137,86 +137,88 @@ public class ElasticSearchSinkService extends SinkService {
     @Override
     @Retryable(retryFor = IOException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
     public void sink(Source source) throws IOException {
-        switch (source) {
-            // 模式匹配
-            case Log sourceLog:
-                try {
-                    esClient.index(builder -> builder
-                            .index(LOG_INDEX)
-                            .document(sourceLog)
-                    );
-                    log.info("Sink log to elasticsearch success.");
-                } catch (IOException e) {
-                    log.error("Sink log error.", e);
-                    throw e;
-                }
-                break;
-            case Span sourceSpan:
-                try {
-                    esClient.index(builder -> builder
-                            .index(SPAN_INDEX)
-                            .document(sourceSpan)
-                    );
-                    log.info("Sink span to elasticsearch success.");
-                } catch (IOException e) {
-                    log.error("Sink span error.", e);
-                    throw e;
-                }
-                break;
-            case Metric sourceMetric:
-                switch (sourceMetric.getMetricType()) {
-                    case COUNTER:
-                        try {
-                            esClient.index(builder -> builder
-                                    .index(COUNTER_INDEX)
-                                    .document(sourceMetric)
-                            );
-                        } catch (IOException e) {
-                            log.error("Sink counter error.", e);
-                            throw e;
-                        }
-                        break;
-                    case GAUGE:
-                        try {
-                            esClient.index(builder -> builder
-                                    .index(GAUGE_INDEX)
-                                    .document(sourceMetric)
-                            );
-                            log.info("Sink gauge to elasticsearch success.");
-                        } catch (IOException e) {
-                            log.error("Sink gauge error.", e);
-                            throw e;
-                        }
-                        break;
-                    case SUMMARY:
-                        try {
-                            esClient.index(builder -> builder
-                                    .index(SUMMARY_INDEX)
-                                    .document(sourceMetric)
-                            );
-                            log.info("Sink summary to elasticsearch success.");
-                        } catch (IOException e) {
-                            log.error("Sink summary error.", e);
-                            throw e;
-                        }
-                        break;
-                    case HISTOGRAM:
-                        try {
-                            esClient.index(builder -> builder
-                                    .index(HISTOGRAM_INDEX)
-                                    .document(sourceMetric)
-                            );
-                            log.info("Sink histogram to elasticsearch success.");
-                        } catch (IOException e) {
-                            log.error("Sink histogram error.", e);
-                            throw e;
-                        }
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected metric type value: " + sourceMetric.getMetricType());
-                }
-            default:
-                throw new IllegalStateException("Unexpected source type value: " + source);
+        if (source instanceof Metric sourceMetric) {
+            switch (sourceMetric.getMetricType()) {
+                case COUNTER:
+                    try {
+                        esClient.index(builder -> builder
+                                .index(COUNTER_INDEX)
+                                .document(sourceMetric)
+                        );
+                    } catch (IOException e) {
+                        log.error("Sink counter error.", e);
+                        throw e;
+                    }
+                    break;
+                case GAUGE:
+                    try {
+                        esClient.index(builder -> builder
+                                .index(GAUGE_INDEX)
+                                .document(sourceMetric)
+                        );
+                        log.info("Sink gauge to elasticsearch success.");
+                    } catch (IOException e) {
+                        log.error("Sink gauge error.", e);
+                        throw e;
+                    }
+                    break;
+                case SUMMARY:
+                    try {
+                        esClient.index(builder -> builder
+                                .index(SUMMARY_INDEX)
+                                .document(sourceMetric)
+                        );
+                        log.info("Sink summary to elasticsearch success.");
+                    } catch (IOException e) {
+                        log.error("Sink summary error.", e);
+                        throw e;
+                    }
+                    break;
+                case HISTOGRAM:
+                    try {
+                        esClient.index(builder -> builder
+                                .index(HISTOGRAM_INDEX)
+                                .document(sourceMetric)
+                        );
+                        log.info("Sink histogram to elasticsearch success.");
+                    } catch (IOException e) {
+                        log.error("Sink histogram error.", e);
+                        throw e;
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected metric type value: " + sourceMetric.getMetricType());
+            }
+        } else {
+            switch (source) {
+                // 模式匹配
+                case Log sourceLog:
+                    try {
+                        esClient.index(builder -> builder
+                                .index(LOG_INDEX)
+                                .document(sourceLog)
+                        );
+                        log.info("Sink log to elasticsearch success.");
+                    } catch (IOException e) {
+                        log.error("Sink log error.", e);
+                        throw e;
+                    }
+                    break;
+                case Span sourceSpan:
+                    try {
+                        esClient.index(builder -> builder
+                                .index(SPAN_INDEX)
+                                .document(sourceSpan)
+                        );
+                        log.info("Sink span to elasticsearch success.");
+                    } catch (IOException e) {
+                        log.error("Sink span error.", e);
+                        throw e;
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected source type value: " + source);
+            }
         }
     }
 }

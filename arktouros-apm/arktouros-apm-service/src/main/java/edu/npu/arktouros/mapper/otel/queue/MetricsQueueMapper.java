@@ -84,4 +84,17 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
         }
         return 0;
     }
+
+    @Override
+    public void removeTop() {
+        String sql = "delete from APM_METRICS_QUEUE where ID = (select ID from APM_METRICS_QUEUE order by ID limit 1);";
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            log.error("Encounter error when get connection from dataSource", e);
+        }
+    }
 }

@@ -83,4 +83,17 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
         }
         return 0;
     }
+
+    @Override
+    public void removeTop() {
+        String sql = "delete from APM_TRACE_QUEUE order by ID limit 1;";
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            log.error("Encounter error when get connection from dataSource", e);
+        }
+    }
 }

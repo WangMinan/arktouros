@@ -38,8 +38,7 @@ public class MetricsQueueService implements QueueService<MetricsQueueItem> {
     }
 
     @SneakyThrows
-    @Override
-    public MetricsQueueItem get() {
+    public MetricsQueueItem getItem(boolean removeAtSameTime) {
         MetricsQueueItem item = metricsQueueMapper.getTop();
         final ReentrantLock lock = this.lock;
         lock.lock();
@@ -48,12 +47,25 @@ public class MetricsQueueService implements QueueService<MetricsQueueItem> {
                 notEmpty.await();
                 item = metricsQueueMapper.getTop();
             }
+            if (removeAtSameTime) {
+                metricsQueueMapper.removeTop();
+            }
         } catch (InterruptedException e) {
             log.warn("Force traceQueueService shutting down");
         }  finally {
             lock.unlock();
         }
         return item;
+    }
+
+    @Override
+    public MetricsQueueItem get(boolean removeAtSameTime) {
+        return getItem(removeAtSameTime);
+    }
+
+    @Override
+    public MetricsQueueItem get() {
+        return getItem(true);
     }
 
     @Override

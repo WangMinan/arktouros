@@ -6,6 +6,8 @@ public interface QueueService <T> {
 
     T get();
 
+    T get(boolean removeAtSameTime);
+
     boolean isEmpty();
 
     long size();

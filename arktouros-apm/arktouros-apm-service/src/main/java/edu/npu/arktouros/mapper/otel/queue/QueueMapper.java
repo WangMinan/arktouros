@@ -9,4 +9,6 @@ public abstract class QueueMapper<T> {
     public abstract boolean isEmpty();
 
     public abstract long getSize();
+
+    public abstract void removeTop();
 }

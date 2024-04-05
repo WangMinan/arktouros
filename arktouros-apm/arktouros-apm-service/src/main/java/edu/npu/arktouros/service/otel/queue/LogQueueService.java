@@ -38,19 +38,27 @@ public class LogQueueService implements QueueService<LogQueueItem> {
     }
 
     @Override
-    @SneakyThrows
     public LogQueueItem get() {
-        LogQueueItem item = queueMapper.getTop();
-        final ReentrantLock lock = this.lock;
+        return getItem(true);
+    }
+
+    @Override
+    public LogQueueItem get(boolean removeAtSameTime) {
+        return getItem(removeAtSameTime);
+    }
+
+    @SneakyThrows
+    private LogQueueItem getItem(boolean removeAtSameTime) {
+        LogQueueItem item;
         lock.lock();
         try {
-            while (item == null) {
+            while ((item = queueMapper.getTop()) == null) {
                 notEmpty.await();
-                item = queueMapper.getTop();
             }
-        }  catch (InterruptedException e) {
-            log.warn("Force traceQueueService shutting down");
-        }  finally {
+            if (removeAtSameTime) {
+                queueMapper.removeTop();
+            }
+        } finally {
             lock.unlock();
         }
         return item;
