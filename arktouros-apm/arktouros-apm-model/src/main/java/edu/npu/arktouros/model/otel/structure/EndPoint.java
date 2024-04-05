@@ -20,6 +20,7 @@ import java.util.Map;
 @Builder
 public class EndPoint implements Source {
     private String serviceName;
+    private String ip;
     private int port;
     private int latency;
     private SourceType type;
@@ -28,6 +29,10 @@ public class EndPoint implements Source {
     static {
         documentMap.put("serviceName", Property.of(property ->
                 property.text(EsProperties.keywordTextProperty)
+        ));
+        documentMap.put("ip", Property.of(property ->
+                property.keyword(KeywordProperty.of(
+                        keywordProperty -> keywordProperty.index(true)))
         ));
         documentMap.put("port", Property.of(property ->
                 property.integer(IntegerNumberProperty.of(integerNumberProperty

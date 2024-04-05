@@ -96,11 +96,11 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
 
     private String getServiceNameFromAttributes(Map<String, String> attributes) {
         String name = null;
-        name = getServiceNameFromAttributes(name, attributes, "service.name", false);
-        name = getServiceNameFromAttributes(name, attributes, "faas.name", true);
-        name = getServiceNameFromAttributes(name, attributes, "k8s.deployment.name", true);
-        name = getServiceNameFromAttributes(name, attributes, "process.executable.name", true);
-
+        name = getServiceNameFromAttributes(name, attributes, "service_name", false);
+        name = getServiceNameFromAttributes(name, attributes, "faas_name", true);
+        name = getServiceNameFromAttributes(name, attributes, "k8s_deployment_name", true);
+        name = getServiceNameFromAttributes(name, attributes, "process_executable_name", true);
+        name = getServiceNameFromAttributes(name, attributes, "job_name", true);
         return name;
     }
 
@@ -113,7 +113,7 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         if (StringUtils.isNotEmpty(name)) {
             if (addingSource) {
                 resourceTags.remove(tagKey);
-                resourceTags.put("otlp.service.name.source", tagKey);
+                resourceTags.put("otlp_service_name_source", tagKey);
             }
             return name;
         }
@@ -123,7 +123,7 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
     private void convertAndSinkSpan(io.opentelemetry.proto.trace.v1.Span otelSpan,
                                     Map<String, String> attributes) {
         Map<String, String> tags = aggregateSpanTags(otelSpan.getAttributesList(), attributes);
-        tags.put("w3c.tracestate", otelSpan.getTraceState());
+        tags.put("w3c_tracestate", otelSpan.getTraceState());
         Span.SpanBuilder builder = Span.builder();
         String serviceName = getServiceNameFromAttributes(tags);
         builder.name(otelSpan.getName()).serviceName(serviceName);
@@ -207,11 +207,11 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         String serviceName = localServiceName;
         String tmpVal;
         if (isRemote && StringUtils.isNotEmpty(tmpVal = getAndPutRedundantKey(
-                resourceTags, "peer.service", redundantKeys))) {
+                resourceTags, "peer_service", redundantKeys))) {
             serviceName = tmpVal;
         } else if (isRemote &&
                 StringUtils.isNotEmpty(tmpVal = getAndPutRedundantKey(
-                        resourceTags, "net.peer.name", redundantKeys)) &&
+                        resourceTags, "net_peer_name", redundantKeys)) &&
                 // if it's not IP, then define it as service name
                 !parseIp(tmpVal)) {
             serviceName = tmpVal;
@@ -219,11 +219,11 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
 
         String ipKey, portKey;
         if (isRemote) {
-            ipKey = "net.peer.ip";
-            portKey = "net.peer.port";
+            ipKey = "net_peer_ip";
+            portKey = "net_peer_port";
         } else {
-            ipKey = "net.host.ip";
-            portKey = "net.host.port";
+            ipKey = "net_host_ip";
+            portKey = "net_host_port";
         }
 
         boolean ipParseSuccess = false;
@@ -232,6 +232,8 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
             if (!(ipParseSuccess = parseIp(tmpVal))) {
                 // if ip parse failed, use the value as service name
                 serviceName = StringUtils.isEmpty(serviceName) ? tmpVal : serviceName;
+            } else {
+                builder.ip(tmpVal);
             }
         }
         if (StringUtils.isNotEmpty(tmpVal = getAndPutRedundantKey(
@@ -275,10 +277,10 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         }
 
         if (StringUtils.isNotEmpty(scope.getName())) {
-            resourceTags.put("otel.library.name", scope.getName());
+            resourceTags.put("otel_library_name", scope.getName());
         }
         if (StringUtils.isNotEmpty(scope.getVersion())) {
-            resourceTags.put("otel.library.version", scope.getVersion());
+            resourceTags.put("otel_library_version", scope.getVersion());
         }
     }
 
@@ -286,9 +288,5 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
     public void interrupt() {
         log.info("OtelTraceAnalyzer is shutting down.");
         super.interrupt();
-    }
-
-    public void sink() {
-
     }
 }

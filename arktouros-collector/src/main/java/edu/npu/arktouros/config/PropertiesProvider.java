@@ -1,6 +1,7 @@
 package edu.npu.arktouros.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class PropertiesProvider {
                                      "config", "application.yaml"))) {
             map = yaml.load(propertiesFileInputStream);
         } catch (IOException e) {
-            log.warn("Failed to load properties file from config, try to find it from resource dir");
+            log.warn("Failed to load properties file from config. Trying to find it from resource dir");
             try (InputStream propertiesFileInputStream =
                          PropertiesProvider.class.getResourceAsStream("/application.yaml")) {
                 map = yaml.load(propertiesFileInputStream);
@@ -53,7 +54,12 @@ public class PropertiesProvider {
             if (obj instanceof Map) {
                 value = (Map<String, Object>) obj;
             } else {
-                return String.valueOf(obj);
+                String result = String.valueOf(obj);
+                if (StringUtils.isEmpty(result)) {
+                    return defaultValue;
+                } else {
+                    return result;
+                }
             }
         }
         return defaultValue;

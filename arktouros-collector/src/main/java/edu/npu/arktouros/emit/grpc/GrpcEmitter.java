@@ -22,12 +22,10 @@ import io.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.proto.metrics.v1.MetricsData;
 import io.opentelemetry.proto.trace.v1.TracesData;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -66,7 +64,7 @@ public class GrpcEmitter extends AbstractEmitter {
 
         if (Boolean.parseBoolean(
                 PropertiesProvider.getProperty("emitter.grpc.keepAlive.enabled",
-                        "false")
+                        "true")
         )) {
             CountDownLatch waitForFirstConnectLatch = new CountDownLatch(1);
             startKeepAliveCheck(waitForFirstConnectLatch);
@@ -132,7 +130,7 @@ public class GrpcEmitter extends AbstractEmitter {
     public void run() {
         // 我们通过拿到的json串的前缀来判断这玩意是metrics logs还是trace
         while (true) {
-            String inputJson = inputCache.get();
+            String inputJson = inputCache.get().trim();
             try {
                 if (inputJson.startsWith("{\"resourceSpans\":")) {
                     handleTrace(inputJson);
@@ -153,42 +151,54 @@ public class GrpcEmitter extends AbstractEmitter {
         LogsData.Builder builder = LogsData.newBuilder();
         ProtoBufJsonUtils.fromJSON(inputJson, builder);
         LogsData logsData = builder.build();
-        log.info("sending logs data to apm");
+        log.info("Sending logs data to apm");
         ExportLogsServiceRequest request =
                 ExportLogsServiceRequest
                         .newBuilder()
                         .addAllResourceLogs(logsData.getResourceLogsList())
                         .build();
         ExportLogsServiceResponse response = logsServiceBlockingStub.export(request);
-        log.info("response from apm: {}", response);
+        if (response.hasPartialSuccess()) {
+            log.info("Send logs data to apm complete");
+        } else {
+            log.error("Failed to send logs data to apm");
+        }
     }
 
     private void handleMetrics(String inputJson) throws IOException {
         MetricsData.Builder builder = MetricsData.newBuilder();
         ProtoBufJsonUtils.fromJSON(inputJson, builder);
         MetricsData metricsData = builder.build();
-        log.info("sending metrics data to apm");
+        log.info("Sending metrics data to apm");
         ExportMetricsServiceRequest request =
                 ExportMetricsServiceRequest
                         .newBuilder()
                         .addAllResourceMetrics(metricsData.getResourceMetricsList())
                         .build();
         ExportMetricsServiceResponse response = metricsServiceBlockingStub.export(request);
-        log.info("response from apm: {}", response);
+        if (response.hasPartialSuccess()) {
+            log.info("Send metrics data to apm complete");
+        } else {
+            log.error("Failed to send metrics data to apm");
+        }
     }
 
     private void handleTrace(String inputJson) throws IOException {
         TracesData.Builder builder = TracesData.newBuilder();
         ProtoBufJsonUtils.fromJSON(inputJson, builder);
         TracesData tracesData = builder.build();
-        log.info("sending trace data to apm");
+        log.info("Sending trace data to apm");
         ExportTraceServiceRequest request =
                 ExportTraceServiceRequest
                         .newBuilder()
                         .addAllResourceSpans(tracesData.getResourceSpansList())
                         .build();
         ExportTraceServiceResponse response = traceServiceBlockingStub.export(request);
-        log.info("response from apm: {}", response);
+        if (response.hasPartialSuccess()) {
+            log.info("Send trace data to apm complete");
+        } else {
+            log.error("Failed to send trace data to apm");
+        }
     }
 
     public static class Factory implements EmitterFactory {

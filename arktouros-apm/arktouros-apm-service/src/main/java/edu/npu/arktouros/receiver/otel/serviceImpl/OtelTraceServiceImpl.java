@@ -24,10 +24,8 @@ public class OtelTraceServiceImpl extends TraceServiceGrpc.TraceServiceImplBase 
     @Override
     public void export(ExportTraceServiceRequest request,
                        StreamObserver<ExportTraceServiceResponse> responseObserver) {
-        request.getResourceSpansList().forEach(resourceSpans -> {
-            analyzer.handle(resourceSpans);
-            responseObserver.onNext(ExportTraceServiceResponse.getDefaultInstance());
-            responseObserver.onCompleted();
-        });
+        request.getResourceSpansList().forEach(analyzer::handle);
+        responseObserver.onNext(ExportTraceServiceResponse.getDefaultInstance());
+        responseObserver.onCompleted();
     }
 }

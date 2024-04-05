@@ -17,15 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * @author : [wangminan]
@@ -148,6 +145,7 @@ public class ElasticSearchSinkService extends SinkService {
                             .index(LOG_INDEX)
                             .document(sourceLog)
                     );
+                    log.info("Sink log to elasticsearch success.");
                 } catch (IOException e) {
                     log.error("Sink log error.", e);
                     throw e;
@@ -159,6 +157,7 @@ public class ElasticSearchSinkService extends SinkService {
                             .index(SPAN_INDEX)
                             .document(sourceSpan)
                     );
+                    log.info("Sink span to elasticsearch success.");
                 } catch (IOException e) {
                     log.error("Sink span error.", e);
                     throw e;
@@ -183,6 +182,7 @@ public class ElasticSearchSinkService extends SinkService {
                                     .index(GAUGE_INDEX)
                                     .document(sourceMetric)
                             );
+                            log.info("Sink gauge to elasticsearch success.");
                         } catch (IOException e) {
                             log.error("Sink gauge error.", e);
                             throw e;
@@ -194,6 +194,7 @@ public class ElasticSearchSinkService extends SinkService {
                                     .index(SUMMARY_INDEX)
                                     .document(sourceMetric)
                             );
+                            log.info("Sink summary to elasticsearch success.");
                         } catch (IOException e) {
                             log.error("Sink summary error.", e);
                             throw e;
@@ -205,6 +206,7 @@ public class ElasticSearchSinkService extends SinkService {
                                     .index(HISTOGRAM_INDEX)
                                     .document(sourceMetric)
                             );
+                            log.info("Sink histogram to elasticsearch success.");
                         } catch (IOException e) {
                             log.error("Sink histogram error.", e);
                             throw e;

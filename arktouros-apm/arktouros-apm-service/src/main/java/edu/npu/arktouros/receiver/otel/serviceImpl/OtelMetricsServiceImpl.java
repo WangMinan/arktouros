@@ -25,10 +25,8 @@ public class OtelMetricsServiceImpl extends MetricsServiceGrpc.MetricsServiceImp
     @Override
     public void export(ExportMetricsServiceRequest request,
                        StreamObserver<ExportMetricsServiceResponse> responseObserver) {
-        request.getResourceMetricsList().forEach(resourceMetrics -> {
-            analyzer.handle(resourceMetrics);
-            responseObserver.onNext(ExportMetricsServiceResponse.getDefaultInstance());
-            responseObserver.onCompleted();
-        });
+        request.getResourceMetricsList().forEach(analyzer::handle);
+        responseObserver.onNext(ExportMetricsServiceResponse.getDefaultInstance());
+        responseObserver.onCompleted();
     }
 }

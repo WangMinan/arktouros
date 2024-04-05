@@ -34,6 +34,14 @@ public class OtelAnalyzerUtil {
         ));
     }
 
+    private Map<String, String> convertAttributeToMap(List<KeyValue> attrs) {
+        return attrs.stream().collect(Collectors.toMap(
+                KeyValue::getKey,
+                attributeKeyValue -> attributeKeyValue.getValue().getStringValue(),
+                (v1, v2) -> v1
+        ));
+    }
+
     public static String convertSpanId(ByteString spanId) {
         return ByteBuffer.wrap(spanId.toByteArray()).getLong() + "";
     }

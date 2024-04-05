@@ -13,6 +13,6 @@ emitter:
     host: 127.0.0.1
     port: 50051
     keepAlive:
-      enabled: false # 是否进行连接检查
+      enabled: false # 是否进行连接检查 置空默认true
       delay: 5 # timeunit seconds
       maxRetryTimes: 3

@@ -24,10 +24,8 @@ public class OtelLogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     @Override
     public void export(ExportLogsServiceRequest request,
                        StreamObserver<ExportLogsServiceResponse> responseObserver) {
-        request.getResourceLogsList().forEach(resourceLogs -> {
-            analyzer.handle(resourceLogs);
-            responseObserver.onNext(ExportLogsServiceResponse.getDefaultInstance());
-            responseObserver.onCompleted();
-        });
+        request.getResourceLogsList().forEach(analyzer::handle);
+        responseObserver.onNext(ExportLogsServiceResponse.getDefaultInstance());
+        responseObserver.onCompleted();
     }
 }
