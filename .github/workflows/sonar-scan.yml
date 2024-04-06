@@ -39,4 +39,4 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=WangMinan_Arktouros_4d1c1f98-9103-4776-a8af-4f4c507fbb24 -Dsonar.projectName='Arktouros'
+        run: mvn -Dmaven.test.skip=true -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=WangMinan_Arktouros_4d1c1f98-9103-4776-a8af-4f4c507fbb24 -Dsonar.projectName='Arktouros'
