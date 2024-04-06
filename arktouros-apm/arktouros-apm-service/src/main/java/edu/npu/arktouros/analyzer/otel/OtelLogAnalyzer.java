@@ -56,7 +56,6 @@ public class OtelLogAnalyzer extends DataAnalyzer {
 
     @Override
     public void run() {
-        log.info("OtelLogAnalyzer start to transform data");
         while (!isInterrupted()) {
             transform();
         }
@@ -69,6 +68,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
     }
 
     public void transform() {
+        log.info("OtelLogAnalyzer start to transform data");
         LogQueueItem item = queueService.get();
         if (item != null) {
             String json = item.getData();

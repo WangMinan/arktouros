@@ -24,7 +24,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
 
     @Override
     public void add(TraceQueueItem traceQueueItem) {
-        String sql = "insert into APM_TRACE_QUEUE (DATA) values (?);";
+        String sql = "insert into PUBLIC.APM_TRACE_QUEUE (DATA) values (?);";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
@@ -42,7 +42,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
 
     @Override
     public TraceQueueItem getTop() {
-        String sql = "select * from APM_TRACE_QUEUE order by ID limit 1;";
+        String sql = "select * from PUBLIC.APM_TRACE_QUEUE order by ID limit 1;";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql);
@@ -68,7 +68,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
 
     @Override
     public long getSize() {
-        String sql = "select count(*) from APM_TRACE_QUEUE;";
+        String sql = "select count(*) from PUBLIC.APM_TRACE_QUEUE;";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql);
@@ -86,7 +86,8 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
 
     @Override
     public void removeTop() {
-        String sql = "delete from APM_TRACE_QUEUE order by ID limit 1;";
+        String sql = "delete from PUBLIC.APM_TRACE_QUEUE where ID = " +
+                "(select ID from PUBLIC.APM_TRACE_QUEUE order by ID limit 1);";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql);

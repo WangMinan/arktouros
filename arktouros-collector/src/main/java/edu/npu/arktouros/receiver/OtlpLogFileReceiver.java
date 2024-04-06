@@ -222,12 +222,13 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
                         currentPos = 0L;
                         currentFileCreateTime = entry.getKey();
                         List<String> line = List.of(currentFileCreateTime + ":" + currentPos);
-                        File tmpIndex = new File(LOG_DIR + "logs.index.tmp");
+                        File tmpIndex = new File(LOG_DIR + File.separator + "logs.index.tmp");
                         try {
                             tmpIndex.createNewFile();
                             Files.write(tmpIndex.toPath(), line,
                                     StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
                             tmpIndex.renameTo(indexFile);
+                            tmpIndex.delete();
                         } catch (IOException e) {
                             throw new RuntimeException("failed while writing index file", e);
                         }

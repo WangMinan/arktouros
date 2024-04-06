@@ -25,7 +25,7 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
 
     @Override
     public void add(LogQueueItem logQueueItem) {
-        String sql = "insert into APM_LOG_QUEUE (DATA) values (?);";
+        String sql = "insert into PUBLIC.APM_LOG_QUEUE (DATA) values (?);";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -43,7 +43,7 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
 
     @Override
     public LogQueueItem getTop() {
-        String sql = "select * from APM_LOG_QUEUE order by ID limit 1;";
+        String sql = "select * from PUBLIC.APM_LOG_QUEUE order by ID limit 1;";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql);
@@ -69,7 +69,7 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
 
     @Override
     public long getSize() {
-        String sql = "select count(*) from APM_LOG_QUEUE;";
+        String sql = "select count(*) from PUBLIC.APM_LOG_QUEUE;";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql);
@@ -87,7 +87,8 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
 
     @Override
     public void removeTop() {
-        String sql = "delete from APM_LOG_QUEUE order by ID limit 1;";
+        String sql = "delete from PUBLIC.APM_LOG_QUEUE where ID = " +
+                "(select ID from PUBLIC.APM_LOG_QUEUE order by ID limit 1);";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql);

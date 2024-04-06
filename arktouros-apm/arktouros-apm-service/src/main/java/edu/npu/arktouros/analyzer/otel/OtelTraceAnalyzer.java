@@ -51,7 +51,6 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
 
     @Override
     public void run() {
-        log.info("OtelTraceAnalyzer start to transform data");
         while (!isInterrupted()) {
             transform();
         }

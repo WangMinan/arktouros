@@ -157,12 +157,7 @@ public class GrpcEmitter extends AbstractEmitter {
                         .newBuilder()
                         .addAllResourceLogs(logsData.getResourceLogsList())
                         .build();
-        ExportLogsServiceResponse response = logsServiceBlockingStub.export(request);
-        if (response.hasPartialSuccess()) {
-            log.info("Send logs data to apm complete");
-        } else {
-            log.error("Failed to send logs data to apm, response:{}", response);
-        }
+        logsServiceBlockingStub.export(request);
     }
 
     private void handleMetrics(String inputJson) throws IOException {
@@ -175,12 +170,7 @@ public class GrpcEmitter extends AbstractEmitter {
                         .newBuilder()
                         .addAllResourceMetrics(metricsData.getResourceMetricsList())
                         .build();
-        ExportMetricsServiceResponse response = metricsServiceBlockingStub.export(request);
-        if (response.hasPartialSuccess()) {
-            log.info("Send metrics data to apm complete");
-        } else {
-            log.error("Failed to send metrics data to apm, response:{}", response);
-        }
+        metricsServiceBlockingStub.export(request);
     }
 
     private void handleTrace(String inputJson) throws IOException {
@@ -193,12 +183,7 @@ public class GrpcEmitter extends AbstractEmitter {
                         .newBuilder()
                         .addAllResourceSpans(tracesData.getResourceSpansList())
                         .build();
-        ExportTraceServiceResponse response = traceServiceBlockingStub.export(request);
-        if (response.hasPartialSuccess()) {
-            log.info("Send trace data to apm complete");
-        } else {
-            log.error("Failed to send trace data to apm, response:{}", response);
-        }
+        traceServiceBlockingStub.export(request);
     }
 
     public static class Factory implements EmitterFactory {

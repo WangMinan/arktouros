@@ -65,7 +65,6 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
 
     @Override
     public void run() {
-        log.info("OtelMetricsAnalyzer start to transform data");
         while (!isInterrupted()) {
             transform();
         }

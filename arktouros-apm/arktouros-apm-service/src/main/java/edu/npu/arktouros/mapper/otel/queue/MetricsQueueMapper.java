@@ -25,7 +25,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
 
     @Override
     public void add(MetricsQueueItem metricsQueueItem) {
-        String sql = "insert into APM_METRICS_QUEUE (DATA) values (?);";
+        String sql = "insert into PUBLIC.APM_METRICS_QUEUE (DATA) values (?);";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -43,7 +43,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
 
     @Override
     public MetricsQueueItem getTop() {
-        String sql = "select * from APM_METRICS_QUEUE order by ID limit 1;";
+        String sql = "select * from PUBLIC.APM_METRICS_QUEUE order by ID limit 1;";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql);
@@ -69,7 +69,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
 
     @Override
     public long getSize() {
-        String sql = "select count(*) from APM_METRICS_QUEUE;";
+        String sql = "select count(*) from PUBLIC.APM_METRICS_QUEUE;";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql);
@@ -87,7 +87,8 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
 
     @Override
     public void removeTop() {
-        String sql = "delete from APM_METRICS_QUEUE where ID = (select ID from APM_METRICS_QUEUE order by ID limit 1);";
+        String sql = "delete from PUBLIC.APM_METRICS_QUEUE where ID = " +
+                "(select ID from PUBLIC.APM_METRICS_QUEUE order by ID limit 1);";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(sql);
