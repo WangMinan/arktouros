@@ -1,14 +1,23 @@
 package edu.npu.arktouros.service.otel.queue;
 
-public interface QueueService <T> {
+import lombok.Getter;
 
-    void put(T t);
+import java.util.concurrent.CountDownLatch;
 
-    T get();
+@Getter
+public abstract class QueueService <T> {
 
-    T get(boolean removeAtSameTime);
+    protected String name;
 
-    boolean isEmpty();
+    abstract void put(T t);
 
-    long size();
+    abstract T get();
+
+    abstract T get(boolean removeAtSameTime);
+
+    abstract boolean isEmpty();
+
+    abstract long size();
+
+    abstract void waitTableReady();
 }

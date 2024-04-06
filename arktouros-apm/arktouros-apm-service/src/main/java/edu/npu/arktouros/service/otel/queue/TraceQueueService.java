@@ -16,17 +16,21 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @Service
 @Slf4j
-public class TraceQueueService implements QueueService<TraceQueueItem> {
+public class TraceQueueService extends QueueService<TraceQueueItem> {
 
     @Resource
-    private TraceQueueMapper traceQueueMapper;
+    private TraceQueueMapper queueMapper;
+
+    public TraceQueueService() {
+        this.name = "TraceQueueService";
+    }
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition notEmpty = lock.newCondition();
 
     @Override
     public void put(TraceQueueItem traceQueueItem) {
-        traceQueueMapper.add(traceQueueItem);
+        queueMapper.add(traceQueueItem);
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -48,16 +52,16 @@ public class TraceQueueService implements QueueService<TraceQueueItem> {
 
     @SneakyThrows
     public TraceQueueItem getItem(boolean removeAtSameTime) {
-        TraceQueueItem item = traceQueueMapper.getTop();
+        TraceQueueItem item = queueMapper.getTop();
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
             while (item == null) {
                 notEmpty.await();
-                item = traceQueueMapper.getTop();
+                item = queueMapper.getTop();
             }
             if (removeAtSameTime) {
-                traceQueueMapper.removeTop();
+                queueMapper.removeTop();
             }
         } catch (InterruptedException e) {
             log.warn("Force traceQueueService shutting down");
@@ -69,11 +73,16 @@ public class TraceQueueService implements QueueService<TraceQueueItem> {
 
     @Override
     public boolean isEmpty() {
-        return traceQueueMapper.isEmpty();
+        return queueMapper.isEmpty();
     }
 
     @Override
     public long size() {
-        return traceQueueMapper.getSize();
+        return queueMapper.getSize();
+    }
+
+    @Override
+    public void waitTableReady() {
+        queueMapper.prepareTable();
     }
 }

@@ -1,5 +1,6 @@
 package edu.npu.arktouros.receiver.otel;
 
+import edu.npu.arktouros.analyzer.DataAnalyzer;
 import edu.npu.arktouros.analyzer.otel.OtelLogAnalyzer;
 import edu.npu.arktouros.analyzer.otel.OtelMetricsAnalyzer;
 import edu.npu.arktouros.analyzer.otel.OtelTraceAnalyzer;
@@ -12,6 +13,7 @@ import io.grpc.ServerBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,6 +39,9 @@ public class OtelGrpcReceiver extends DataReceiver {
         this.logAnalyzer = logAnalyzer;
         this.metricsAnalyzer = metricsAnalyzer;
         this.traceAnalyzer = traceAnalyzer;
+        List<DataAnalyzer> analyzers = List.of(this.logAnalyzer,
+                this.metricsAnalyzer, this.traceAnalyzer);
+        analyzers.forEach(DataAnalyzer::init);
         server = ServerBuilder.forPort(grpcPort)
                 .addService(new OtelMetricsServiceImpl(metricsAnalyzer))
                 .addService(new OtelLogServiceImpl(logAnalyzer))

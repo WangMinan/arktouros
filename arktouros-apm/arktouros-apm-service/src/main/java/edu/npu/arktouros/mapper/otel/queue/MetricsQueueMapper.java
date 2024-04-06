@@ -97,4 +97,25 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
             log.error("Encounter error when get connection from dataSource", e);
         }
     }
+
+    @Override
+    public boolean prepareTable() {
+        String sql = """
+                create table if not exists APM_METRICS_QUEUE
+                (
+                    ID   bigint primary key auto_increment(1), -- 标注1是因为我这儿试出来默认自增是32 太逆天了
+                    DATA longtext
+                );
+                """;
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+            return true;
+        } catch (SQLException e) {
+            log.error("Encounter error when get connection from dataSource", e);
+            return false;
+        }
+    }
 }

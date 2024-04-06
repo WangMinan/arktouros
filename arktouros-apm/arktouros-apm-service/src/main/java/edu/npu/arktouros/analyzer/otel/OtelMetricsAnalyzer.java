@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -315,5 +316,12 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
         result.put(Double.POSITIVE_INFINITY,
                 positiveBucketCounts.getLast());
         return result;
+    }
+
+    @Override
+    public void init() {
+        log.info("Initializing OtelTraceAnalyzer, creating table APM_METRICS_QUEUE");
+        queueService.waitTableReady();
+        log.info("OtelTraceAnalyzer is ready.");
     }
 }

@@ -11,4 +11,6 @@ public abstract class QueueMapper<T> {
     public abstract long getSize();
 
     public abstract void removeTop();
+
+    public abstract boolean prepareTable();
 }

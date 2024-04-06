@@ -5,4 +5,6 @@ package edu.npu.arktouros.analyzer;
  * @description : 数据处理器
  */
 public abstract class DataAnalyzer extends Thread {
+
+    public abstract void init();
 }

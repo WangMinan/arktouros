@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -31,7 +32,7 @@ import static java.util.stream.Collectors.toMap;
 public class OtelLogAnalyzer extends DataAnalyzer {
 
     @Resource
-    private LogQueueService logQueueService;
+    private LogQueueService queueService;
 
     @Resource
     private SinkService sinkService;
@@ -46,7 +47,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
             String resourceLogsJson = ProtoBufJsonUtils.toJSON(resourceLogs);
             LogQueueItem logQueueItem = LogQueueItem.builder()
                     .data(resourceLogsJson).build();
-            logQueueService.put(logQueueItem);
+            queueService.put(logQueueItem);
         } catch (IOException e) {
             log.error("Failed to convert resourceLogs:{} to json", resourceLogs, e);
             throw new RuntimeException(e);
@@ -68,7 +69,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
     }
 
     public void transform() {
-        LogQueueItem item = logQueueService.get();
+        LogQueueItem item = queueService.get();
         if (item != null) {
             String json = item.getData();
             try {
@@ -125,5 +126,12 @@ public class OtelLogAnalyzer extends DataAnalyzer {
                                 value.hasBoolValue() ? String.valueOf(value.getBoolValue()) :
                                         value.hasArrayValue() ? value.getArrayValue().toString() :
                                                 "";
+    }
+
+    @Override
+    public void init() {
+        log.info("Initializing OtelLogAnalyzer, creating table APM_LOG_QUEUE.");
+        queueService.waitTableReady();
+        log.info("OtelLogAnalyzer is ready.");
     }
 }

@@ -35,11 +35,11 @@ public class ApmMain implements CommandLineRunner {
         // 拉起数据接收器 接收器会自动调用analyzer analyzer会自动调用sinker
         dataReceiver.start();
         Thread thread = new Thread(
-            () -> {
-                // 停止数据接收器
-                dataReceiver.stop();
-                log.info("APM shutting down");
-            }
+                () -> {
+                    // 停止数据接收器
+                    dataReceiver.stop();
+                    log.info("APM shutting down");
+                }
         );
         thread.setName("APM-shutdown-thread");
         Runtime.getRuntime().addShutdownHook(thread);

@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -288,5 +289,12 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
     public void interrupt() {
         log.info("OtelTraceAnalyzer is shutting down.");
         super.interrupt();
+    }
+
+    @Override
+    public void init() {
+        log.info("Initializing OtelTraceAnalyzer, creating table APM_TRACE_QUEUE.");
+        queueService.waitTableReady();
+        log.info("OtelTraceAnalyzer is ready.");
     }
 }

@@ -96,4 +96,25 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
             log.error("Encounter error when get connection from dataSource", e);
         }
     }
+
+    @Override
+    public boolean prepareTable() {
+        String sql = """
+                create table if not exists APM_TRACE_QUEUE
+                (
+                    ID   bigint primary key auto_increment(1),
+                    DATA longtext
+                );
+                """;
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+            return true;
+        } catch (SQLException e) {
+            log.error("Encounter error when get connection from dataSource", e);
+            return false;
+        }
+    }
 }

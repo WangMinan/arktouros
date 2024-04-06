@@ -4,20 +4,13 @@ spring:
   datasource:
     driver-class-name: org.h2.Driver
     # 一定要持久化，这玩意是用来做apm缓存的 如果用内存型的话要丢数据 仅限测试环境用
-    url: jdbc:h2:./db/apm;DB_CLOSE_DELAY=-1;MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:D:/code/arktouros/db/apm;DB_CLOSE_DELAY=-1;MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: sa
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:db/schema.sql
+  # 不要寄希望于自启动执行SQL 这个H2已经给我整吐了
   h2:
     console:
       enabled: true
-  data:
-    elasticsearch:
-      repositories:
-        enabled:
 
 instance:
   active:

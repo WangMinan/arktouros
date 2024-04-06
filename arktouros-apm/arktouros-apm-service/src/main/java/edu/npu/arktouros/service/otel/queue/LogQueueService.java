@@ -17,10 +17,14 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @Service
 @Slf4j
-public class LogQueueService implements QueueService<LogQueueItem> {
+public class LogQueueService extends QueueService<LogQueueItem> {
 
     @Resource
     private LogQueueMapper queueMapper;
+
+    public LogQueueService() {
+        this.name = "LogQueueService";
+    }
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition notEmpty = lock.newCondition();
@@ -72,5 +76,10 @@ public class LogQueueService implements QueueService<LogQueueItem> {
     @Override
     public long size() {
         return queueMapper.getSize();
+    }
+
+    @Override
+    public void waitTableReady() {
+        queueMapper.prepareTable();
     }
 }

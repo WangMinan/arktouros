@@ -161,7 +161,7 @@ public class GrpcEmitter extends AbstractEmitter {
         if (response.hasPartialSuccess()) {
             log.info("Send logs data to apm complete");
         } else {
-            log.error("Failed to send logs data to apm");
+            log.error("Failed to send logs data to apm, response:{}", response);
         }
     }
 
@@ -179,7 +179,7 @@ public class GrpcEmitter extends AbstractEmitter {
         if (response.hasPartialSuccess()) {
             log.info("Send metrics data to apm complete");
         } else {
-            log.error("Failed to send metrics data to apm");
+            log.error("Failed to send metrics data to apm, response:{}", response);
         }
     }
 
@@ -197,7 +197,7 @@ public class GrpcEmitter extends AbstractEmitter {
         if (response.hasPartialSuccess()) {
             log.info("Send trace data to apm complete");
         } else {
-            log.error("Failed to send trace data to apm");
+            log.error("Failed to send trace data to apm, response:{}", response);
         }
     }
 

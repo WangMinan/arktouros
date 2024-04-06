@@ -16,10 +16,14 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @Service
 @Slf4j
-public class MetricsQueueService implements QueueService<MetricsQueueItem> {
+public class MetricsQueueService extends QueueService<MetricsQueueItem> {
 
     @Resource
-    private MetricsQueueMapper metricsQueueMapper;
+    private MetricsQueueMapper queueMapper;
+
+    public MetricsQueueService() {
+        this.name = "MetricsQueueService";
+    }
 
     // 模仿LinkedBlockingQueue的实现
     private final ReentrantLock lock = new ReentrantLock();
@@ -27,7 +31,7 @@ public class MetricsQueueService implements QueueService<MetricsQueueItem> {
 
     @Override
     public void put(MetricsQueueItem metricsQueueItem) {
-        metricsQueueMapper.add(metricsQueueItem);
+        queueMapper.add(metricsQueueItem);
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -39,16 +43,16 @@ public class MetricsQueueService implements QueueService<MetricsQueueItem> {
 
     @SneakyThrows
     public MetricsQueueItem getItem(boolean removeAtSameTime) {
-        MetricsQueueItem item = metricsQueueMapper.getTop();
+        MetricsQueueItem item = queueMapper.getTop();
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
             while (item == null) {
                 notEmpty.await();
-                item = metricsQueueMapper.getTop();
+                item = queueMapper.getTop();
             }
             if (removeAtSameTime) {
-                metricsQueueMapper.removeTop();
+                queueMapper.removeTop();
             }
         } catch (InterruptedException e) {
             log.warn("Force traceQueueService shutting down");
@@ -70,11 +74,16 @@ public class MetricsQueueService implements QueueService<MetricsQueueItem> {
 
     @Override
     public boolean isEmpty() {
-        return metricsQueueMapper.isEmpty();
+        return queueMapper.isEmpty();
     }
 
     @Override
     public long size() {
-        return metricsQueueMapper.getSize();
+        return queueMapper.getSize();
+    }
+
+    @Override
+    public void waitTableReady() {
+        queueMapper.prepareTable();
     }
 }
