@@ -10,10 +10,13 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
+import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse;
 import io.opentelemetry.proto.collector.logs.v1.LogsServiceGrpc;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
+import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
+import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
 import io.opentelemetry.proto.collector.trace.v1.TraceServiceGrpc;
 import io.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.proto.metrics.v1.MetricsData;
@@ -154,7 +157,13 @@ public class GrpcEmitter extends AbstractEmitter {
                         .newBuilder()
                         .addAllResourceLogs(logsData.getResourceLogsList())
                         .build();
-        logsServiceBlockingStub.export(request);
+        ExportLogsServiceResponse export = logsServiceBlockingStub.export(request);
+        if (export.getPartialSuccess().getRejectedLogRecords() != 0) {
+            log.error("Failed to send logs data to apm, rejected log records: {}, error message: {}.",
+                    export.getPartialSuccess().getRejectedLogRecords(),
+                    export.getPartialSuccess().getErrorMessage()
+            );
+        }
     }
 
     private void handleMetrics(String inputJson) throws IOException {
@@ -167,7 +176,13 @@ public class GrpcEmitter extends AbstractEmitter {
                         .newBuilder()
                         .addAllResourceMetrics(metricsData.getResourceMetricsList())
                         .build();
-        metricsServiceBlockingStub.export(request);
+        ExportMetricsServiceResponse export = metricsServiceBlockingStub.export(request);
+        if (export.getPartialSuccess().getRejectedDataPoints() != 0) {
+            log.error("Failed to send metrics data to apm, rejected data points: {}, error message: {}.",
+                    export.getPartialSuccess().getRejectedDataPoints(),
+                    export.getPartialSuccess().getErrorMessage()
+            );
+        }
     }
 
     private void handleTrace(String inputJson) throws IOException {
@@ -180,7 +195,13 @@ public class GrpcEmitter extends AbstractEmitter {
                         .newBuilder()
                         .addAllResourceSpans(tracesData.getResourceSpansList())
                         .build();
-        traceServiceBlockingStub.export(request);
+        ExportTraceServiceResponse export = traceServiceBlockingStub.export(request);
+        if (export.getPartialSuccess().getRejectedSpans() != 0) {
+            log.error("Failed to send trace data to apm, rejected spans: {}, error message: {}.",
+                    export.getPartialSuccess().getRejectedSpans(),
+                    export.getPartialSuccess().getErrorMessage()
+            );
+        }
     }
 
     public static class Factory implements EmitterFactory {
