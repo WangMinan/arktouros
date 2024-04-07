@@ -4,7 +4,6 @@ import edu.npu.arktouros.analyzer.otel.OtelLogAnalyzer;
 import edu.npu.arktouros.analyzer.otel.OtelMetricsAnalyzer;
 import edu.npu.arktouros.analyzer.otel.OtelTraceAnalyzer;
 import edu.npu.arktouros.receiver.otel.OtelGrpcReceiver;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;

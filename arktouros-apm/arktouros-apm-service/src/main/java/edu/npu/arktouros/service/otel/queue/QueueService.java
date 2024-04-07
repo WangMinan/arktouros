@@ -2,8 +2,6 @@ package edu.npu.arktouros.service.otel.queue;
 
 import lombok.Getter;
 
-import java.util.concurrent.CountDownLatch;
-
 @Getter
 public abstract class QueueService <T> {
 
