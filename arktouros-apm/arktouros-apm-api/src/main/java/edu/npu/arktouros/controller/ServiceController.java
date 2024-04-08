@@ -1,10 +1,14 @@
 package edu.npu.arktouros.controller;
 
+import edu.npu.arktouros.model.dto.BaseQueryDto;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.service.otel.search.SearchService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/service")
+@Slf4j
 public class ServiceController {
 
     @Resource
@@ -20,7 +25,8 @@ public class ServiceController {
 
     // 获取服务列表
     @GetMapping
-    public R getServiceList() {
+    public R getServiceList(@Validated BaseQueryDto query) {
+        log.info("获取服务列表: {}", query);
         return R.ok();
     }
 }

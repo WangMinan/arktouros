@@ -63,7 +63,7 @@ public class LogQueueService extends QueueService<LogQueueItem> {
             }
             return item;
         } catch (InterruptedException e) {
-            log.error("Interrupted while waiting for item.");
+            log.warn("Interrupted while waiting for item.");
         } finally {
             lock.unlock();
         }
