@@ -4,7 +4,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * @author : [wangminan]
- * @description : [一句话描述该类的功能]
+ * @description : 日志队列缓存
  */
 public class LogQueueCache implements AbstractCache {
 
