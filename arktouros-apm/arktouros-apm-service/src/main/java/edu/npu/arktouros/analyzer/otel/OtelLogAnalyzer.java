@@ -83,7 +83,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
                     scopeLogs.getLogRecordsList().forEach(
                             logRecord -> {
                                 Log sourceLog = Log.builder()
-                                        .serviceName(nodeLabels.get("service_name"))
+                                        .serviceName(nodeLabels.get("job_name"))
                                         .timestamp(TimeUnit.NANOSECONDS.toMicros(
                                                 logRecord.getTimeUnixNano()))
                                         .content(logRecord.getBody().getStringValue())

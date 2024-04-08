@@ -7,15 +7,17 @@ spring:
     url: jdbc:h2:D:/code/arktouros/db/apm;DB_CLOSE_DELAY=-1;MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: sa
-  # 不要寄希望于自启动执行SQL 这个H2已经给我整吐了
+  # 不要寄希望于自启动执行SQL，已经靠编码实现了 这个H2已经给我整吐了
   h2:
     console:
       enabled: true
 
+# 对象选择，目前只完善了otelGrpc->elasticsearch全链路,h2暂不可选
 instance:
   active:
     dataReceiver: otelGrpc
     sinker: elasticsearch # elasticsearch/h2
+    searchMapper: elasticsearch # elasticsearch/h2
 
 receiver:
   grpc:
@@ -23,6 +25,7 @@ receiver:
 
 elasticsearch:
   serverUrl: https://localhost:9200
+  # 暂不支持apiKey模式
   username: elastic
   password: elastic
   caPos: D:/code/arktouros/docs/http_ca.crt # 证书位置 留空或文件不存在则不开启SSL
