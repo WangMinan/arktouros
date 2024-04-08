@@ -9,12 +9,15 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: analyze with sonarqube
     runs-on: ubuntu-latest
     permissions: read-all
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
       - name: Set up Graal JDK 21
         uses: graalvm/setup-graalvm@v1
         with:
@@ -23,18 +26,21 @@ jobs:
           version: '21.0.2'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
+
       - name: Cache SonarQube packages
         uses: actions/cache@v1
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: Cache Maven packages
         uses: actions/cache@v1
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
