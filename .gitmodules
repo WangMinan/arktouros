@@ -1,0 +1,3 @@
+[submodule "arktouros-ui"]
+	path = arktouros-ui
+	url = https://github.com/WangMinan/Arktouros-ui.git
