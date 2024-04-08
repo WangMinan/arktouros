@@ -24,7 +24,6 @@ import java.util.Map;
  */
 @Data
 public class Log implements Source {
-    private String serviceId;
     private String serviceName;
     private String traceId;
     private String spanId;
@@ -53,10 +52,6 @@ public class Log implements Source {
     }
 
     static {
-        documentMap.put("serviceId", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))
-        ));
         documentMap.put("serviceName", Property.of(property ->
                 property.text(EsProperties.keywordTextProperty)
         ));

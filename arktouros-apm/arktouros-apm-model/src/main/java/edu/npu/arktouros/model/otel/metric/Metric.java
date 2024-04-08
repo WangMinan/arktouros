@@ -19,8 +19,6 @@ import java.util.Map;
 @Data
 public abstract class Metric implements Source {
     private String name;
-    // serviceId到底要怎么取是待定的
-    private String serviceId;
     private String serviceName;
     private final Map<String, String> labels;
     private final long timestamp;
@@ -38,9 +36,6 @@ public abstract class Metric implements Source {
     protected static Map<String, Property> metricBaseMap = Map.of(
             "name", Property.of(property ->
                     property.text(EsProperties.keywordTextProperty)),
-            "serviceId", Property.of(property ->
-                    property.keyword(KeywordProperty.of(
-                            keywordProperty -> keywordProperty.index(true)))),
             "serviceName", Property.of(property ->
                     property.text(EsProperties.keywordTextProperty)),
             "labels", Property.of(property ->
