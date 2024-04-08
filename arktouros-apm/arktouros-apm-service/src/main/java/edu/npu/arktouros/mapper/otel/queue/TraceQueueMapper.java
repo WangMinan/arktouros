@@ -36,7 +36,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
             resultSet.close();
             preparedStatement.close();
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource", e);
+            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
         }
     }
 
@@ -56,7 +56,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
                 return traceQueueItem;
             }
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource", e);
+            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
         }
         return null;
     }
@@ -79,7 +79,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
             preparedStatement.close();
             return size;
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource", e);
+            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
         }
         return 0;
     }
@@ -94,7 +94,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
             preparedStatement.executeUpdate();
             preparedStatement.close();
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource", e);
+            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
         }
     }
 
@@ -114,7 +114,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
             preparedStatement.close();
             return true;
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource", e);
+            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
             return false;
         }
     }

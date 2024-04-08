@@ -37,7 +37,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
             resultSet.close();
             preparedStatement.close();
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource", e);
+            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
         }
     }
 
@@ -57,7 +57,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
                 return metricsQueueItem;
             }
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource", e);
+            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
         }
         return null;
     }
@@ -80,7 +80,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
             preparedStatement.close();
             return size;
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource", e);
+            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
         }
         return 0;
     }
@@ -95,7 +95,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
             preparedStatement.executeUpdate();
             preparedStatement.close();
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource", e);
+            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
         }
     }
 
@@ -115,7 +115,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
             preparedStatement.close();
             return true;
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource", e);
+            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
             return false;
         }
     }

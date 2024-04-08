@@ -12,6 +12,15 @@ spring:
     console:
       enabled: true
 
+server:
+  servlet:
+    context-path: /api/${var.api.version}
+  port: 50050
+
+var:
+  api:
+    version: v0
+
 # 对象选择，目前只完善了otelGrpc->elasticsearch全链路,h2暂不可选
 instance:
   active:

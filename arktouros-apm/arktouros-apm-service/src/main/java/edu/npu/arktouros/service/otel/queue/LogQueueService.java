@@ -51,7 +51,6 @@ public class LogQueueService extends QueueService<LogQueueItem> {
         return getItem(removeAtSameTime);
     }
 
-    @SneakyThrows
     private LogQueueItem getItem(boolean removeAtSameTime) {
         LogQueueItem item;
         lock.lock();
@@ -62,10 +61,13 @@ public class LogQueueService extends QueueService<LogQueueItem> {
             if (removeAtSameTime) {
                 queueMapper.removeTop();
             }
+            return item;
+        } catch (InterruptedException e) {
+            log.error("Interrupted while waiting for item.");
         } finally {
             lock.unlock();
         }
-        return item;
+        return null;
     }
 
     @Override
