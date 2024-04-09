@@ -1,14 +1,22 @@
 package edu.npu.arktouros.model.otel.structure;
 
+import co.elastic.clients.elasticsearch._types.mapping.BooleanProperty;
+import co.elastic.clients.elasticsearch._types.mapping.IntegerNumberProperty;
+import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
+import co.elastic.clients.elasticsearch._types.mapping.Property;
 import edu.npu.arktouros.model.otel.Source;
+import edu.npu.arktouros.model.otel.basic.EsProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import edu.npu.arktouros.model.otel.basic.Tag;
+import lombok.Builder;
 import lombok.Data;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author : [wangminan]
@@ -32,6 +40,38 @@ public class Service implements Source {
     // 留作扩展
     private List<Tag> tags = new ArrayList<>();
 
+    public static final Map<String, Property> documentMap = new HashMap<>();
+
+    static {
+        documentMap.put("id", Property.of(property ->
+                property.text(EsProperties.keywordTextProperty)));
+        documentMap.put("name", Property.of(property ->
+                property.text(EsProperties.keywordTextProperty)));
+        documentMap.put("nameSpace", Property.of(property ->
+                property.text(EsProperties.keywordTextProperty)));
+        documentMap.put("nodeId", Property.of(property ->
+                property.text(EsProperties.keywordTextProperty)));
+        documentMap.put("type", Property.of(property ->
+                property.keyword(KeywordProperty.of(
+                        keywordProperty -> keywordProperty.index(true)))));
+        documentMap.put("nodeName", Property.of(property ->
+                property.text(EsProperties.keywordTextProperty)));
+        documentMap.put("latency", Property.of(property ->
+                property.integer(IntegerNumberProperty.of(
+                        integerNumberProperty ->
+                                integerNumberProperty.index(true).store(true)))));
+        documentMap.put("httpStatusCode", Property.of(property ->
+                property.integer(IntegerNumberProperty.of(
+                        integerNumberProperty ->
+                                integerNumberProperty.index(true).store(true)))));
+        documentMap.put("rpcStatusCode", Property.of(property ->
+                property.text(EsProperties.keywordTextProperty)));
+        documentMap.put("status", Property.of(property ->
+                property.boolean_(BooleanProperty.of(
+                        booleanProperty -> booleanProperty.index(true).store(true)))));
+    }
+
+    @Builder
     public Service(String name) {
         this.nameSpace = DEFAULT_NAMESPACE;
         this.name = name;

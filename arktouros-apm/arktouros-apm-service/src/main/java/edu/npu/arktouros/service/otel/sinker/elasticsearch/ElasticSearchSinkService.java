@@ -11,6 +11,7 @@ import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.metric.Histogram;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.metric.Summary;
+import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class ElasticSearchSinkService extends SinkService {
         this.esClient = esClient;
     }
 
+    private static final String SERVICE_INDEX = "arktouros-service";
     private static final String LOG_INDEX = "arktouros-log";
     private static final String SPAN_INDEX = "arktouros-span";
     private static final String GAUGE_INDEX = "arktouros-gauge";
@@ -43,7 +45,7 @@ public class ElasticSearchSinkService extends SinkService {
     private static final String SUMMARY_INDEX = "arktouros-summary";
     private static final String HISTOGRAM_INDEX = "arktouros-histogram";
 
-    private static final List<String> indexList = List.of(LOG_INDEX, SPAN_INDEX, GAUGE_INDEX,
+    private static final List<String> indexList = List.of(SERVICE_INDEX, LOG_INDEX, SPAN_INDEX, GAUGE_INDEX,
             COUNTER_INDEX, SUMMARY_INDEX, HISTOGRAM_INDEX);
 
     private final ExecutorService createIndexThreadPool =
@@ -60,7 +62,7 @@ public class ElasticSearchSinkService extends SinkService {
                 try {
                     checkAndCreate(indexName, createIndexLatch);
                 } catch (Exception e) {
-                    log.error("Check and create index" + indexName + " error.", e);
+                    log.error("Check and create index:{} error.", indexName, e);
                     System.exit(1);
                 }
             });
@@ -112,7 +114,10 @@ public class ElasticSearchSinkService extends SinkService {
     private static CreateIndexRequest.Builder getCreateIndexRequestBuilder(String indexName) {
         CreateIndexRequest.Builder createIndexRequestBuilder = new CreateIndexRequest.Builder();
         createIndexRequestBuilder.index(indexName);
-        if (LOG_INDEX.equals(indexName)) {
+        if (SERVICE_INDEX.equals(indexName)) {
+            createIndexRequestBuilder.mappings(typeMappingBuilder ->
+                    typeMappingBuilder.properties(Service.documentMap));
+        } else if (LOG_INDEX.equals(indexName)) {
             createIndexRequestBuilder.mappings(typeMappingBuilder ->
                     typeMappingBuilder.properties(Log.documentMap));
         } else if (SPAN_INDEX.equals(indexName)) {
@@ -138,6 +143,13 @@ public class ElasticSearchSinkService extends SinkService {
     @Retryable(retryFor = IOException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
     public void sink(Source source) throws IOException {
         if (source instanceof Metric sourceMetric) {
+            Service service =
+                    Service.builder().name(sourceMetric.getServiceName()).build();
+            esClient.index(builder -> builder
+                    .id(service.getId())
+                    .index(SERVICE_INDEX)
+                    .document(service)
+            );
             switch (sourceMetric.getMetricType()) {
                 case COUNTER:
                     try {
@@ -194,6 +206,12 @@ public class ElasticSearchSinkService extends SinkService {
                 // 模式匹配
                 case Log sourceLog:
                     try {
+                        Service service = Service.builder().name(sourceLog.getServiceName()).build();
+                        esClient.index(builder -> builder
+                                .id(service.getId())
+                                .index(SERVICE_INDEX)
+                                .document(service)
+                        );
                         esClient.index(builder -> builder
                                 .index(LOG_INDEX)
                                 .document(sourceLog)
@@ -206,8 +224,15 @@ public class ElasticSearchSinkService extends SinkService {
                     break;
                 case Span sourceSpan:
                     try {
+                        Service service = Service.builder().name(sourceSpan.getServiceName()).build();
+                        esClient.index(builder -> builder
+                                .id(service.getId())
+                                .index(SERVICE_INDEX)
+                                .document(service)
+                        );
                         esClient.index(builder -> builder
                                 .index(SPAN_INDEX)
+                                .id(sourceSpan.getId())
                                 .document(sourceSpan)
                         );
                         log.info("Sink span to elasticsearch success.");

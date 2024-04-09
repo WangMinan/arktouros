@@ -134,7 +134,7 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         if (otelSpan.getSpanId().isEmpty()) {
             throw new IllegalArgumentException("SpanId is empty in span: " + otelSpan.getName());
         }
-        builder.id(OtelAnalyzerUtil.convertSpanId(otelSpan.getSpanId()))
+        builder.id(OtelAnalyzerUtil.convertSpanId(otelSpan.getSpanId(), otelSpan.getName()))
                 .parentSpanId(OtelAnalyzerUtil.convertSpanId(otelSpan.getParentSpanId()))
                 .startTime(TimeUnit.NANOSECONDS.toMicros(otelSpan.getStartTimeUnixNano()))
                 .endTime(TimeUnit.NANOSECONDS.toMicros(otelSpan.getStartTimeUnixNano()));

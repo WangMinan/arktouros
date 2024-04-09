@@ -27,6 +27,6 @@ public class ServiceController {
     @GetMapping
     public R getServiceList(@Validated BaseQueryDto query) {
         log.info("获取服务列表: {}", query);
-        return R.ok();
+        return searchService.getServiceList(query);
     }
 }
