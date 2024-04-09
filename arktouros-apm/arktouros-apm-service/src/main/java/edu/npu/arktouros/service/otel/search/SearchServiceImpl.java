@@ -20,9 +20,6 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public R getServiceList(BaseQueryDto queryDto) {
-        R r = new R();
-        r.put("code", ResponseCodeEnum.SUCCESS);
-        r.put("result", searchMapper.getServiceList(queryDto));
-        return r;
+        return searchMapper.getServiceList(queryDto);
     }
 }
