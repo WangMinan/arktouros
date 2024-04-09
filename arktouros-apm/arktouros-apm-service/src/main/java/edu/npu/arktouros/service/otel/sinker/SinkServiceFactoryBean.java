@@ -3,7 +3,6 @@ package edu.npu.arktouros.service.otel.sinker;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import edu.npu.arktouros.service.otel.sinker.elasticsearch.ElasticSearchSinkService;
 import edu.npu.arktouros.service.otel.sinker.h2.H2SinkService;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

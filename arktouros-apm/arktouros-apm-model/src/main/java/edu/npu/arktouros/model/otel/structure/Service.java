@@ -8,8 +8,10 @@ import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.EsProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import edu.npu.arktouros.model.otel.basic.Tag;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ import java.util.Map;
  * @description : 对标otel的resource 表示一个服务 每个trace应该包含多个service
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Service implements Source {
     private String id;
     private String name;

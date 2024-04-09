@@ -9,6 +9,9 @@ import edu.npu.arktouros.model.otel.basic.EsProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
+import io.micrometer.common.util.StringUtils;
+import io.netty.util.internal.StringUtil;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
@@ -22,6 +25,7 @@ import java.util.Map;
  * @description : 链路中的基础节点
  */
 @Data
+@AllArgsConstructor
 public class Span implements Source {
     private String name;
     private String id;
@@ -51,7 +55,7 @@ public class Span implements Source {
         this.remoteEndPoint = remoteEndPoint;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.root = root;
+        this.root = StringUtils.isEmpty(parentSpanId);
         this.tags = tags;
     }
 

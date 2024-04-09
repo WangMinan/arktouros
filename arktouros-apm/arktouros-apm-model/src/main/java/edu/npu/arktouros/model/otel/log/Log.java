@@ -9,6 +9,7 @@ import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.EsProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import edu.npu.arktouros.model.otel.basic.Tag;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
@@ -23,6 +24,7 @@ import java.util.Map;
  * @description : 日志
  */
 @Data
+@AllArgsConstructor
 public class Log implements Source {
     private String serviceName;
     private String traceId;

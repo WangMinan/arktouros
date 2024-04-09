@@ -4,7 +4,6 @@ package edu.npu.arktouros.service.otel.queue;
 import edu.npu.arktouros.mapper.otel.queue.LogQueueMapper;
 import edu.npu.arktouros.model.queue.LogQueueItem;
 import jakarta.annotation.Resource;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
