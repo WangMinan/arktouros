@@ -4,10 +4,12 @@ import edu.npu.arktouros.model.dto.BaseQueryDto;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.service.otel.search.SearchService;
 import jakarta.annotation.Resource;
+import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -26,5 +28,10 @@ public class ServiceController {
     @GetMapping
     public R getServiceList(@Validated BaseQueryDto query) {
         return searchService.getServiceList(query);
+    }
+
+    @GetMapping("/topology")
+    public R getTopology(@NotBlank @RequestParam("namespace") String namespace) {
+        return searchService.getTopology(namespace);
     }
 }

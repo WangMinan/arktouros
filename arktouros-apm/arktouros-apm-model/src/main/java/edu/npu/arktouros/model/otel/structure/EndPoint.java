@@ -38,6 +38,7 @@ public class EndPoint implements Source {
     }
 
     public static final Map<String, Property> documentMap = new HashMap<>();
+
     static {
         documentMap.put("serviceName", Property.of(property ->
                 property.text(EsProperties.keywordTextProperty)

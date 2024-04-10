@@ -1,6 +1,7 @@
 package edu.npu.arktouros.service.otel.search;
 
 import edu.npu.arktouros.model.dto.BaseQueryDto;
+import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.vo.R;
 
@@ -10,4 +11,10 @@ public interface SearchService {
     R getTopology(String namespace);
 
     R getLogList(LogQueryDto logQueryDto);
+
+    R getLogById(String id);
+
+    R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto);
+
+    R getSpanTopologyByTraceId(String traceId);
 }

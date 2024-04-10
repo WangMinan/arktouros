@@ -3,6 +3,7 @@ package edu.npu.arktouros.model.otel.topology;
 import edu.npu.arktouros.model.otel.structure.Service;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Singular;
 
 import java.util.ArrayList;
@@ -13,15 +14,16 @@ import java.util.List;
  * @description : 拓扑节点
  */
 @Data
-public class TopologyNode {
+@NoArgsConstructor
+public class ServiceTopologyNode {
     private Service service;
-    private List<TopologyNode> parentNodes = new ArrayList<>();
-    private List<TopologyNode> childNodes = new ArrayList<>();
+    private List<ServiceTopologyNode> parentNodes = new ArrayList<>();
+    private List<ServiceTopologyNode> childNodes = new ArrayList<>();
 
     @Builder
-    public TopologyNode(Service service,
-                        @Singular List<TopologyNode> parentNodes,
-                        @Singular List<TopologyNode> childNodes) {
+    public ServiceTopologyNode(Service service,
+                               @Singular List<ServiceTopologyNode> parentNodes,
+                               @Singular List<ServiceTopologyNode> childNodes) {
         this.service = service;
         this.parentNodes = parentNodes;
         this.childNodes = childNodes;
