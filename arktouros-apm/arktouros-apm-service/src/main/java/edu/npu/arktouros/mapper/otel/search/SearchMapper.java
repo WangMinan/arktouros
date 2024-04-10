@@ -1,6 +1,8 @@
 package edu.npu.arktouros.mapper.otel.search;
 
 import edu.npu.arktouros.model.dto.BaseQueryDto;
+import edu.npu.arktouros.model.dto.LogQueryDto;
+import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.R;
@@ -19,4 +21,6 @@ public abstract class SearchMapper {
     public abstract List<Span> getSpanListByServiceNames(List<String> serviceNames);
 
     public abstract Service getServiceByName(String serviceName);
+
+    public abstract R getLogListByQuery(LogQueryDto logQueryDto);
 }

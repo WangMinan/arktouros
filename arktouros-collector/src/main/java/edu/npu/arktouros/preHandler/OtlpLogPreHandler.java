@@ -31,7 +31,7 @@ public class OtlpLogPreHandler extends AbstractPreHandler{
         String input =
                 cacheStringBuilder.append(inputCache.get().trim()).toString();
         if (!input.startsWith("{")) {
-            throw new IllegalArgumentException("Invalid input for json: " + input);
+            throw new IllegalArgumentException("Invalid input for json when handling: " + input);
         }
         // 开始做大括号匹配 匹配部分扔出去 剩下的放cache里
         Stack<Character> stack = new Stack<>();
@@ -49,7 +49,9 @@ public class OtlpLogPreHandler extends AbstractPreHandler{
                 if (stack.isEmpty()) {
                     currentPos = i;
                     log.info("Outputting formatted json to cache.");
-                    outputCache.put(cacheStringBuilder.substring(0, currentPos - lastPos + 1));
+                    outputCache.put(
+                            cacheStringBuilder.substring(0, currentPos - lastPos + 1)
+                    );
                     cacheStringBuilder.delete(0, currentPos - lastPos + 1);
                     lastPos = currentPos + 1;
                 }

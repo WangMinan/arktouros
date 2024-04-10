@@ -131,15 +131,26 @@ public class GrpcEmitter extends AbstractEmitter {
         // 我们通过拿到的json串的前缀来判断这玩意是metrics logs还是trace
         while (true) {
             String inputJson = inputCache.get().trim();
+            String tmpStr = inputJson;
+            // 删除tmpStr开头的大括号和空格
+            while (
+                    tmpStr.startsWith("{") ||
+                            tmpStr.startsWith(" ") ||
+                            tmpStr.startsWith("\n") ||
+                            tmpStr.startsWith("\r")
+            ) {
+                tmpStr = tmpStr.substring(1);
+            }
             try {
-                if (inputJson.startsWith("{\"resourceSpans\":")) {
+                // 这位置可能还有换行符
+                if (tmpStr.startsWith("\"resourceSpans\"")) {
                     handleTrace(inputJson);
-                } else if (inputJson.startsWith("{\"resourceMetrics\":")) {
+                } else if (tmpStr.startsWith("\"resourceMetrics\"")) {
                     handleMetrics(inputJson);
-                } else if (inputJson.startsWith("{\"resourceLogs\":")) {
+                } else if (tmpStr.startsWith("\"resourceLogs\"")) {
                     handleLogs(inputJson);
                 } else {
-                    log.warn("Invalid input for json: {}", inputJson);
+                    log.warn("Invalid input for json when emitting: {}", inputJson);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

@@ -2,6 +2,7 @@ package edu.npu.arktouros.mapper.otel.search.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
@@ -14,6 +15,8 @@ import edu.npu.arktouros.mapper.otel.search.SearchMapper;
 import edu.npu.arktouros.model.common.ElasticSearchIndex;
 import edu.npu.arktouros.model.common.ResponseCodeEnum;
 import edu.npu.arktouros.model.dto.BaseQueryDto;
+import edu.npu.arktouros.model.dto.LogQueryDto;
+import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.PageResultVo;
@@ -131,16 +134,55 @@ public class ElasticSearchMapper extends SearchMapper {
         }
     }
 
-    private R transformListResponseToR(SearchResponse<Service> searchResponse) {
+    @Override
+    public R getLogListByQuery(LogQueryDto logQueryDto) {
+        MatchQuery.Builder matchQueryBuilder = new MatchQuery.Builder();
+        TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        if (StringUtils.isNotEmpty(logQueryDto.serviceName())) {
+            matchQueryBuilder.field("serviceName").query(logQueryDto.serviceName());
+        }
+        if (StringUtils.isNotEmpty(logQueryDto.traceId())) {
+            termQueryBuilder.field("traceId").value(logQueryDto.traceId());
+        }
+        if (StringUtils.isNotEmpty(logQueryDto.keyword())) {
+            matchQueryBuilder.field("content").query(logQueryDto.keyword());
+        }
+        boolQueryBuilder.must(
+                termQueryBuilder.build()._toQuery(),
+                matchQueryBuilder.build()._toQuery());
+        if (StringUtils.isNotEmpty(logQueryDto.keywordNotIncluded())) {
+            // content不包含
+            boolQueryBuilder.filter(
+                    new MatchQuery.Builder()
+                            .field("content")
+                            .query(logQueryDto.keywordNotIncluded())
+                            .build()._toQuery()
+            );
+        }
+        SearchRequest searchRequest = new SearchRequest.Builder()
+                .query(boolQueryBuilder.build()._toQuery())
+                .build();
+        try {
+            SearchResponse<Log> searchResponse =
+                    esClient.search(searchRequest, Log.class);
+            return transformListResponseToR(searchResponse);
+        } catch (IOException e) {
+            log.error("Search for log list error:{}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private <T> R transformListResponseToR(SearchResponse<T> searchResponse) {
         R r = new R();
         r.put("code", ResponseCodeEnum.SUCCESS.getValue());
-        List<Hit<Service>> hits = searchResponse.hits().hits();
+        List<Hit<T>> hits = searchResponse.hits().hits();
         long total = 0;
         if (searchResponse.hits().total() != null) {
             total = searchResponse.hits().total().value();
         }
-        List<Service> list = hits.stream().map(Hit::source).toList();
-        PageResultVo<Service> pageResult = new PageResultVo<>(total, list);
+        List<T> list = hits.stream().map(Hit::source).toList();
+        PageResultVo<T> pageResult = new PageResultVo<>(total, list);
         r.put("data", pageResult);
         return r;
     }

@@ -1,12 +1,19 @@
 package edu.npu.arktouros.service.otel.search;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
 import edu.npu.arktouros.mapper.otel.search.SearchMapper;
 import edu.npu.arktouros.model.dto.BaseQueryDto;
+import edu.npu.arktouros.model.dto.LogQueryDto;
+import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.topology.TopologyNode;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.R;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +73,11 @@ public class SearchServiceImpl implements SearchService {
         R r = new R();
         r.put("result", topTopologyNodes);
         return r;
+    }
+
+    @Override
+    public R getLogList(LogQueryDto logQueryDto) {
+        return searchMapper.getLogListByQuery(logQueryDto);
     }
 
     private void organizeTopology(TopologyNode beforeNode, Span beforeSpan,
