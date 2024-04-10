@@ -17,4 +17,6 @@ public abstract class SearchMapper {
     public abstract List<Service> getServiceListFromNamespace(String namespace);
 
     public abstract List<Span> getSpanListByServiceNames(List<String> serviceNames);
+
+    public abstract Service getServiceByName(String serviceName);
 }

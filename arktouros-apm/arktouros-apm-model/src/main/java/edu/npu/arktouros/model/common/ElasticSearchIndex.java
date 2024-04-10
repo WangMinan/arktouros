@@ -26,10 +26,6 @@ public enum ElasticSearchIndex {
         this.indexName = indexName;
     }
 
-    public String getIndexName() {
-        return indexName;
-    }
-
     public static List<String> getIndexList() {
         return Arrays.stream(ElasticSearchIndex.values())
                 .map(ElasticSearchIndex::getIndexName)

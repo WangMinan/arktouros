@@ -3,6 +3,7 @@ package edu.npu.arktouros.controller;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.service.otel.search.SearchService;
 import jakarta.annotation.Resource;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +22,7 @@ public class TopologyController {
     private SearchService searchService;
 
     @GetMapping
-    public R getTopology(@NotNull @RequestParam("namespace") String namespace) {
+    public R getTopology(@NotBlank @RequestParam("namespace") String namespace) {
         return searchService.getTopology(namespace);
     }
 }

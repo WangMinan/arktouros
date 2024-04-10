@@ -27,4 +27,9 @@ public class H2SearchMapper extends SearchMapper {
     public List<Span> getSpanListByServiceNames(List<String> serviceNames) {
         return List.of();
     }
+
+    @Override
+    public Service getServiceByName(String serviceName) {
+        return null;
+    }
 }

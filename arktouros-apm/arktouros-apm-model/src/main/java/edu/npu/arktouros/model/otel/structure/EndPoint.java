@@ -6,8 +6,10 @@ import co.elastic.clients.elasticsearch._types.mapping.Property;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.EsProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,13 +19,23 @@ import java.util.Map;
  * @description : 一条链路的端点
  */
 @Data
-@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class EndPoint implements Source {
     private String serviceName;
     private String ip;
     private int port;
     private int latency;
     private SourceType type;
+
+    @Builder
+    public EndPoint(String serviceName, String ip, int port, int latency) {
+        this.serviceName = serviceName;
+        this.ip = ip;
+        this.port = port;
+        this.latency = latency;
+        this.type = SourceType.ENDPOINT;
+    }
 
     public static final Map<String, Property> documentMap = new HashMap<>();
     static {

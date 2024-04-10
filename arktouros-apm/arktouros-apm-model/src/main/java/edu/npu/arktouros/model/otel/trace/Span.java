@@ -4,16 +4,18 @@ import co.elastic.clients.elasticsearch._types.mapping.BooleanProperty;
 import co.elastic.clients.elasticsearch._types.mapping.DateProperty;
 import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.EsProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
 import io.micrometer.common.util.StringUtils;
-import io.netty.util.internal.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Singular;
 
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import java.util.Map;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Span implements Source {
     private String name;
     private String id;
@@ -45,7 +48,7 @@ public class Span implements Source {
     @Builder
     public Span(String id, String serviceName, String name, String traceId,
                 String parentSpanId, EndPoint localEndPoint, EndPoint remoteEndPoint,
-                Long startTime, Long endTime, boolean root, @Singular List<Tag> tags) {
+                Long startTime, Long endTime, @Singular List<Tag> tags) {
         this.id = id;
         this.serviceName = serviceName;
         this.name = name;

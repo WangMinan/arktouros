@@ -71,7 +71,7 @@ public class ElasticSearchMapper extends SearchMapper {
     public List<Service> getServiceListFromNamespace(String namespace) {
         MatchQuery.Builder queryBuilder = new MatchQuery.Builder();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
-        queryBuilder.field("namespace").query(namespace);
+        queryBuilder.field("nameSpace").query(namespace);
         SearchRequest searchRequest = searchRequestBuilder
                 .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
                 .query(queryBuilder.build()._toQuery()).build();
@@ -105,6 +105,28 @@ public class ElasticSearchMapper extends SearchMapper {
             return searchResponse.hits().hits().stream().map(Hit::source).toList();
         } catch (IOException e) {
             log.error("Search for span list error:{}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Service getServiceByName(String serviceName) {
+        TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        termQueryBuilder.field("name").value(serviceName);
+        SearchRequest searchRequest = searchRequestBuilder
+                .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
+                .query(termQueryBuilder.build()._toQuery()).build();
+        try {
+            SearchResponse<Service> searchResponse =
+                    esClient.search(searchRequest, Service.class);
+            List<Hit<Service>> hits = searchResponse.hits().hits();
+            if (hits.isEmpty()) {
+                return null;
+            }
+            return hits.getFirst().source();
+        } catch (IOException e) {
+            log.error("Search for service by name error:{}", e.getMessage());
             throw new RuntimeException(e);
         }
     }

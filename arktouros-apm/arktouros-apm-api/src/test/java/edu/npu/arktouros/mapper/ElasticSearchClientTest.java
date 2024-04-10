@@ -1,8 +1,14 @@
 package edu.npu.arktouros.mapper;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
+import edu.npu.arktouros.model.common.ElasticSearchIndex;
 import edu.npu.arktouros.model.otel.structure.Service;
+import edu.npu.arktouros.model.otel.trace.Span;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
@@ -58,6 +64,27 @@ public class ElasticSearchClientTest {
                         .id(service.getId())
                         .document(service)
         );
+    }
+
+    @Test
+    void testSpanDecode() {
+        TermQuery query = new TermQuery.Builder()
+                .field("serviceName")
+                .value("telemetrygen")
+                .build();
+        SearchRequest searchRequest = new SearchRequest.Builder()
+                .index(ElasticSearchIndex.SPAN_INDEX.getIndexName())
+                .query(query._toQuery())
+                .build();
+        try {
+            SearchResponse<Span> response = esClient.search(searchRequest, Span.class);
+            if (response.hits().total() != null) {
+                log.info(String.valueOf(response.hits().total().value()));
+            }
+        } catch (IOException e) {
+            log.error("search error:{}", e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Test
