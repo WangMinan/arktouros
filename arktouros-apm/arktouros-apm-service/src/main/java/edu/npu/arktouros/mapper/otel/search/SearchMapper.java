@@ -24,8 +24,6 @@ public abstract class SearchMapper {
 
     public abstract R getLogListByQuery(LogQueryDto logQueryDto);
 
-    public abstract R getLogById(String id);
-
     public abstract R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto);
 
     public abstract List<Span> getSpanListByTraceId(String traceId);

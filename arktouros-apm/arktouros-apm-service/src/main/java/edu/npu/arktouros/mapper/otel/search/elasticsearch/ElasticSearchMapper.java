@@ -1,7 +1,10 @@
 package edu.npu.arktouros.mapper.otel.search.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldSort;
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
@@ -141,61 +144,59 @@ public class ElasticSearchMapper extends SearchMapper {
 
     @Override
     public R getLogListByQuery(LogQueryDto logQueryDto) {
-        MatchQuery.Builder matchQueryBuilder = new MatchQuery.Builder();
-        TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+
+        SortOptions sort = new SortOptions.Builder()
+                .field(new FieldSort.Builder()
+                        .field("timestamp")
+                        .order(SortOrder.Desc)
+                        .build())
+                .build();
+
         if (StringUtils.isNotEmpty(logQueryDto.serviceName())) {
-            matchQueryBuilder.field("serviceName").query(logQueryDto.serviceName());
+            boolQueryBuilder.must(new MatchQuery.Builder()
+                    .field("serviceName")
+                    .query(logQueryDto.serviceName())
+                    .build()._toQuery());
         }
         if (StringUtils.isNotEmpty(logQueryDto.traceId())) {
-            termQueryBuilder.field("traceId").value(logQueryDto.traceId());
+            boolQueryBuilder.must(new TermQuery.Builder()
+                    .field("traceId")
+                    .value(logQueryDto.traceId())
+                    .build()._toQuery());
         }
         if (StringUtils.isNotEmpty(logQueryDto.keyword())) {
-            matchQueryBuilder.field("content").query(logQueryDto.keyword());
+            boolQueryBuilder.must(new MatchQuery.Builder()
+                    .field("content")
+                    .query(logQueryDto.keyword())
+                    .build()._toQuery());
         }
-        boolQueryBuilder.must(
-                termQueryBuilder.build()._toQuery(),
-                matchQueryBuilder.build()._toQuery());
         if (StringUtils.isNotEmpty(logQueryDto.keywordNotIncluded())) {
-            // content不包含
-            boolQueryBuilder.filter(
-                    new MatchQuery.Builder()
-                            .field("content")
-                            .query(logQueryDto.keywordNotIncluded())
-                            .build()._toQuery()
-            );
+            boolQueryBuilder.filter(new MatchQuery.Builder()
+                    .field("content")
+                    .query(logQueryDto.keywordNotIncluded()).build()._toQuery());
         }
-        SearchRequest searchRequest = new SearchRequest.Builder()
+        if (StringUtils.isNotEmpty(logQueryDto.severityText())) {
+            boolQueryBuilder.filter(new TermQuery.Builder()
+                    .field("severityText")
+                    .value(logQueryDto.severityText())
+                    .build()._toQuery());
+        }
+
+        searchRequestBuilder
                 .index(ElasticSearchIndex.LOG_INDEX.getIndexName())
                 .query(boolQueryBuilder.build()._toQuery())
-                .build();
+                .from(logQueryDto.pageSize() * (logQueryDto.pageNum() - 1))
+                .size(logQueryDto.pageSize())
+                .sort(sort);
+
         try {
-            SearchResponse<Log> searchResponse =
-                    esClient.search(searchRequest, Log.class);
+            SearchResponse<Log> searchResponse = esClient.search(
+                    searchRequestBuilder.build(), Log.class);
             return transformListResponseToR(searchResponse);
         } catch (IOException e) {
             log.error("Search for log list error:{}", e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public R getLogById(String id) {
-        TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
-        SearchRequest searchRequest = new SearchRequest.Builder()
-                .index(ElasticSearchIndex.LOG_INDEX.getIndexName())
-                .query(termQueryBuilder.field("id").value(id).build()._toQuery())
-                .build();
-        try {
-            SearchResponse<Log> searchResponse =
-                    esClient.search(searchRequest, Log.class);
-            List<Hit<Log>> hits = searchResponse.hits().hits();
-            R r = new R();
-            r.put("code", ResponseCodeEnum.SUCCESS.getValue());
-            r.put("result", hits.getFirst().source());
-            return r;
-        } catch (IOException e) {
-            log.error("Search for log by id error:{}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -241,7 +242,7 @@ public class ElasticSearchMapper extends SearchMapper {
                             endPointSet.add(localEndPoint);
                             EndPointTraceIdDto endPointTraceIdDto =
                                     new EndPointTraceIdDto(localEndPoint,
-                                            new ArrayList<>());
+                                            new HashSet<>());
                             endPointTraceIdDto.traceIds().add(hit.source().getTraceId());
                             endPointTraceIdDtoList.add(endPointTraceIdDto);
                         }

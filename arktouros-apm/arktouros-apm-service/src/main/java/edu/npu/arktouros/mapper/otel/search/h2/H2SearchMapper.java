@@ -41,11 +41,6 @@ public class H2SearchMapper extends SearchMapper {
     }
 
     @Override
-    public R getLogById(String id) {
-        return null;
-    }
-
-    @Override
     public R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto) {
         return null;
     }

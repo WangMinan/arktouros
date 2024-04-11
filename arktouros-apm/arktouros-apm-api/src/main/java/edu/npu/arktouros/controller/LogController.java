@@ -26,9 +26,4 @@ public class LogController {
     public R getLogList(@Validated LogQueryDto logQueryDto) {
         return searchService.getLogList(logQueryDto);
     }
-
-    @GetMapping("/{id}")
-    public R getLogById(@PathVariable @NotEmpty String id) {
-        return searchService.getLogById(id);
-    }
 }

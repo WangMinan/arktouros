@@ -79,11 +79,6 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public R getLogById(String id) {
-        return searchMapper.getLogById(id);
-    }
-
-    @Override
     public R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto) {
         return searchMapper.getEndPointListByServiceName(endPointQueryDto);
     }

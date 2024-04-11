@@ -5,6 +5,8 @@ import co.elastic.clients.elasticsearch._types.mapping.DateProperty;
 import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.EsProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
@@ -35,13 +37,35 @@ public class Log implements Source {
     private List<Tag> tags = new ArrayList<>();
     private boolean error = false;
     private Long timestamp;
+    private String severityText; // logLevel
 
     public static final Map<String, Property> documentMap = new HashMap<>();
 
+    // 一定要有这个 Jackson找不到AllArgsConstructor生成的构造函数
+    @JsonCreator
+    public Log(@JsonProperty("serviceName") String serviceName,
+               @JsonProperty("traceId") String traceId,
+               @JsonProperty("spanId") String spanId,
+               @JsonProperty("content") String content,
+               @JsonProperty("tags") List<Tag> tags,
+               @JsonProperty("error") boolean error,
+               @JsonProperty("timestamp") Long timestamp,
+               @JsonProperty("severityText") String severityText) {
+        this.serviceName = serviceName;
+        this.traceId = traceId;
+        this.spanId = spanId;
+        this.content = content;
+        this.tags = tags;
+        this.error = error;
+        this.timestamp = timestamp;
+        this.severityText = severityText;
+    }
+
+    // 不能用在类上的Builder注解，否则default设置会失效
     @Builder
     public Log(
             String serviceName, Long timestamp,
-            String spanId, String traceId,
+            String spanId, String traceId, String severityText,
             String content, @Singular List<Tag> tags, boolean error
     ) {
         this.serviceName = serviceName;
@@ -51,6 +75,7 @@ public class Log implements Source {
         this.content = content;
         this.tags = tags;
         this.error = error;
+        this.severityText = severityText;
     }
 
     static {
@@ -72,6 +97,10 @@ public class Log implements Source {
         documentMap.put("content", Property.of(property ->
                 property.text(EsProperties.keywordTextProperty)
         ));
+        documentMap.put("severityText", Property.of(property ->
+                property.keyword(KeywordProperty.of(
+                        keywordProperty -> keywordProperty.index(true))
+                )));
         documentMap.put("tags", Property.of(property ->
                 property.nested(NestedProperty.of(
                         na -> na.properties(Tag.documentMap)))

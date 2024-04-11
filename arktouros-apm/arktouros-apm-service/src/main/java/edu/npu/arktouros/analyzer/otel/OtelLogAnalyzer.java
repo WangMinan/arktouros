@@ -89,6 +89,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
                                         .content(logRecord.getBody().getStringValue())
                                         .spanId(OtelAnalyzerUtil.convertSpanId(logRecord.getSpanId()))
                                         .traceId(OtelAnalyzerUtil.convertSpanId(logRecord.getTraceId()))
+                                        .severityText(logRecord.getSeverityText())
                                         .tags(logRecord
                                                 .getAttributesList()
                                                 .stream()

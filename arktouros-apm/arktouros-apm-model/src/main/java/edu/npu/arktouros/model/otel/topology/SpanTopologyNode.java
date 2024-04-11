@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,8 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 public class SpanTopologyNode {
     private Span span;
-    private List<SpanTopologyNode> parentNodes;
-    private List<SpanTopologyNode> childNodes;
+    private List<SpanTopologyNode> parentNodes = new ArrayList<>();
+    private List<SpanTopologyNode> childNodes = new ArrayList<>();
 
     @Builder
     public SpanTopologyNode(Span span,

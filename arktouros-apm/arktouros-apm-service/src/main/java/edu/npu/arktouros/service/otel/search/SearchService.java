@@ -12,8 +12,6 @@ public interface SearchService {
 
     R getLogList(LogQueryDto logQueryDto);
 
-    R getLogById(String id);
-
     R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto);
 
     R getSpanTopologyByTraceId(String traceId);

@@ -17,6 +17,7 @@ public record LogQueryDto(
         String serviceName,
         String traceId,
         String keyword,
-        String keywordNotIncluded
+        String keywordNotIncluded,
+        String severityText
 ) {
 }

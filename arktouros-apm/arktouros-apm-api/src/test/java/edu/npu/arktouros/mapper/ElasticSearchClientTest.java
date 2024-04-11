@@ -1,11 +1,18 @@
 package edu.npu.arktouros.mapper;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldSort;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.model.common.ElasticSearchIndex;
+import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import jakarta.annotation.Resource;
@@ -27,6 +34,9 @@ import java.util.List;
 public class ElasticSearchClientTest {
     @Resource
     private ElasticsearchClient esClient;
+
+    @Resource
+    private ObjectMapper objectMapper;
 
     private static final String SERVICE_INDEX = "arktouros-service";
     private static final String LOG_INDEX = "arktouros-log";
@@ -82,6 +92,25 @@ public class ElasticSearchClientTest {
             }
         } catch (IOException e) {
             log.error("search error:{}", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testLogDecode() throws JsonProcessingException {
+
+        SearchRequest searchRequest = new SearchRequest.Builder()
+                .index(ElasticSearchIndex.LOG_INDEX.getIndexName())
+                .query(new MatchAllQuery.Builder().build()._toQuery())
+//                .sort(sort)
+                .build();
+        try {
+            SearchResponse<Log> response = esClient.search(searchRequest, Log.class);
+            if (response.hits().total() != null) {
+                log.info(String.valueOf(response.hits().total().value()));
+            }
+        } catch (IOException e) {
+            log.error("search log error:{}", e.getMessage());
             e.printStackTrace();
         }
     }
