@@ -23,7 +23,6 @@ import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Singular;
 import lombok.ToString;
 
 import java.util.HashMap;
@@ -37,9 +36,9 @@ public class Gauge extends Metric {
     private double value;
 
     @Builder
-    public Gauge(String name, @Singular Map<String, String> labels,
+    public Gauge(String name, String description, Map<String, String> labels,
                  double value, long timestamp) {
-        super(name, labels, timestamp);
+        super(name, description, labels, timestamp);
         this.metricType = MetricType.GAUGE;
         this.value = value;
     }

@@ -23,7 +23,6 @@ import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Singular;
 import lombok.ToString;
 
 import java.util.HashMap;
@@ -36,6 +35,7 @@ public class Counter extends Metric {
 
     private double value;
     public static final Map<String, Property> documentMap = new HashMap<>();
+
     static {
         documentMap.putAll(metricBaseMap);
         documentMap.put("value", Property.of(property ->
@@ -46,19 +46,22 @@ public class Counter extends Metric {
     }
 
     @Builder
-    public Counter(String name, @Singular Map<String, String> labels,
+    public Counter(String name, String description,
+                   Map<String, String> labels,
                    double value, long timestamp) {
-        super(name, labels, timestamp);
+        super(name, description, labels, timestamp);
         this.metricType = MetricType.COUNTER;
         this.value = value;
     }
 
-    @Override public Metric sum(Metric m) {
+    @Override
+    public Metric sum(Metric m) {
         this.value = this.value + m.value();
         return this;
     }
 
-    @Override public Double value() {
+    @Override
+    public Double value() {
         return this.value;
     }
 }

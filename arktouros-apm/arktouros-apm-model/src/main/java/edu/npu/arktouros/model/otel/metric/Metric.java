@@ -20,8 +20,9 @@ import java.util.Map;
 public abstract class Metric implements Source {
     private String name;
     private String serviceName;
-    private final Map<String, String> labels;
-    private final long timestamp;
+    private String description;
+    private Map<String, String> labels = new HashMap<>();
+    private long timestamp;
     private final SourceType sourceType = SourceType.METRIC;
     protected MetricType metricType = MetricType.METRIC;
 
@@ -38,6 +39,8 @@ public abstract class Metric implements Source {
                     property.text(EsProperties.keywordTextProperty)),
             "serviceName", Property.of(property ->
                     property.text(EsProperties.keywordTextProperty)),
+            "description", Property.of(property ->
+                    property.text(EsProperties.keywordTextProperty)),
             "labels", Property.of(property ->
                     property.nested(NestedProperty.of(
                             ne -> ne.properties(labelProperty)))),
@@ -52,9 +55,10 @@ public abstract class Metric implements Source {
                             keywordProperty -> keywordProperty.index(true))))
     );
 
-
-    protected Metric(String name, Map<String, String> labels, long timestamp) {
+    protected Metric(String name, String description,
+                     Map<String, String> labels, long timestamp) {
         this.name = name;
+        this.description = description;
         this.labels = new HashMap<>(labels);
         this.serviceName = labels.get("service_name");
         this.timestamp = timestamp;

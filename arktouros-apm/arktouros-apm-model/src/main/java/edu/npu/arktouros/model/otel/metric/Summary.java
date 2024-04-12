@@ -4,7 +4,6 @@ import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Singular;
 import lombok.ToString;
 
 import java.util.HashMap;
@@ -14,13 +13,14 @@ import java.util.Map;
  * @author : [wangminan]
  * @description : prometheus的Summary类型
  */
+
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Getter
 public class Summary extends Metric {
     private long sampleCount;
     private double sampleSum;
-    private final Map<Double, Double> quantiles;
+    private Map<Double, Double> quantiles = new HashMap<>();
 
     public static final Map<String, Property> documentMap = new HashMap<>();
 
@@ -49,10 +49,11 @@ public class Summary extends Metric {
     }
 
     @Builder
-    public Summary(String name, @Singular Map<String, String> labels,
+    public Summary(String name, String description,
+                   Map<String, String> labels,
                    long sampleCount, double sampleSum,
-                   @Singular Map<Double, Double> quantiles, long timestamp) {
-        super(name, labels, timestamp);
+                   Map<Double, Double> quantiles, long timestamp) {
+        super(name, description, labels, timestamp);
         getLabels().remove("quantile");
         this.metricType = MetricType.SUMMARY;
         this.sampleCount = sampleCount;

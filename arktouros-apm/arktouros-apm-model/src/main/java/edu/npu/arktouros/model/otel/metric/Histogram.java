@@ -25,7 +25,6 @@ import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Singular;
 import lombok.ToString;
 
 import java.util.HashMap;
@@ -41,8 +40,7 @@ public class Histogram extends Metric {
 
     private long sampleCount;
     private double sampleSum;
-    private Map<Double, Long> buckets;
-
+    private Map<Double, Long> buckets = new HashMap<>();
     private static final Map<String, Property> bucketsMap = new HashMap<>();
 
     public static final Map<String, Property> documentMap = new HashMap<>();
@@ -77,10 +75,10 @@ public class Histogram extends Metric {
     }
 
     @Builder
-    public Histogram(String name, @Singular Map<String, String> labels,
+    public Histogram(String name, String description, Map<String, String> labels,
                      long sampleCount, double sampleSum,
-                     @Singular Map<Double, Long> buckets, long timestamp) {
-        super(name, labels, timestamp);
+                     Map<Double, Long> buckets, long timestamp) {
+        super(name, description, labels, timestamp);
         getLabels().remove("le");
         this.metricType = MetricType.HISTOGRAM;
         this.sampleCount = sampleCount;

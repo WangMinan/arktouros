@@ -1,4 +1,4 @@
-# helm install otel-collector-cluster open-telemetry/opentelemetry-collector --values deployment.yaml
+# helm install otel-collector-cluster open-telemetry/opentelemetry-collector --values helmChart.yaml
 mode: deployment
 
 # We only want one of these collectors - any more and we'd produce duplicate data
