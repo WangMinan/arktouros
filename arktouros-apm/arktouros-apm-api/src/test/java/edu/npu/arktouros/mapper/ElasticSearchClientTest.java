@@ -7,7 +7,7 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.npu.arktouros.mapper.otel.search.SearchMapper;
 import edu.npu.arktouros.model.common.ElasticSearchIndex;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.structure.Service;
@@ -33,7 +33,7 @@ public class ElasticSearchClientTest {
     private ElasticsearchClient esClient;
 
     @Resource
-    private ObjectMapper objectMapper;
+    private SearchMapper searchMapper;
 
     private static final String SERVICE_INDEX = "arktouros-service";
     private static final String LOG_INDEX = "arktouros-log";
@@ -122,5 +122,11 @@ public class ElasticSearchClientTest {
                 log.error("delete index:{} failed", index);
             }
         });
+    }
+
+    @Test
+    void getMetricNames() {
+        List<String> metricsNames = searchMapper.getMetricsNames("otelcol-contrib", null);
+        log.info("metricsNames:{}", metricsNames);
     }
 }

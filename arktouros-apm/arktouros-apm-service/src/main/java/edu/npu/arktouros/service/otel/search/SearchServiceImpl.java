@@ -4,6 +4,7 @@ import edu.npu.arktouros.mapper.otel.search.SearchMapper;
 import edu.npu.arktouros.model.dto.BaseQueryDto;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
+import edu.npu.arktouros.model.dto.MetricQueryDto;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.topology.Topology;
 import edu.npu.arktouros.model.otel.topology.TopologyCall;
@@ -124,6 +125,19 @@ public class SearchServiceImpl implements SearchService {
         R r = new R();
         r.put("result", topology);
         return r;
+    }
+
+    @Override
+    public R getMetrics(MetricQueryDto metricQueryDto) {
+        // 先取name，然后用name来搜 做两次搜索
+        List<String> metricNames = searchMapper.getMetricsNames(metricQueryDto.serviceName(),
+                metricQueryDto.metricNameLimit());
+        if (metricNames.isEmpty()) {
+            return R.ok();
+        }
+        List<String> metricValues = searchMapper.getMetricsValues(metricNames,
+                metricQueryDto.startTimeStamp(), metricQueryDto.endTimeStamp());
+        return null;
     }
 
     private void handleOtherSpansForTraceTopology(

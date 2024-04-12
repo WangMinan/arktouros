@@ -22,6 +22,8 @@ import co.elastic.clients.elasticsearch._types.mapping.DoubleNumberProperty;
 import co.elastic.clients.elasticsearch._types.mapping.LongNumberProperty;
 import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -75,9 +77,14 @@ public class Histogram extends Metric {
     }
 
     @Builder
-    public Histogram(String name, String description, Map<String, String> labels,
-                     long sampleCount, double sampleSum,
-                     Map<Double, Long> buckets, long timestamp) {
+    @JsonCreator
+    public Histogram(@JsonProperty("name") String name,
+                     @JsonProperty("description") String description,
+                     @JsonProperty("labels") Map<String, String> labels,
+                     @JsonProperty("sampleCount") long sampleCount,
+                     @JsonProperty("sampleSum") double sampleSum,
+                     @JsonProperty("buckets") Map<Double, Long> buckets,
+                     @JsonProperty("timestamp") long timestamp) {
         super(name, description, labels, timestamp);
         getLabels().remove("le");
         this.metricType = MetricType.HISTOGRAM;

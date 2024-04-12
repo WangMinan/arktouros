@@ -9,11 +9,13 @@ import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermsQuery;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.json.JsonData;
 import edu.npu.arktouros.mapper.otel.search.SearchMapper;
 import edu.npu.arktouros.model.common.ElasticSearchIndex;
 import edu.npu.arktouros.model.common.ResponseCodeEnum;
@@ -21,6 +23,11 @@ import edu.npu.arktouros.model.dto.BaseQueryDto;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.otel.log.Log;
+import edu.npu.arktouros.model.otel.metric.Counter;
+import edu.npu.arktouros.model.otel.metric.Gauge;
+import edu.npu.arktouros.model.otel.metric.Histogram;
+import edu.npu.arktouros.model.otel.metric.Metric;
+import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
@@ -35,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author : [wangminan]
@@ -273,6 +281,57 @@ public class ElasticSearchMapper extends SearchMapper {
             log.error("Search for span list by trace query error:{}", e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<String> getMetricsNames(String serviceName, Integer metricNameLimit) {
+        try {
+            List<String> allNames = new ArrayList<>();
+            allNames.addAll(getMetricNamesFromIndex(serviceName,
+                    ElasticSearchIndex.GAUGE_INDEX.getIndexName(), Gauge.class));
+            allNames.addAll(getMetricNamesFromIndex(serviceName,
+                    ElasticSearchIndex.COUNTER_INDEX.getIndexName(), Counter.class));
+            allNames.addAll(getMetricNamesFromIndex(serviceName,
+                    ElasticSearchIndex.HISTOGRAM_INDEX.getIndexName(), Histogram.class));
+            allNames.addAll(getMetricNamesFromIndex(serviceName,
+                    ElasticSearchIndex.SUMMARY_INDEX.getIndexName(), Summary.class));
+
+            return metricNameLimit == null ? allNames : allNames.stream().limit(metricNameLimit).toList();
+        } catch (IOException e) {
+            log.error("Search for metric names error:{}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<String> getMetricsValues(List<String> metricNames,
+                                         Long startTimestamp, Long endTimestamp) {
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
+        rangeQueryBuilder.field("timestamp")
+                .gte(JsonData.of(startTimestamp))
+                .lte(JsonData.of(endTimestamp));
+        TermsQuery.Builder termQueryBuilder = new TermsQuery.Builder();
+        List<FieldValue> fieldValues = new ArrayList<>();
+        for (String metricName : metricNames) {
+            fieldValues.add(FieldValue.of(metricName));
+        }
+        termQueryBuilder.field("name").terms(builder -> builder.value(fieldValues));
+        return List.of();
+    }
+
+    private <T extends Metric> List<String> getMetricNamesFromIndex(
+            String serviceName, String indexName, Class<T> clazz) throws IOException {
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        MatchQuery.Builder matchQueryBuilder = new MatchQuery.Builder();
+        matchQueryBuilder.field("serviceName").query(serviceName);
+        searchRequestBuilder.index(indexName).query(matchQueryBuilder.build()._toQuery());
+        SearchResponse<T> searchResponse = esClient.search(searchRequestBuilder.build(), clazz);
+        return searchResponse.hits().hits()
+                .stream()
+                .filter(hit -> hit.source() != null)
+                .map(hit -> hit.source().getName())
+                .collect(Collectors.toList());
     }
 
     private <T> R transformListResponseToR(SearchResponse<T> searchResponse) {

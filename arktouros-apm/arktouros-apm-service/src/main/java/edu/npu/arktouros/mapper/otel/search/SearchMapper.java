@@ -27,4 +27,8 @@ public abstract class SearchMapper {
     public abstract R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto);
 
     public abstract List<Span> getSpanListByTraceId(String traceId);
+
+    public abstract List<String> getMetricsNames(String serviceName, Integer metricNameLimit);
+
+    public abstract List<String> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp);
 }

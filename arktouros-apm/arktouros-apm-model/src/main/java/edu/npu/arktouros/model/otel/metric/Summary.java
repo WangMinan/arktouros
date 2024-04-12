@@ -1,6 +1,8 @@
 package edu.npu.arktouros.model.otel.metric;
 
 import co.elastic.clients.elasticsearch._types.mapping.Property;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -49,10 +51,14 @@ public class Summary extends Metric {
     }
 
     @Builder
-    public Summary(String name, String description,
-                   Map<String, String> labels,
-                   long sampleCount, double sampleSum,
-                   Map<Double, Double> quantiles, long timestamp) {
+    @JsonCreator
+    public Summary(@JsonProperty("name") String name,
+                   @JsonProperty("description") String description,
+                   @JsonProperty("labels") Map<String, String> labels,
+                   @JsonProperty("timestamp") long timestamp,
+                   @JsonProperty("sampleCount") long sampleCount,
+                   @JsonProperty("sampleSum") double sampleSum,
+                   @JsonProperty("quantiles") Map<Double, Double> quantiles) {
         super(name, description, labels, timestamp);
         getLabels().remove("quantile");
         this.metricType = MetricType.SUMMARY;

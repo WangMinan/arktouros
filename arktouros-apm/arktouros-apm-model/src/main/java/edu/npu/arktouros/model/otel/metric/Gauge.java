@@ -20,6 +20,8 @@ package edu.npu.arktouros.model.otel.metric;
 
 import co.elastic.clients.elasticsearch._types.mapping.DoubleNumberProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -36,8 +38,12 @@ public class Gauge extends Metric {
     private double value;
 
     @Builder
-    public Gauge(String name, String description, Map<String, String> labels,
-                 double value, long timestamp) {
+    @JsonCreator
+    public Gauge(@JsonProperty("name") String name,
+                 @JsonProperty("description") String description,
+                 @JsonProperty("labels") Map<String, String> labels,
+                 @JsonProperty("timestamp") long timestamp,
+                 @JsonProperty("value") double value) {
         super(name, description, labels, timestamp);
         this.metricType = MetricType.GAUGE;
         this.value = value;

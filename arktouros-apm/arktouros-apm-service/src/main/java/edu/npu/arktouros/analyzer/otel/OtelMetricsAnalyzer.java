@@ -229,7 +229,8 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
     }
 
     private static Map<String, String> buildLabels(List<KeyValue> kvs) {
-        return kvs.stream().collect(toMap(KeyValue::getKey,
+        return kvs.stream().collect(toMap(
+                KeyValue::getKey,
                 it -> it.getValue().getStringValue()));
     }
 

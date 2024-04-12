@@ -149,10 +149,12 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         populateStatus(otelSpan.getStatus(), tags);
         convertLink(tags, otelSpan.getLinksList());
 
-        tags.forEach((key, value) -> {
-            Tag tag = Tag.builder().key(key).value(value).build();
-            builder.tag(tag);
-        });
+        builder.tags(
+                tags.entrySet()
+                        .stream()
+                        .map(entry -> Tag.builder().key(entry.getKey()).value(entry.getValue())
+                                .build())
+                        .toList());
 
         try {
             sinkService.sink(builder.build());

@@ -49,4 +49,15 @@ public class H2SearchMapper extends SearchMapper {
     public List<Span> getSpanListByTraceId(String traceId) {
         return List.of();
     }
+
+    @Override
+    public List<String> getMetricsNames(String serviceName, Integer metricNameLimit) {
+        return List.of();
+    }
+
+    @Override
+    public List<String> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp) {
+        return List.of();
+    }
+
 }

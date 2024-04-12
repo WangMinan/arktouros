@@ -7,6 +7,7 @@ import co.elastic.clients.elasticsearch._types.mapping.Property;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.EsProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
+import io.micrometer.common.util.StringUtils;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -18,12 +19,12 @@ import java.util.Map;
  */
 @Data
 public abstract class Metric implements Source {
-    private String name;
-    private String serviceName;
-    private String description;
-    private Map<String, String> labels = new HashMap<>();
-    private long timestamp;
-    private final SourceType sourceType = SourceType.METRIC;
+    protected String name;
+    protected String serviceName;
+    protected String description;
+    protected Map<String, String> labels = new HashMap<>();
+    protected long timestamp;
+    protected final SourceType sourceType = SourceType.METRIC;
     protected MetricType metricType = MetricType.METRIC;
 
     private static final Map<String, Property> labelProperty =
@@ -60,8 +61,12 @@ public abstract class Metric implements Source {
         this.name = name;
         this.description = description;
         this.labels = new HashMap<>(labels);
-        this.serviceName = labels.get("service_name");
         this.timestamp = timestamp;
+        if (StringUtils.isNotEmpty(labels.get("service_name"))) {
+            this.serviceName = labels.get("service_name");
+        } else if (name.startsWith("k8s.")) {
+            this.serviceName = "k8s";
+        }
     }
 
     public abstract Metric sum(Metric m);
