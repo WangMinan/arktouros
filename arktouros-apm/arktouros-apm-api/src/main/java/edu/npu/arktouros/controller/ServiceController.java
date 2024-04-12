@@ -32,6 +32,6 @@ public class ServiceController {
 
     @GetMapping("/topology")
     public R getTopology(@NotBlank @RequestParam("namespace") String namespace) {
-        return searchService.getTopology(namespace);
+        return searchService.getServiceTopology(namespace);
     }
 }

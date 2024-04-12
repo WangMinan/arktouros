@@ -25,16 +25,20 @@ import java.util.Map;
  * @author : [wangminan]
  * @description : 日志
  */
+@Builder
 @Data
 @AllArgsConstructor
 public class Log implements Source {
     private String serviceName;
     private String traceId;
     private String spanId;
+    @Builder.Default
     private SourceType type = SourceType.LOG;
     // 日志标准内容
     private String content;
+    @Builder.Default
     private List<Tag> tags = new ArrayList<>();
+    @Builder.Default
     private boolean error = false;
     private Long timestamp;
     private String severityText; // logLevel

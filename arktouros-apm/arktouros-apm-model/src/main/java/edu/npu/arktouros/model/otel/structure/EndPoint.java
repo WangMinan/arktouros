@@ -18,6 +18,7 @@ import java.util.Map;
  * @author : [wangminan]
  * @description : 一条链路的端点
  */
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,7 +27,8 @@ public class EndPoint implements Source {
     private String ip;
     private int port;
     private int latency;
-    private SourceType type;
+    @Builder.Default
+    private SourceType type = SourceType.ENDPOINT;
 
     @Builder
     public EndPoint(String serviceName, String ip, int port, int latency) {
@@ -34,7 +36,6 @@ public class EndPoint implements Source {
         this.ip = ip;
         this.port = port;
         this.latency = latency;
-        this.type = SourceType.ENDPOINT;
     }
 
     public static final Map<String, Property> documentMap = new HashMap<>();

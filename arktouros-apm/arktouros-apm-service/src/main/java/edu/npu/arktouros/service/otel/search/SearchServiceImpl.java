@@ -5,8 +5,9 @@ import edu.npu.arktouros.model.dto.BaseQueryDto;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.otel.structure.Service;
-import edu.npu.arktouros.model.otel.topology.ServiceTopologyNode;
-import edu.npu.arktouros.model.otel.topology.SpanTopologyNode;
+import edu.npu.arktouros.model.otel.topology.Topology;
+import edu.npu.arktouros.model.otel.topology.TopologyCall;
+import edu.npu.arktouros.model.otel.topology.TopologyNode;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.R;
 import jakarta.annotation.Resource;
@@ -33,7 +34,8 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public R getTopology(String namespace) {
+    public R getServiceTopology(String namespace) {
+        Topology<Service> topology = new Topology<>();
         // 拿到namespace下的所有服务
         List<Service> serviceList =
                 searchMapper.getServiceListFromNamespace(namespace);
@@ -48,29 +50,43 @@ public class SearchServiceImpl implements SearchService {
         // 组织成有序的拓扑
         // 注意 可能有多条链路
         List<Span> rootSpans = originalSpanList.stream().filter(Span::isRoot).toList();
-        List<ServiceTopologyNode> topServiceTopologyNodes = new ArrayList<>();
-        List<ServiceTopologyNode> knownServiceTopologyNodes = new ArrayList<>();
-        // 以每一个rootSpan为起点，找到对应的service 然后做dfs构建topology
-        for (Span rootSpan : rootSpans) {
-            Service rootService =
-                    serviceList.stream()
-                            .filter(service -> service.getName().equals(rootSpan.getServiceName()))
-                            .findFirst().orElse(null);
-            if (rootSpan == null) {
-                continue;
-            }
-            ServiceTopologyNode serviceTopologyNode =
-                    ServiceTopologyNode.builder().service(rootService).build();
-            knownServiceTopologyNodes.add(serviceTopologyNode);
-            organizeServiceTopology(serviceTopologyNode, rootSpan, knownServiceTopologyNodes, serviceList,
-                    originalSpanList.stream().filter(span -> !span.isRoot()).toList());
-            topServiceTopologyNodes.add(serviceTopologyNode);
-        }
-        // 对topTopologyNodes进行去重
-        topServiceTopologyNodes = topServiceTopologyNodes.stream().distinct().toList();
+        List<TopologyNode<Service>> topologyNodes = new ArrayList<>();
+        List<TopologyCall<Service>> topologyCalls = new ArrayList<>();
+        rootSpans.forEach(rootSpan -> {
+            Service rootService = searchMapper.getServiceByName(rootSpan.getServiceName());
+            TopologyNode<Service> rootNode = new TopologyNode<>(rootService);
+            topologyNodes.add(rootNode);
+            // 递归查找
+            handleOtherSpansForServiceTopology(rootSpan,
+                    rootNode,
+                    // 过滤掉rootSpan
+                    rootSpans.stream().filter(span -> !span.equals(rootSpan)).toList(),
+                    topologyNodes, topologyCalls);
+        });
+        topology.setNodes(topologyNodes);
+        topology.setCalls(topologyCalls);
         R r = new R();
-        r.put("result", topServiceTopologyNodes);
+        r.put("result", topology);
         return r;
+    }
+
+    private void handleOtherSpansForServiceTopology(
+            Span formerSpan, TopologyNode<Service> formerNode,
+            List<Span> otherSpans,
+            List<TopologyNode<Service>> topologyNodes,
+            List<TopologyCall<Service>> topologyCalls) {
+        otherSpans.forEach(otherSpan -> {
+            if (otherSpan.getParentSpanId().equals(formerSpan.getId())) {
+                Service otherService = searchMapper.getServiceByName(otherSpan.getServiceName());
+                TopologyNode<Service> otherNode = new TopologyNode<>(otherService);
+                topologyNodes.add(otherNode);
+                TopologyCall<Service> topologyCall = new TopologyCall<>(formerNode, otherNode);
+                topologyCalls.add(topologyCall);
+                handleOtherSpansForServiceTopology(otherSpan, otherNode,
+                        otherSpans.stream().filter(span -> !span.equals(otherSpan)).toList(),
+                        topologyNodes, topologyCalls);
+            }
+        });
     }
 
     @Override
@@ -86,66 +102,46 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public R getSpanTopologyByTraceId(String traceId) {
         List<Span> originalSpanList = searchMapper.getSpanListByTraceId(traceId);
+        Topology<Span> topology = new Topology<>();
+        List<TopologyNode<Span>> topologyNodes = new ArrayList<>();
+        List<TopologyCall<Span>> topologyCalls = new ArrayList<>();
         // 找到唯一的rootSpan
         Span rootSpan = originalSpanList.stream().filter(Span::isRoot).findFirst().orElse(null);
         if (rootSpan == null) {
             log.warn("Can't find root span for traceId: {}", traceId);
             return R.ok();
         }
-        SpanTopologyNode topNode = SpanTopologyNode.builder().span(rootSpan).build();
-        organizeSpanTopology(topNode,
-                originalSpanList.stream().filter(span -> !span.isRoot()).toList());
+        TopologyNode<Span> rootNode = new TopologyNode<>(rootSpan);
+        topologyNodes.add(rootNode);
+        // 递归查找
+        handleOtherSpansForTraceTopology(rootSpan,
+                rootNode,
+                // 过滤掉rootSpan
+                originalSpanList.stream().filter(span -> !span.equals(rootSpan)).toList(),
+                topologyNodes, topologyCalls);
+        topology.setNodes(topologyNodes);
+        topology.setCalls(topologyCalls);
         R r = new R();
-        r.put("result", topNode);
+        r.put("result", topology);
         return r;
     }
 
-    private void organizeSpanTopology(SpanTopologyNode beforeNode,
-                                      List<Span> otherSpans) {
-        otherSpans.stream()
-                .filter(span -> span.getParentSpanId().equals(beforeNode.getSpan().getId()))
-                .forEach(span -> {
-                    SpanTopologyNode childNode = SpanTopologyNode.builder().span(span).build();
-                    beforeNode.getChildNodes().add(childNode);
-                    childNode.getParentNodes().add(beforeNode);
-                    organizeSpanTopology(childNode, otherSpans);
-                });
-    }
-
-    private void organizeServiceTopology(ServiceTopologyNode beforeNode, Span beforeSpan,
-                                         List<ServiceTopologyNode> knownServiceTopologyNodes,
-                                         List<Service> serviceList, List<Span> otherSpans) {
-        otherSpans.stream()
-                // 找出child service
-                .filter(span -> span.getParentSpanId().equals(beforeSpan.getParentSpanId()))
-                .forEach(span -> {
-                    // 查找对应服务
-                    Service service =
-                            serviceList.stream()
-                                    .filter(s -> s.getName().equals(span.getServiceName()))
-                                    .findFirst().orElse(null);
-                    if (service == null) {
-                        return;
-                    }
-                    // 查找service对应node是否已经存在 如果和beforeNode的Service一致则无需添加
-                    ServiceTopologyNode childNode =
-                            knownServiceTopologyNodes.stream()
-                                    .filter(node ->
-                                            node.getService().getName().equals(service.getName()))
-                                    .findFirst().orElse(null);
-                    if (childNode == null) {
-                        childNode = ServiceTopologyNode.builder().service(service).build();
-                        knownServiceTopologyNodes.add(childNode);
-                        childNode.getParentNodes().add(beforeNode);
-                        beforeNode.getChildNodes().add(childNode);
-                    } else if (!childNode.equals(beforeNode)) {
-                        childNode.getParentNodes().add(beforeNode);
-                        beforeNode.getChildNodes().add(childNode);
-                    }
-                    // 继续递归搜索
-                    organizeServiceTopology(childNode, span,
-                            knownServiceTopologyNodes, serviceList, otherSpans);
-                });
+    private void handleOtherSpansForTraceTopology(
+            Span formerSpan, TopologyNode<Span> formerNode,
+            List<Span> otherSpans,
+            List<TopologyNode<Span>> topologyNodes,
+            List<TopologyCall<Span>> topologyCalls) {
+        otherSpans.forEach(otherSpan -> {
+            if (otherSpan.getParentSpanId().equals(formerSpan.getId())) {
+                TopologyNode<Span> otherNode = new TopologyNode<>(otherSpan);
+                topologyNodes.add(otherNode);
+                TopologyCall<Span> topologyCall = new TopologyCall<>(formerNode, otherNode);
+                topologyCalls.add(topologyCall);
+                handleOtherSpansForTraceTopology(otherSpan, otherNode,
+                        otherSpans.stream().filter(span -> !span.equals(otherSpan)).toList(),
+                        topologyNodes, topologyCalls);
+            }
+        });
     }
 
 }

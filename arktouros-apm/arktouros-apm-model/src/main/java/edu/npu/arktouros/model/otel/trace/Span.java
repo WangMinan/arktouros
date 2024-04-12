@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.Map;
  * @author : [wangminan]
  * @description : 链路中的基础节点
  */
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,8 +40,10 @@ public class Span implements Source {
     private Long startTime;
     private Long endTime;
     private boolean root;
+    @Builder.Default
     private SourceType type = SourceType.SPAN;
-    private List<Tag> tags;
+    @Builder.Default
+    private List<Tag> tags = new ArrayList<>();
 
     public static final Map<String, Property> documentMap = new HashMap<>();
 

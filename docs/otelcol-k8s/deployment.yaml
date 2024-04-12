@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+data:
+  config.yaml: |
+    # 在这里插入你的 OpenTelemetry Collector 配置
+    exporters:
+      otlp:
+        endpoint: "8.217.44.101:4317"
+        tls:
+          # 一定要加 默认是TLS开启的
+          insecure: true
+    service:
+      pipelines:
+        traces:
+          exporters: [ otlp ]
+        metrics:
+          exporters: [ otlp ]
+        logs:
+          exporters: [ otlp ]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector-cluster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector-cluster
+  template:
+    metadata:
+      labels:
+        app: otel-collector-cluster
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector:latest
+          ports:
+            - containerPort: 4317
+            - containerPort: 4318
+          volumeMounts:
+            - name: otel-collector-config
+              mountPath: /etc/otel/config.yaml
+              subPath: config.yaml
+      volumes:
+        - name: otel-collector-config
+          configMap:
+            name: otel-collector-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector-cluster
+spec:
+  selector:
+    app: otel-collector-cluster
+  ports:
+    - protocol: TCP
+      port: 4317
+      targetPort: 4317
+    - protocol: TCP
+      port: 4318
+      targetPort: 4318
