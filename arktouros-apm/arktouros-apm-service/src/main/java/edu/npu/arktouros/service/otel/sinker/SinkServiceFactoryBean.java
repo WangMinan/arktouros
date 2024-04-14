@@ -22,7 +22,10 @@ public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
 
     private ElasticsearchClient esClient;
 
-    // 改用Autowired注解 能够实现在ElasticSearchClient的这个bean没有加载的情况下运行
+    /**
+     * 改用Autowired注解 能够实现在ElasticSearchClient的这个bean没有加载的情况下运行
+     * 如果用Resource的话 根据配置文件没加载ElasticSearchClient 这个位置的注入就会出问题
+     */
     @Autowired(required = false)
     public void setEsClient(ElasticsearchClient esClient) {
         this.esClient = esClient;

@@ -6,6 +6,7 @@ import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -33,6 +34,7 @@ import java.security.cert.CertificateFactory;
  * @author : [wangminan]
  * @description : ElasticSearch配置类
  */
+@Slf4j
 @Configuration
 // 仅当instance.active.sinker=elasticsearch时，才会加载此配置类
 // prefix表示配置前缀 name表示配置名称 havingValue表示配置值
@@ -76,7 +78,7 @@ public class ElasticSearchConfig {
 
         RestClient restClient = builder.build();
         ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper(objectMapper));
-
+        log.info("Elasticsearch client created.");
         return new ElasticsearchClient(transport);
     }
 
@@ -89,6 +91,7 @@ public class ElasticSearchConfig {
     }
 
     private SSLContext createSSLContext() throws Exception {
+        log.info("Ssl config detected. Loading ca certificate from {}", caPos);
         Path caCertificatePath = Paths.get(caPos);
         Certificate trustedCa;
         try (InputStream is = Files.newInputStream(caCertificatePath)) {
