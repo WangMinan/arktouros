@@ -17,11 +17,7 @@ import java.util.Arrays;
 @Slf4j
 public class OtelLogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
-    private final OtelLogAnalyzer analyzer;
-
-    public OtelLogServiceImpl(OtelLogAnalyzer analyzer) {
-        this.analyzer = analyzer;
-        analyzer.start();
+    public OtelLogServiceImpl() {
     }
 
     @Override
@@ -31,7 +27,7 @@ public class OtelLogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
                 ExportLogsServiceResponse.newBuilder();
         try {
             // 只能定位到analyzer接收时的问题，之后就跟踪不到了
-            request.getResourceLogsList().forEach(analyzer::handle);
+            request.getResourceLogsList().forEach(OtelLogAnalyzer::handle);
         } catch (Exception e) {
             responseBuilder.setPartialSuccess(
               ExportLogsPartialSuccess.newBuilder()

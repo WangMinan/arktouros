@@ -16,15 +16,19 @@ import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author : [wangminan]
@@ -39,7 +43,16 @@ public class ElasticSearchSinkService extends SinkService {
     }
 
     private final ExecutorService createIndexThreadPool =
-            Executors.newFixedThreadPool(ElasticSearchIndex.getIndexList().size());
+            new ThreadPoolExecutor(
+                    ElasticSearchIndex.getIndexList().size(),
+                    ElasticSearchIndex.getIndexList().size(),
+                    0L,
+                    TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<>(ElasticSearchIndex.getIndexList().size()),
+                    new BasicThreadFactory.Builder()
+                            .namingPattern("ElasticSearch-init-%d").build(),
+                    new ThreadPoolExecutor.AbortPolicy()
+            );
 
     @Override
     public void init() {
@@ -68,6 +81,8 @@ public class ElasticSearchSinkService extends SinkService {
             throw new RuntimeException(e);
         }
         this.setReady(true);
+        // 关闭init线程池
+        createIndexThreadPool.shutdown();
         log.info("ElasticSearch sinker init success.");
     }
 

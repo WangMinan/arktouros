@@ -17,11 +17,8 @@ import java.util.Arrays;
 @Slf4j
 public class OtelMetricsServiceImpl extends MetricsServiceGrpc.MetricsServiceImplBase {
 
-    private final OtelMetricsAnalyzer analyzer;
 
-    public OtelMetricsServiceImpl(OtelMetricsAnalyzer analyzer) {
-        this.analyzer = analyzer;
-        analyzer.start();
+    public OtelMetricsServiceImpl() {
     }
 
 
@@ -31,7 +28,7 @@ public class OtelMetricsServiceImpl extends MetricsServiceGrpc.MetricsServiceImp
         ExportMetricsServiceResponse.Builder responseBuilder =
                 ExportMetricsServiceResponse.newBuilder();
         try {
-            request.getResourceMetricsList().forEach(analyzer::handle);
+            request.getResourceMetricsList().forEach(OtelMetricsAnalyzer::handle);
         } catch (Exception e) {
             responseBuilder.setPartialSuccess(ExportMetricsPartialSuccess.newBuilder()
                     .setRejectedDataPoints(request.getResourceMetricsList().size())

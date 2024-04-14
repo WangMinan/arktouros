@@ -15,10 +15,8 @@ import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.proto.trace.v1.ScopeSpans;
 import io.opentelemetry.proto.trace.v1.Status;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -35,17 +33,15 @@ import java.util.stream.Stream;
  * @author : [wangminan]
  * @description : 链路分析模块
  */
-@Component
 @Slf4j
 public class OtelTraceAnalyzer extends DataAnalyzer {
-    @Resource
-    private TraceQueueService queueService;
 
-    @Resource
-    private SinkService sinkService;
+    public static TraceQueueService queueService;
 
-    public OtelTraceAnalyzer() {
-        this.setName("OtelTraceAnalyzer");
+    private final SinkService sinkService;
+
+    public OtelTraceAnalyzer(SinkService sinkService) {
+        this.sinkService = sinkService;
     }
 
     @Override
@@ -55,7 +51,7 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         }
     }
 
-    public void handle(ResourceSpans resourceSpans) {
+    public static void handle(ResourceSpans resourceSpans) {
         try {
             String resourceSpansJson = ProtoBufJsonUtils.toJSON(resourceSpans);
             TraceQueueItem logQueueItem = TraceQueueItem.builder()
@@ -293,7 +289,8 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
 
     @Override
     public void init() {
-        log.info("Initializing OtelTraceAnalyzer, creating table APM_TRACE_QUEUE.");
+        log.info("Initializing OtelTraceAnalyzer:{}, creating table APM_TRACE_QUEUE.",
+                this.getName());
         queueService.waitTableReady();
         log.info("OtelTraceAnalyzer is ready.");
     }

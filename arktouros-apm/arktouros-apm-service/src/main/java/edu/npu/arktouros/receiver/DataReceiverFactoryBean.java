@@ -1,13 +1,14 @@
 package edu.npu.arktouros.receiver;
 
-import edu.npu.arktouros.analyzer.otel.OtelLogAnalyzer;
-import edu.npu.arktouros.analyzer.otel.OtelMetricsAnalyzer;
-import edu.npu.arktouros.analyzer.otel.OtelTraceAnalyzer;
 import edu.npu.arktouros.receiver.otel.OtelGrpcReceiver;
-import jakarta.annotation.Resource;
+import edu.npu.arktouros.service.otel.queue.LogQueueService;
+import edu.npu.arktouros.service.otel.queue.MetricsQueueService;
+import edu.npu.arktouros.service.otel.queue.TraceQueueService;
+import edu.npu.arktouros.service.otel.sinker.SinkService;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,19 +25,40 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
     @Value("${receiver.grpc.port}")
     private int grpcPort;
 
-    @Resource
-    private OtelLogAnalyzer logAnalyzer;
+    @Value("${instance.number.analyzer.otel.log}")
+    private int logAnalyzerNumber;
 
-    @Resource
-    private OtelMetricsAnalyzer metricsAnalyzer;
+    @Value("${instance.number.analyzer.otel.trace}")
+    private int traceAnalyzerNumber;
 
-    @Resource
-    private OtelTraceAnalyzer traceAnalyzer;
+    @Value("${instance.number.analyzer.otel.metric}")
+    private int metricsAnalyzerNumber;
+
+    private final LogQueueService logQueueService;
+
+    private final TraceQueueService traceQueueService;
+
+    private final MetricsQueueService metricsQueueService;
+
+    private final SinkService sinkService;
+
+    @Lazy
+    public DataReceiverFactoryBean(LogQueueService logQueueService,
+                                   TraceQueueService traceQueueService,
+                                   MetricsQueueService metricsQueueService,
+                                   SinkService sinkService) {
+        this.logQueueService = logQueueService;
+        this.traceQueueService = traceQueueService;
+        this.metricsQueueService = metricsQueueService;
+        this.sinkService = sinkService;
+    }
 
     @Override
     public DataReceiver getObject() {
         if (activeDataReceiver.equals("otelGrpc")) {
-            return new OtelGrpcReceiver(grpcPort, logAnalyzer, metricsAnalyzer, traceAnalyzer);
+            return new OtelGrpcReceiver(logAnalyzerNumber, traceAnalyzerNumber, metricsAnalyzerNumber,
+                    logQueueService, traceQueueService,
+                    metricsQueueService, sinkService, grpcPort);
         } else {
             throw new IllegalArgumentException("can not find data receiver type from profile");
         }

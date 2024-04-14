@@ -17,11 +17,7 @@ import java.util.Arrays;
 @Slf4j
 public class OtelTraceServiceImpl extends TraceServiceGrpc.TraceServiceImplBase {
 
-    private final OtelTraceAnalyzer analyzer;
-
-    public OtelTraceServiceImpl(OtelTraceAnalyzer analyzer) {
-        this.analyzer = analyzer;
-        analyzer.start();
+    public OtelTraceServiceImpl() {
     }
 
     @Override
@@ -30,7 +26,7 @@ public class OtelTraceServiceImpl extends TraceServiceGrpc.TraceServiceImplBase 
         ExportTraceServiceResponse.Builder builder =
                 ExportTraceServiceResponse.newBuilder();
         try {
-            request.getResourceSpansList().forEach(analyzer::handle);
+            request.getResourceSpansList().forEach(OtelTraceAnalyzer::handle);
         } catch (Exception e) {
             builder.setPartialSuccess(ExportTracePartialSuccess.newBuilder()
                     .setRejectedSpans(request.getResourceSpansList().size())

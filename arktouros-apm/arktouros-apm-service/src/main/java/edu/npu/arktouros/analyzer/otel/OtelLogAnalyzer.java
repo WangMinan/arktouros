@@ -11,9 +11,7 @@ import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import io.opentelemetry.proto.logs.v1.ScopeLogs;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
@@ -26,21 +24,22 @@ import static java.util.stream.Collectors.toMap;
  * @author : [wangminan]
  * @description : 日志分析模块
  */
-@Component
 @Slf4j
 public class OtelLogAnalyzer extends DataAnalyzer {
 
-    @Resource
-    private LogQueueService queueService;
+    public static LogQueueService queueService;
 
-    @Resource
-    private SinkService sinkService;
+    private final SinkService sinkService;
 
-    public OtelLogAnalyzer() {
-        this.setName("OtelLogAnalyzer");
+    public OtelLogAnalyzer(SinkService sinkService) {
+        this.sinkService = sinkService;
     }
 
-    public void handle(ResourceLogs resourceLogs) {
+    static {
+
+    }
+
+    public static void handle(ResourceLogs resourceLogs) {
         // 在新线程中进行分析
         try {
             String resourceLogsJson = ProtoBufJsonUtils.toJSON(resourceLogs);
@@ -130,7 +129,8 @@ public class OtelLogAnalyzer extends DataAnalyzer {
 
     @Override
     public void init() {
-        log.info("Initializing OtelLogAnalyzer, creating table APM_LOG_QUEUE.");
+        log.info("Initializing OtelLogAnalyzer:{} creating table APM_LOG_QUEUE.",
+                this.getName());
         queueService.waitTableReady();
         log.info("OtelLogAnalyzer is ready.");
     }

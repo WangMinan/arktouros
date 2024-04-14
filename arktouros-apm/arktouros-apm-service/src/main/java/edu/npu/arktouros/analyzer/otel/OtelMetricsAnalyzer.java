@@ -16,10 +16,8 @@ import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import io.opentelemetry.proto.metrics.v1.ScopeMetrics;
 import io.opentelemetry.proto.metrics.v1.Sum;
 import io.opentelemetry.proto.metrics.v1.SummaryDataPoint;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -36,21 +34,18 @@ import static java.util.stream.Collectors.toMap;
  * @author : [wangminan]
  * @description : 数值分析模块
  */
-@Component
 @Slf4j
 public class OtelMetricsAnalyzer extends DataAnalyzer {
 
-    @Resource
-    private MetricsQueueService queueService;
+    public static MetricsQueueService queueService;
 
-    @Resource
-    private SinkService sinkService;
+    private final SinkService sinkService;
 
-    public OtelMetricsAnalyzer() {
-        this.setName("OtelMetricsAnalyzer");
+    public OtelMetricsAnalyzer(SinkService sinkService) {
+        this.sinkService = sinkService;
     }
 
-    public void handle(ResourceMetrics resourceMetrics) {
+    public static void handle(ResourceMetrics resourceMetrics) {
         try {
             String resourceMetricsJson = ProtoBufJsonUtils.toJSON(resourceMetrics);
             MetricsQueueItem metricsQueueItem = MetricsQueueItem.builder()
@@ -303,7 +298,8 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
 
     @Override
     public void init() {
-        log.info("Initializing OtelTraceAnalyzer, creating table APM_METRICS_QUEUE");
+        log.info("Initializing OtelMetricsAnalyzer:{}, creating table APM_METRICS_QUEUE",
+                this.getName());
         queueService.waitTableReady();
         log.info("OtelTraceAnalyzer is ready.");
     }
