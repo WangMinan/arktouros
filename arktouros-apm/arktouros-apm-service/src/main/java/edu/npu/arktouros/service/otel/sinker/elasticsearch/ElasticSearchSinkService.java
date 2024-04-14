@@ -15,6 +15,7 @@ import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.util.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -36,11 +36,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class ElasticSearchSinkService extends SinkService {
-    private final ElasticsearchClient esClient;
-
-    public ElasticSearchSinkService(ElasticsearchClient esClient) {
-        this.esClient = esClient;
-    }
 
     private final ExecutorService createIndexThreadPool =
             new ThreadPoolExecutor(
@@ -87,8 +82,10 @@ public class ElasticSearchSinkService extends SinkService {
     }
 
     public void checkAndCreate(String indexName, CountDownLatch createIndexLatch) throws IOException {
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         BooleanResponse exists =
                 esClient.indices().exists(builder -> builder.index(indexName));
+        ElasticsearchClientPool.returnClient(esClient);
         if (!exists.value()) {
             // spring-retry
             createIndex(indexName);
@@ -109,7 +106,9 @@ public class ElasticSearchSinkService extends SinkService {
         CreateIndexRequest.Builder createIndexRequestBuilder =
                 getCreateIndexRequestBuilder(indexName);
         CreateIndexRequest createIndexRequest = createIndexRequestBuilder.build();
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         CreateIndexResponse createIndexResponse = esClient.indices().create(createIndexRequest);
+        ElasticsearchClientPool.returnClient(esClient);
         if (!createIndexResponse.acknowledged()) {
             throw new IOException("Create index failed: " + indexName);
         }
@@ -147,6 +146,7 @@ public class ElasticSearchSinkService extends SinkService {
     @Override
     @Retryable(retryFor = IOException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
     public void sink(Source source) throws IOException {
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         if (source instanceof Metric sourceMetric) {
             Service service =
                     Service.builder().name(sourceMetric.getServiceName()).build();
@@ -250,5 +250,6 @@ public class ElasticSearchSinkService extends SinkService {
                     throw new IllegalStateException("Unexpected source type value: " + source);
             }
         }
+        ElasticsearchClientPool.returnClient(esClient);
     }
 }

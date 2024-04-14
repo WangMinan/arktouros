@@ -34,6 +34,7 @@ import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.PageResultVo;
 import edu.npu.arktouros.model.vo.R;
+import edu.npu.arktouros.util.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,12 +51,6 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class ElasticSearchMapper extends SearchMapper {
-
-    private final ElasticsearchClient esClient;
-
-    public ElasticSearchMapper(ElasticsearchClient esClient) {
-        this.esClient = esClient;
-    }
 
     @Override
     public R getServiceList(BaseQueryDto queryDto) {
@@ -77,8 +72,10 @@ public class ElasticSearchMapper extends SearchMapper {
                         .from(pageSize * (pageNum - 1))
                         .size(pageSize).build();
         try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Service> searchResponse =
                     esClient.search(searchRequest, Service.class);
+            ElasticsearchClientPool.returnClient(esClient);
             return transformListResponseToR(searchResponse);
         } catch (IOException e) {
             log.error("Search for service list error:{}", e.getMessage());
@@ -95,8 +92,10 @@ public class ElasticSearchMapper extends SearchMapper {
                 .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
                 .query(queryBuilder.build()._toQuery()).build();
         try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Service> searchResponse =
                     esClient.search(searchRequest, Service.class);
+            ElasticsearchClientPool.returnClient(esClient);
             return searchResponse.hits().hits().stream().map(Hit::source).toList();
         } catch (IOException e) {
             log.error("Search for service with namespace error:{}", e.getMessage());
@@ -119,8 +118,10 @@ public class ElasticSearchMapper extends SearchMapper {
                 .index(ElasticSearchIndex.SPAN_INDEX.getIndexName())
                 .query(termsQueryBuilder.build()._toQuery());
         try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Span> searchResponse =
                     esClient.search(searchRequestBuilder.build(), Span.class);
+            ElasticsearchClientPool.returnClient(esClient);
             return searchResponse.hits().hits().stream().map(Hit::source).toList();
         } catch (IOException e) {
             log.error("Search for span list error:{}", e.getMessage());
@@ -137,8 +138,10 @@ public class ElasticSearchMapper extends SearchMapper {
                 .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
                 .query(termQueryBuilder.build()._toQuery()).build();
         try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Service> searchResponse =
                     esClient.search(searchRequest, Service.class);
+            ElasticsearchClientPool.returnClient(esClient);
             List<Hit<Service>> hits = searchResponse.hits().hits();
             if (hits.isEmpty()) {
                 return null;
@@ -200,8 +203,10 @@ public class ElasticSearchMapper extends SearchMapper {
                 .sort(sort);
 
         try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Log> searchResponse = esClient.search(
                     searchRequestBuilder.build(), Log.class);
+            ElasticsearchClientPool.returnClient(esClient);
             return transformListResponseToR(searchResponse);
         } catch (IOException e) {
             log.error("Search for log list error:{}", e.getMessage());
@@ -222,8 +227,10 @@ public class ElasticSearchMapper extends SearchMapper {
                 .size(endPointQueryDto.pageSize())
                 .build();
         try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Span> searchResponse =
                     esClient.search(searchRequest, Span.class);
+            ElasticsearchClientPool.returnClient(esClient);
             List<Hit<Span>> hits = searchResponse.hits().hits();
             R r = new R();
             r.put("code", ResponseCodeEnum.SUCCESS.getValue());
@@ -274,8 +281,10 @@ public class ElasticSearchMapper extends SearchMapper {
                 .query(termQueryBuilder.build()._toQuery())
                 .build();
         try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Span> searchResponse =
                     esClient.search(searchRequest, Span.class);
+            ElasticsearchClientPool.returnClient(esClient);
             return searchResponse.hits().hits().stream().map(Hit::source).toList();
         } catch (IOException e) {
             log.error("Search for span list by trace query error:{}", e.getMessage());
@@ -309,7 +318,9 @@ public class ElasticSearchMapper extends SearchMapper {
         matchQueryBuilder.field("serviceName").query(serviceName);
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         searchRequestBuilder.index(indexName).query(matchQueryBuilder.build()._toQuery());
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         SearchResponse<T> searchResponse = esClient.search(searchRequestBuilder.build(), clazz);
+        ElasticsearchClientPool.returnClient(esClient);
         return searchResponse.hits().hits()
                 .stream()
                 .filter(hit -> hit.source() != null)
@@ -357,7 +368,10 @@ public class ElasticSearchMapper extends SearchMapper {
             String indexName, Query query, Class<T> clazz) throws IOException {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         searchRequestBuilder.index(indexName).query(query);
-        SearchResponse<T> searchResponse = esClient.search(searchRequestBuilder.build(), clazz);
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+        SearchResponse<T> searchResponse =
+                esClient.search(searchRequestBuilder.build(), clazz);
+        ElasticsearchClientPool.returnClient(esClient);
         return searchResponse.hits().hits()
                 .stream()
                 .filter(hit -> hit.source() != null)

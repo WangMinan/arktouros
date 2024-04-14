@@ -58,6 +58,7 @@
         <!-- commons -->
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <commons-io.version>2.15.1</commons-io.version>
+        <commons-pool2.version>2.12.0</commons-pool2.version>
         <!-- commons -->
 
         <!-- log4j2 -->
@@ -119,6 +120,12 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-pool2</artifactId>
+                <version>${commons-pool2.version}</version>
             </dependency>
             <!-- commons -->
 

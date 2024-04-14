@@ -12,6 +12,7 @@ import edu.npu.arktouros.model.common.ElasticSearchIndex;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
+import edu.npu.arktouros.util.pool.ElasticsearchClientPool;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
@@ -29,8 +30,6 @@ import java.util.List;
 @Slf4j
 @Disabled // junit4 @Ignore = junit5 @Disabled
 public class ElasticSearchClientTest {
-    @Resource
-    private ElasticsearchClient esClient;
 
     @Resource
     private SearchMapper searchMapper;
@@ -49,8 +48,10 @@ public class ElasticSearchClientTest {
     @Test
     void testClientConnect() throws IOException {
         log.info("root path:{}", System.getProperty("user.dir"));
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         BooleanResponse exists =
                 esClient.indices().exists(builder -> builder.index("arktouros_log"));
+        ElasticsearchClientPool.returnClient(esClient);
         log.info("index exists: {}", exists.value());
     }
 
@@ -58,6 +59,7 @@ public class ElasticSearchClientTest {
     void testWriteSame() throws IOException {
         // 只会写一次
         Service service = Service.builder().name("test_service").build();
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         esClient.index(
                 builder -> builder
                         .index(SERVICE_INDEX)
@@ -70,6 +72,7 @@ public class ElasticSearchClientTest {
                         .id(service.getId())
                         .document(service)
         );
+        ElasticsearchClientPool.returnClient(esClient);
     }
 
     @Test
@@ -83,7 +86,9 @@ public class ElasticSearchClientTest {
                 .query(query._toQuery())
                 .build();
         try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Span> response = esClient.search(searchRequest, Span.class);
+            ElasticsearchClientPool.returnClient(esClient);
             if (response.hits().total() != null) {
                 log.info(String.valueOf(response.hits().total().value()));
             }
@@ -102,7 +107,9 @@ public class ElasticSearchClientTest {
 //                .sort(sort)
                 .build();
         try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Log> response = esClient.search(searchRequest, Log.class);
+            ElasticsearchClientPool.returnClient(esClient);
             if (response.hits().total() != null) {
                 log.info(String.valueOf(response.hits().total().value()));
             }
@@ -115,6 +122,7 @@ public class ElasticSearchClientTest {
     @Test
     void deleteMappings() {
         log.info("start deleting mappings");
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         indexList.forEach(index -> {
             try {
                 esClient.indices().delete(builder -> builder.index(index));
@@ -122,6 +130,7 @@ public class ElasticSearchClientTest {
                 log.error("delete index:{} failed", index);
             }
         });
+        ElasticsearchClientPool.returnClient(esClient);
     }
 
     @Test

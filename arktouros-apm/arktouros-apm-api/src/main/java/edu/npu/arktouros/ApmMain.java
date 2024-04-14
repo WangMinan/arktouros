@@ -1,5 +1,6 @@
 package edu.npu.arktouros;
 
+import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import jakarta.annotation.Resource;
@@ -27,6 +28,7 @@ public class ApmMain implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("APM starting, adding shutdown hook.");
+        PropertiesProvider.init();
         sinkService.init();
         if (!sinkService.isReady()) {
             log.error("APM sink service is not ready, shutting down.");

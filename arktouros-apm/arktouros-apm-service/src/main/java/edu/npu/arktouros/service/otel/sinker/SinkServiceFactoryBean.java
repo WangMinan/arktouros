@@ -1,10 +1,8 @@
 package edu.npu.arktouros.service.otel.sinker;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import edu.npu.arktouros.service.otel.sinker.elasticsearch.ElasticSearchSinkService;
 import edu.npu.arktouros.service.otel.sinker.h2.H2SinkService;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,24 +18,13 @@ public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
     @Value("${instance.active.sinker}")
     private String activeSinker;
 
-    private ElasticsearchClient esClient;
-
-    /**
-     * 改用Autowired注解 能够实现在ElasticSearchClient的这个bean没有加载的情况下运行
-     * 如果用Resource的话 根据配置文件没加载ElasticSearchClient 这个位置的注入就会出问题
-     */
-    @Autowired(required = false)
-    public void setEsClient(ElasticsearchClient esClient) {
-        this.esClient = esClient;
-    }
-
     private SinkService sinkService;
 
     @Override
     public SinkService getObject() {
         if (sinkService == null) {
             if (activeSinker.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
-                sinkService = new ElasticSearchSinkService(esClient);
+                sinkService = new ElasticSearchSinkService();
             } else if (activeSinker.toLowerCase(Locale.ROOT).equals("h2")) {
                 sinkService = new H2SinkService();
             } else {

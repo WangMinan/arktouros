@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -27,6 +28,7 @@ import java.time.format.DateTimeFormatter;
  */
 @Configuration
 @ConditionalOnClass(Jackson2ObjectMapperBuilder.class)
+@Slf4j
 public class JacksonConfig {
 
     @Resource
@@ -40,6 +42,7 @@ public class JacksonConfig {
     @Primary
     @ConditionalOnMissingBean(ObjectMapper.class)
     public ObjectMapper jacksonObjectMapper() {
+        log.info("jacksonObjectMapper init");
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
 
         objectMapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer<>() {

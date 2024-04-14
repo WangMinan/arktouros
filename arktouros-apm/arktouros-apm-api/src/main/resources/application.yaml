@@ -44,3 +44,7 @@ elasticsearch:
   username: elastic
   password: elastic
   caPos: D:/code/arktouros/docs/http_ca.crt # 证书位置 留空或文件不存在则不开启SSL
+  pool:
+    maxTotal: 10
+    minIdle: 1
+    maxWait: 3000

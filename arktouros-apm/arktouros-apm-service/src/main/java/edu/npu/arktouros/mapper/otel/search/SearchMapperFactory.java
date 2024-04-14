@@ -20,20 +20,12 @@ public class SearchMapperFactory implements FactoryBean<SearchMapper> {
     @Value("${instance.active.searchMapper}")
     private String activeSearchMapper;
 
-    private ElasticsearchClient esClient;
-
-    // 改用Autowired注解 能够实现在ElasticSearchClient的这个bean没有加载的情况下运行
-    @Autowired(required = false)
-    public void setEsClient(ElasticsearchClient esClient) {
-        this.esClient = esClient;
-    }
-
     private SearchMapper searchMapper;
 
     @Override
     public SearchMapper getObject() throws Exception {
         if (activeSearchMapper.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
-            searchMapper = new ElasticSearchMapper(esClient);
+            searchMapper = new ElasticSearchMapper();
         } else if (activeSearchMapper.toLowerCase(Locale.ROOT).equals("h2")) {
             searchMapper = new H2SearchMapper();
         } else {
