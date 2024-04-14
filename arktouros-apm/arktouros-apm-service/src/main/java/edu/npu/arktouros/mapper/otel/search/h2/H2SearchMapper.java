@@ -4,6 +4,7 @@ import edu.npu.arktouros.mapper.otel.search.SearchMapper;
 import edu.npu.arktouros.model.dto.BaseQueryDto;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
+import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.R;
@@ -56,7 +57,7 @@ public class H2SearchMapper extends SearchMapper {
     }
 
     @Override
-    public List<String> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp) {
+    public List<Metric> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp) {
         return List.of();
     }
 

@@ -8,7 +8,7 @@ import java.util.Set;
  * @author : [wangminan]
  * @description : endPoint和TraceId的整合
  */
-public record EndPointTraceIdDto(
+public record EndPointTraceIdVo(
         EndPoint endPoint,
         Set<String> traceIds
 ) {

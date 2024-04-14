@@ -31,7 +31,7 @@ import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
-import edu.npu.arktouros.model.vo.EndPointTraceIdDto;
+import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.PageResultVo;
 import edu.npu.arktouros.model.vo.R;
 import lombok.extern.slf4j.Slf4j;
@@ -228,7 +228,7 @@ public class ElasticSearchMapper extends SearchMapper {
             R r = new R();
             r.put("code", ResponseCodeEnum.SUCCESS.getValue());
             Set<EndPoint> endPointSet = new HashSet<>();
-            List<EndPointTraceIdDto> endPointTraceIdDtoList = new ArrayList<>();
+            List<EndPointTraceIdVo> endPointTraceIdVoList = new ArrayList<>();
             if (hits.isEmpty()) {
                 r.put("result", new ArrayList<>());
             } else {
@@ -237,10 +237,10 @@ public class ElasticSearchMapper extends SearchMapper {
                         EndPoint localEndPoint = hit.source().getLocalEndPoint();
                         if (endPointSet.contains(localEndPoint)) {
                             // endPointTraceIdDtoList中找到对应记录 并在traceIds中做添加
-                            for (EndPointTraceIdDto endPointTraceIdDto :
-                                    endPointTraceIdDtoList) {
-                                if (endPointTraceIdDto.endPoint().equals(localEndPoint)) {
-                                    endPointTraceIdDto
+                            for (EndPointTraceIdVo endPointTraceIdVo :
+                                    endPointTraceIdVoList) {
+                                if (endPointTraceIdVo.endPoint().equals(localEndPoint)) {
+                                    endPointTraceIdVo
                                             .traceIds()
                                             .add(hit.source().getTraceId());
                                     break;
@@ -248,15 +248,15 @@ public class ElasticSearchMapper extends SearchMapper {
                             }
                         } else {
                             endPointSet.add(localEndPoint);
-                            EndPointTraceIdDto endPointTraceIdDto =
-                                    new EndPointTraceIdDto(localEndPoint,
+                            EndPointTraceIdVo endPointTraceIdVo =
+                                    new EndPointTraceIdVo(localEndPoint,
                                             new HashSet<>());
-                            endPointTraceIdDto.traceIds().add(hit.source().getTraceId());
-                            endPointTraceIdDtoList.add(endPointTraceIdDto);
+                            endPointTraceIdVo.traceIds().add(hit.source().getTraceId());
+                            endPointTraceIdVoList.add(endPointTraceIdVo);
                         }
                     }
                 });
-                r.put("result", endPointTraceIdDtoList);
+                r.put("result", endPointTraceIdVoList);
             }
             return r;
         } catch (IOException e) {
@@ -303,34 +303,65 @@ public class ElasticSearchMapper extends SearchMapper {
         }
     }
 
-    @Override
-    public List<String> getMetricsValues(List<String> metricNames,
-                                         Long startTimestamp, Long endTimestamp) {
-        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
-        RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
-        rangeQueryBuilder.field("timestamp")
-                .gte(JsonData.of(startTimestamp))
-                .lte(JsonData.of(endTimestamp));
-        TermsQuery.Builder termQueryBuilder = new TermsQuery.Builder();
-        List<FieldValue> fieldValues = new ArrayList<>();
-        for (String metricName : metricNames) {
-            fieldValues.add(FieldValue.of(metricName));
-        }
-        termQueryBuilder.field("name").terms(builder -> builder.value(fieldValues));
-        return List.of();
-    }
-
     private <T extends Metric> List<String> getMetricNamesFromIndex(
             String serviceName, String indexName, Class<T> clazz) throws IOException {
-        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         MatchQuery.Builder matchQueryBuilder = new MatchQuery.Builder();
         matchQueryBuilder.field("serviceName").query(serviceName);
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         searchRequestBuilder.index(indexName).query(matchQueryBuilder.build()._toQuery());
         SearchResponse<T> searchResponse = esClient.search(searchRequestBuilder.build(), clazz);
         return searchResponse.hits().hits()
                 .stream()
                 .filter(hit -> hit.source() != null)
                 .map(hit -> hit.source().getName())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Metric> getMetricsValues(List<String> metricNames,
+                                         Long startTimestamp, Long endTimestamp) {
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        TermsQuery.Builder termQueryBuilder = new TermsQuery.Builder();
+        List<FieldValue> fieldValues = new ArrayList<>();
+        for (String metricName : metricNames) {
+            fieldValues.add(FieldValue.of(metricName));
+        }
+        termQueryBuilder.field("name").terms(builder -> builder.value(fieldValues));
+        boolQueryBuilder.must(termQueryBuilder.build()._toQuery());
+        if (startTimestamp != null && endTimestamp != null) {
+            RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
+            rangeQueryBuilder.field("timestamp")
+                    .gte(JsonData.of(startTimestamp))
+                    .lte(JsonData.of(endTimestamp));
+            boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
+        }
+        Query query = boolQueryBuilder.build()._toQuery();
+        List<Metric> metrics = new ArrayList<>();
+        try {
+            metrics.addAll(getMetricsFromBoolQuery(ElasticSearchIndex.GAUGE_INDEX.getIndexName(),
+                    query, Gauge.class));
+            metrics.addAll(getMetricsFromBoolQuery(ElasticSearchIndex.COUNTER_INDEX.getIndexName(),
+                    query, Counter.class));
+            metrics.addAll(getMetricsFromBoolQuery(ElasticSearchIndex.HISTOGRAM_INDEX.getIndexName(),
+                    query, Histogram.class));
+            metrics.addAll(getMetricsFromBoolQuery(ElasticSearchIndex.SUMMARY_INDEX.getIndexName(),
+                    query, Summary.class));
+        } catch (IOException e) {
+            log.error("Search for metric values error:{}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return metrics;
+    }
+
+    private <T extends Metric> List<Metric> getMetricsFromBoolQuery(
+            String indexName, Query query, Class<T> clazz) throws IOException {
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        searchRequestBuilder.index(indexName).query(query);
+        SearchResponse<T> searchResponse = esClient.search(searchRequestBuilder.build(), clazz);
+        return searchResponse.hits().hits()
+                .stream()
+                .filter(hit -> hit.source() != null)
+                .map(Hit::source)
                 .collect(Collectors.toList());
     }
 

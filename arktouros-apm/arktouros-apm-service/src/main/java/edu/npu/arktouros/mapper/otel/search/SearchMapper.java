@@ -3,6 +3,7 @@ package edu.npu.arktouros.mapper.otel.search;
 import edu.npu.arktouros.model.dto.BaseQueryDto;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
+import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.R;
@@ -30,5 +31,5 @@ public abstract class SearchMapper {
 
     public abstract List<String> getMetricsNames(String serviceName, Integer metricNameLimit);
 
-    public abstract List<String> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp);
+    public abstract List<Metric> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp);
 }

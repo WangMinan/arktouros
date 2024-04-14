@@ -8,9 +8,7 @@ public record MetricQueryDto(
         @NotEmpty(message = "serviceName should not be empty")
         String serviceName,
         Integer metricNameLimit,
-        @Past
         Long startTimeStamp,
-        @PastOrPresent
         Long endTimeStamp
 ) {
 }

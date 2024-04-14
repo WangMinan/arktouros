@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class OtelGrpcReceiver extends DataReceiver {
 
+    // 这个位置未来要解耦 不用框架来管理analyzer实例 我们要有多个analyzer并发做处理
     private final OtelLogAnalyzer logAnalyzer;
 
     private final OtelMetricsAnalyzer metricsAnalyzer;

@@ -27,6 +27,11 @@ instance:
     dataReceiver: otelGrpc
     sinker: elasticsearch # elasticsearch/h2
     searchMapper: elasticsearch # elasticsearch/h2
+  number:
+    analyzer:
+      log: 1
+      metric: 1
+      trace: 1
 
 receiver:
   grpc:

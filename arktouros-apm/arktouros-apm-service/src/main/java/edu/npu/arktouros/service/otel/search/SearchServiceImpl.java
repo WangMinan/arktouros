@@ -5,11 +5,13 @@ import edu.npu.arktouros.model.dto.BaseQueryDto;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.MetricQueryDto;
+import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.topology.Topology;
 import edu.npu.arktouros.model.otel.topology.TopologyCall;
 import edu.npu.arktouros.model.otel.topology.TopologyNode;
 import edu.npu.arktouros.model.otel.trace.Span;
+import edu.npu.arktouros.model.vo.MetricVo;
 import edu.npu.arktouros.model.vo.R;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -135,9 +137,31 @@ public class SearchServiceImpl implements SearchService {
         if (metricNames.isEmpty()) {
             return R.ok();
         }
-        List<String> metricValues = searchMapper.getMetricsValues(metricNames,
+        List<Metric> metricValues = searchMapper.getMetricsValues(metricNames,
                 metricQueryDto.startTimeStamp(), metricQueryDto.endTimeStamp());
-        return null;
+        // 整形 最后要送出去一个MetricVo类型的List 需要做三层聚合 只有name serviceName和metricType字段一样的才能放到一个桶里
+        List<MetricVo> metricVoList = new ArrayList<>();
+        metricValues.forEach(metric -> {
+            boolean isFound = false;
+            // 桶里新加
+            for (MetricVo metricVo : metricVoList) {
+                if (metricVo.name().equals(metric.getName()) &&
+                        metricVo.serviceName().equals(metric.getServiceName()) &&
+                        metricVo.metricType().equals(metric.getMetricType())) {
+                    metricVo.metrics().add(metric);
+                    isFound = true;
+                    break;
+                }
+            }
+            // 开新的一个桶
+            if (!isFound) {
+                metricVoList.add(new MetricVo(metric.getName(), metric.getServiceName(),
+                        metric.getMetricType(), new ArrayList<>(List.of(metric))));
+            }
+        });
+        R r = new R();
+        r.put("result", metricVoList);
+        return r;
     }
 
     private void handleOtherSpansForTraceTopology(
