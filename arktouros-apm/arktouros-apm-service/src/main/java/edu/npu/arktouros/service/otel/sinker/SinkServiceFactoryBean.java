@@ -41,6 +41,6 @@ public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
 
     @Override
     public boolean isSingleton() {
-        return true;
+        return false;
     }
 }

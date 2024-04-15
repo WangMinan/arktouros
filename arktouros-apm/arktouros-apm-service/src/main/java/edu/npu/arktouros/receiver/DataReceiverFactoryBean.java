@@ -61,7 +61,7 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
                     logQueueService, traceQueueService,
                     metricsQueueService, sinkService, grpcPort);
         } else if (activeDataReceiver.equals("arktourosGrpc")) {
-            return new OtelArktourosReceiver();
+            return new OtelArktourosReceiver(sinkService, grpcPort);
         } else {
             throw new IllegalArgumentException("can not find data receiver type from profile");
         }
