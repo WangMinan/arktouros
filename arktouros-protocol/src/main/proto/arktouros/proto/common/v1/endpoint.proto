@@ -6,9 +6,12 @@ option java_multiple_files = true;
 option java_package = "edu.npu.arktouros.proto.common.v1";
 option java_outer_classname = "EndPointProto";
 
+import "arktouros/proto/common/v1/source_type.proto";
+
 message EndPoint {
   string service_name = 1;
   string ip = 2;
   int32 port = 3;
   int32 latency = 4;
+  arktouros.proto.common.v1.EndPoint endpoint = 5;
 }

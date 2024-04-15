@@ -49,6 +49,11 @@ public class Gauge extends Metric {
         this.value = value;
     }
 
+    public Gauge(edu.npu.arktouros.proto.metric.v1.Gauge gauge) {
+        super(gauge.getMetric());
+        this.value = gauge.getValue();
+    }
+
     public static final Map<String, Property> documentMap = new HashMap<>();
     static {
         documentMap.putAll(metricBaseMap);

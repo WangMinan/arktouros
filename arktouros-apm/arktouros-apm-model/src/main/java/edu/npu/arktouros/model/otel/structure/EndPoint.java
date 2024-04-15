@@ -38,6 +38,13 @@ public class EndPoint implements Source {
         this.latency = latency;
     }
 
+    public EndPoint(edu.npu.arktouros.proto.common.v1.EndPoint endPoint) {
+        this.serviceName = endPoint.getServiceName();
+        this.ip = endPoint.getIp();
+        this.port = endPoint.getPort();
+        this.latency = endPoint.getLatency();
+    }
+
     public static final Map<String, Property> documentMap = new HashMap<>();
 
     static {

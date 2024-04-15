@@ -1,5 +1,6 @@
 package edu.npu.arktouros.receiver;
 
+import edu.npu.arktouros.receiver.arktouros.OtelArktourosReceiver;
 import edu.npu.arktouros.receiver.otel.OtelGrpcReceiver;
 import edu.npu.arktouros.service.otel.queue.LogQueueService;
 import edu.npu.arktouros.service.otel.queue.MetricsQueueService;
@@ -59,6 +60,8 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
             return new OtelGrpcReceiver(logAnalyzerNumber, traceAnalyzerNumber, metricsAnalyzerNumber,
                     logQueueService, traceQueueService,
                     metricsQueueService, sinkService, grpcPort);
+        } else if (activeDataReceiver.equals("arktourosGrpc")) {
+            return new OtelArktourosReceiver();
         } else {
             throw new IllegalArgumentException("can not find data receiver type from profile");
         }

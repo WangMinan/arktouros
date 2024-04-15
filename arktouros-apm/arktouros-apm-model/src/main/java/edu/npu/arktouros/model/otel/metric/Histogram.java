@@ -43,8 +43,17 @@ public class Histogram extends Metric {
     private long sampleCount;
     private double sampleSum;
     private Map<Double, Long> buckets = new HashMap<>();
-    private static final Map<String, Property> bucketsMap = new HashMap<>();
 
+    public Histogram(edu.npu.arktouros.proto.metric.v1.Histogram histogram) {
+        super(histogram.getMetric());
+        this.sampleCount = histogram.getSampleCount();
+        this.sampleSum = histogram.getSampleSum();
+        histogram.getBucketsList().forEach(bucket -> {
+            this.buckets.put(bucket.getKey(), bucket.getValue());
+        });
+    }
+
+    private static final Map<String, Property> bucketsMap = new HashMap<>();
     public static final Map<String, Property> documentMap = new HashMap<>();
 
     static {

@@ -24,6 +24,15 @@ public class Summary extends Metric {
     private double sampleSum;
     private Map<Double, Double> quantiles = new HashMap<>();
 
+    public Summary(edu.npu.arktouros.proto.metric.v1.Summary summary) {
+        super(summary.getMetric());
+        this.sampleCount = summary.getSampleCount();
+        this.sampleSum = summary.getSampleSum();
+        summary.getQuantilesList().forEach(quantile -> {
+            this.quantiles.put(quantile.getKey(), quantile.getValue());
+        });
+    }
+
     public static final Map<String, Property> documentMap = new HashMap<>();
 
     static {

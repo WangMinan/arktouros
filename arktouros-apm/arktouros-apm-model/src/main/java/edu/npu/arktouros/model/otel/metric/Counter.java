@@ -38,6 +38,11 @@ public class Counter extends Metric {
     private double value;
     public static final Map<String, Property> documentMap = new HashMap<>();
 
+    public Counter(edu.npu.arktouros.proto.metric.v1.Counter counter) {
+        super(counter.getMetric());
+        this.value = counter.getValue();
+    }
+
     static {
         documentMap.putAll(metricBaseMap);
         documentMap.put("value", Property.of(property ->

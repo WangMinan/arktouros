@@ -64,6 +64,20 @@ public class Span implements Source {
         this.tags = tags;
     }
 
+    public Span(edu.npu.arktouros.proto.span.v1.Span span) {
+        this.id = span.getId();
+        this.serviceName = span.getServiceName();
+        this.name = span.getName();
+        this.traceId = span.getTraceId();
+        this.parentSpanId = span.getParentSpanId();
+        this.localEndPoint = new EndPoint(span.getLocalEndPoint());
+        this.remoteEndPoint = new EndPoint(span.getRemoteEndPoint());
+        this.startTime = span.getStartTime();
+        this.endTime = span.getEndTime();
+        this.root = StringUtils.isEmpty(span.getParentSpanId());
+        span.getTagsList().forEach(tag -> this.tags.add(new Tag(tag)));
+    }
+
     static {
         documentMap.put("name", Property.of(property ->
                 property.text(EsProperties.keywordTextProperty)

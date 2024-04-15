@@ -44,6 +44,11 @@ public class Tag {
     private String value;
     public static Map<String, Property> documentMap = new HashMap<>();
 
+    public Tag(edu.npu.arktouros.proto.common.v1.Tag tag) {
+        this.key = tag.getKey();
+        this.value = tag.getValue();
+    }
+
     static {
         documentMap.put("key", Property.of(property ->
                 property.keyword(KeywordProperty.of(

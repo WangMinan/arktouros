@@ -82,6 +82,19 @@ public class Log implements Source {
         this.severityText = severityText;
     }
 
+    public Log(edu.npu.arktouros.proto.log.v1.Log log) {
+        this.serviceName = log.getServiceName();
+        this.traceId = log.getTraceId();
+        this.spanId = log.getSpanId();
+        this.type = SourceType.valueOf(log.getType().name());
+        this.content = log.getContent();
+        this.tags = new ArrayList<>();
+        log.getTagsList().forEach(tag -> this.tags.add(new Tag(tag)));
+        this.error = log.getError();
+        this.timestamp = log.getTimestamp();
+        this.severityText = log.getSeverityText();
+    }
+
     static {
         documentMap.put("serviceName", Property.of(property ->
                 property.text(EsProperties.keywordTextProperty)

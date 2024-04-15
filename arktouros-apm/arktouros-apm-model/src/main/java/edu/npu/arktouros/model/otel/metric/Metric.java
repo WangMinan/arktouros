@@ -27,6 +27,14 @@ public abstract class Metric implements Source {
     protected final SourceType sourceType = SourceType.METRIC;
     protected MetricType metricType = MetricType.METRIC;
 
+    public Metric(edu.npu.arktouros.proto.metric.v1.Metric metric) {
+        this.name = metric.getName();
+        this.description = metric.getDescription();
+        this.labels = metric.getLabelsMap();
+        this.timestamp = metric.getTimestamp();
+        this.serviceName = metric.getServiceName();
+    }
+
     private static final Map<String, Property> labelProperty =
             Map.of("key", Property.of(p ->
                             p.keyword(KeywordProperty.of(
