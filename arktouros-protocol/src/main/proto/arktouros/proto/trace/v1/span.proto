@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package arktouros.proto.trace.v1;
+
+import "arktouros/proto/common/v1/tag.proto";
+import "arktouros/proto/common/v1/endpoint.proto";
+import "arktouros/proto/common/v1/source_type.proto";
+
+option java_multiple_files = true;
+option java_package = "edu.npu.arktouros.proto.span.v1";
+option java_outer_classname = "SpanProto";
+
+message Span {
+  string name = 1;
+  string id = 2;
+  string service_name = 3;
+  string trace_id = 4;
+  string parent_span_id = 5;
+  arktouros.proto.common.v1.EndPoint localEndPoint = 6;
+  arktouros.proto.common.v1.EndPoint remoteEndPoint = 7;
+  int64 start_time = 8;
+  int64 end_time = 9;
+  bool root = 10;
+  repeated arktouros.proto.common.v1.Tag tags = 11;
+  arktouros.proto.common.v1.SourceType type = 12;
+}

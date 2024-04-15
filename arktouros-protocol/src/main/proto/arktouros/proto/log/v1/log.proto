@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package arktouros.proto.log.v1;
+
+import "arktouros/proto/common/v1/tag.proto";
+import "arktouros/proto/common/v1/source_type.proto";
+
+option java_multiple_files = true;
+option java_package = "edu.npu.arktouros.proto.log.v1";
+option java_outer_classname = "LogProto";
+
+message Log {
+  string service_name = 1;
+  string trace_id = 2;
+  string span_id = 3;
+  string content = 4;
+  repeated arktouros.proto.common.v1.Tag tags = 5;
+  bool error = 6;
+  int64 timestamp = 7;
+  string severity_text = 8;
+  arktouros.proto.common.v1.SourceType type = 9;
+}

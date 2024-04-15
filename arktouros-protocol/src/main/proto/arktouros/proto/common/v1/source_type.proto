@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package arktouros.proto.common.v1;
+
+option java_multiple_files = true;
+option java_package = "edu.npu.arktouros.proto.common.v1";
+option java_outer_classname = "SourceTypeProto";
+
+enum SourceType {
+  NODE = 0;
+  SERVICE = 1;
+  TRACE = 2;
+  SPAN = 3;
+  LOG = 4;
+  METRIC = 5;
+  ENDPOINT = 6;
+}

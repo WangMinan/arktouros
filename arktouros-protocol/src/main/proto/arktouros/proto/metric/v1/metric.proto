@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package arktouros.proto.metric.v1;
+
+option java_multiple_files = true;
+option java_package = "edu.npu.arktouros.proto.metric.v1";
+option java_outer_classname = "MetricProto";
+
+import "arktouros/proto/common/v1/source_type.proto";
+
+message Metric {
+  string name = 1;
+  string service_name = 2;
+  string description = 3;
+  map<string, string> labels = 4;
+  int64 timestamp = 5;
+  arktouros.proto.common.v1.SourceType source_type = 6;
+  MetricType metric_type = 7;
+}
+
+message Summary {
+  Metric metric = 1;
+  int64 sample_count = 2;
+  double sample_sum = 3;
+  repeated Quantile quantiles = 4;
+}
+
+message Quantile {
+  double key = 1;
+  double value = 2;
+}
+
+message Counter {
+  Metric metric = 1;
+  double value = 2;
+}
+
+message Histogram {
+  Metric metric = 1;
+  int64 sample_count = 2;
+  double sample_sum = 3;
+  repeated Bucket buckets = 4;
+}
+
+message Bucket {
+  double key = 1;
+  int64 value = 2;
+}
+
+message Gauge {
+  Metric metric = 1;
+  double value = 2;
+}
+
+enum MetricType {
+  METRIC = 0;
+  COUNTER = 1;
+  GAUGE = 2;
+  SUMMARY = 3;
+  HISTOGRAM = 4;
+}
