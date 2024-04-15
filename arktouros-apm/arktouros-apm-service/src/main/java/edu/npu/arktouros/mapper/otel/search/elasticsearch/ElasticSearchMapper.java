@@ -194,6 +194,18 @@ public class ElasticSearchMapper extends SearchMapper {
                     .value(logQueryDto.severityText())
                     .build()._toQuery());
         }
+        if (logQueryDto.startTimestamp() != null) {
+            RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
+            rangeQueryBuilder.field("timestamp")
+                    .gte(JsonData.of(logQueryDto.startTimestamp()));
+            boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
+        }
+        if (logQueryDto.endTimestamp() != null) {
+            RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
+            rangeQueryBuilder.field("timestamp")
+                    .lte(JsonData.of(logQueryDto.endTimestamp()));
+            boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
+        }
 
         searchRequestBuilder
                 .index(ElasticSearchIndex.LOG_INDEX.getIndexName())
@@ -339,10 +351,15 @@ public class ElasticSearchMapper extends SearchMapper {
         }
         termQueryBuilder.field("name").terms(builder -> builder.value(fieldValues));
         boolQueryBuilder.must(termQueryBuilder.build()._toQuery());
-        if (startTimestamp != null && endTimestamp != null) {
+        if (startTimestamp != null) {
             RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
             rangeQueryBuilder.field("timestamp")
-                    .gte(JsonData.of(startTimestamp))
+                    .gte(JsonData.of(startTimestamp));
+            boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
+        }
+        if (endTimestamp != null) {
+            RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
+            rangeQueryBuilder.field("timestamp")
                     .lte(JsonData.of(endTimestamp));
             boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
         }

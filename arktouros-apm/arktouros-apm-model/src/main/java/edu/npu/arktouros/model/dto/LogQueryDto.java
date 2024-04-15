@@ -18,6 +18,8 @@ public record LogQueryDto(
         String traceId,
         String keyword,
         String keywordNotIncluded,
-        String severityText
+        String severityText,
+        Long startTimestamp,
+        Long endTimestamp
 ) {
 }
