@@ -1,10 +1,8 @@
 package edu.npu.arktouros.mapper.otel.search;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import edu.npu.arktouros.mapper.otel.search.elasticsearch.ElasticSearchMapper;
 import edu.npu.arktouros.mapper.otel.search.h2.H2SearchMapper;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
