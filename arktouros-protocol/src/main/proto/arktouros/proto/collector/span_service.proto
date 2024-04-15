@@ -12,7 +12,7 @@ service SpanService {
 }
 
 message SpanRequest {
-  repeated arktouros.proto.span.v1.Span span_records = 1;
+  repeated arktouros.proto.span.v1.Span spans = 1;
 }
 
 message SpanResponse {
