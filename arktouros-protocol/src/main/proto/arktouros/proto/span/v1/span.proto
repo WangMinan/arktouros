@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package arktouros.proto.trace.v1;
+package arktouros.proto.span.v1;
 
 import "arktouros/proto/common/v1/tag.proto";
 import "arktouros/proto/common/v1/endpoint.proto";

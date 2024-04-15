@@ -5,14 +5,14 @@ option java_multiple_files = true;
 option java_package = "edu.npu.arktouros.proto.collector.v1";
 option java_outer_classname = "SpanServiceProto";
 
-import "arktouros/proto/trace/v1/span.proto";
+import "arktouros/proto/span/v1/span.proto";
 
 service SpanService {
   rpc Export(SpanRequest) returns (SpanResponse);
 }
 
 message SpanRequest {
-  repeated arktouros.proto.trace.v1.Span spans = 1;
+  repeated arktouros.proto.span.v1.Span span_records = 1;
 }
 
 message SpanResponse {
