@@ -8,7 +8,7 @@ option java_outer_classname = "LogServiceProto";
 import "arktouros/proto/log/v1/log.proto";
 
 service LogService {
-  rpc Log(LogRequest) returns (LogResponse);
+  rpc Export(LogRequest) returns (LogResponse);
 }
 
 message LogRequest {

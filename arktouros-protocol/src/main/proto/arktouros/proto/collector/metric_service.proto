@@ -8,13 +8,21 @@ option java_outer_classname = "MetricServiceProto";
 import "arktouros/proto/metric/v1/metric.proto";
 
 service MetricService {
-  rpc Log(MetricRequest) returns (MetricResponse);
+  rpc Export(MetricRequest) returns (MetricResponse);
 }
 
 message MetricRequest {
-  repeated arktouros.proto.metric.v1.Metric metrics = 1;
+  repeated Metric metrics = 1;
 }
 
+message Metric {
+  oneof metric {
+    arktouros.proto.metric.v1.Gauge gauge = 1;
+    arktouros.proto.metric.v1.Counter counter = 2;
+    arktouros.proto.metric.v1.Histogram histogram = 3;
+    arktouros.proto.metric.v1.Summary summary = 4;
+  }
+}
 message MetricResponse {
   // The number of rejected log records.
   //

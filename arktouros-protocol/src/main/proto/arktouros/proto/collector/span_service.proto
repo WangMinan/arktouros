@@ -8,7 +8,7 @@ option java_outer_classname = "SpanServiceProto";
 import "arktouros/proto/trace/v1/span.proto";
 
 service SpanService {
-  rpc Log(SpanRequest) returns (SpanResponse);
+  rpc Export(SpanRequest) returns (SpanResponse);
 }
 
 message SpanRequest {
