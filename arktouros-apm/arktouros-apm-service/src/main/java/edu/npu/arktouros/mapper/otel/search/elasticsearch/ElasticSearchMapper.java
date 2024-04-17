@@ -55,22 +55,22 @@ public class ElasticSearchMapper extends SearchMapper {
 
     @Override
     public R getServiceList(ServiceQueryDto queryDto) {
-        MatchQuery.Builder queryBuilder = new MatchQuery.Builder();
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        MatchQuery.Builder matchQueryBuilder = new MatchQuery.Builder();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         if (StringUtils.isNotEmpty(queryDto.query())) {
-            queryBuilder.field("name").query(queryDto.query());
-            Query matchQuery = queryBuilder.build()._toQuery();
-            searchRequestBuilder.query(matchQuery);
+            boolQueryBuilder.must(new Query.Builder().prefix(prefixBuilder ->
+                    prefixBuilder.field("name")
+                            .value(queryDto.query())).build());
         }
         if (StringUtils.isNotEmpty(queryDto.namespace())) {
-            queryBuilder.field("namespace").query(queryDto.namespace());
-            Query matchQuery = queryBuilder.build()._toQuery();
-            searchRequestBuilder.query(matchQuery);
+            matchQueryBuilder.field("namespace").query(queryDto.namespace());
         } else {
-            queryBuilder.field("namespace").query("default");
-            Query matchQuery = queryBuilder.build()._toQuery();
-            searchRequestBuilder.query(matchQuery);
+            matchQueryBuilder.field("namespace").query("default");
         }
+        boolQueryBuilder.must(matchQueryBuilder.build()._toQuery());
+        searchRequestBuilder.query(boolQueryBuilder.build()._toQuery());
+
         int pageSize = queryDto.pageSize();
         int pageNum = queryDto.pageNum();
         SearchRequest searchRequest =

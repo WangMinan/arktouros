@@ -31,7 +31,7 @@ public class ServiceController {
     }
 
     @GetMapping("/namespace")
-    public R getNamespaceList(@RequestParam("query") String query) {
+    public R getNamespaceList(@RequestParam(value = "query", required = false) String query) {
         return searchService.getNamespaceList(query);
     }
 
