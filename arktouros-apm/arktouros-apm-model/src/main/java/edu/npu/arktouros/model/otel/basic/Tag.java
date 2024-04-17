@@ -50,12 +50,9 @@ public class Tag {
     }
 
     static {
-        documentMap.put("key", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))
-        ));
+        documentMap.put("key", EsProperties.keywordIndexProperty);
         documentMap.put("value", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)
+                property.text(EsProperties.textKeywordProperty)
         ));
     }
 

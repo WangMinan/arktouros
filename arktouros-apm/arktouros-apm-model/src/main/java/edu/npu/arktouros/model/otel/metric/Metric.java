@@ -44,24 +44,18 @@ public abstract class Metric implements Source {
                                     keywordProperty -> keywordProperty.index(true)))));
 
     protected static Map<String, Property> metricBaseMap = Map.of(
-            "name", Property.of(property ->
-                    property.text(EsProperties.keywordTextProperty)),
-            "serviceName", Property.of(property ->
-                    property.text(EsProperties.keywordTextProperty)),
+            "name",EsProperties.keywordIndexProperty,
+            "serviceName", EsProperties.keywordIndexProperty,
             "description", Property.of(property ->
-                    property.text(EsProperties.keywordTextProperty)),
+                    property.text(EsProperties.textKeywordProperty)),
             "labels", Property.of(property ->
                     property.nested(NestedProperty.of(
                             ne -> ne.properties(labelProperty)))),
             "timestamp", Property.of(property ->
                     property.date(DateProperty.of(
                             date -> date.index(true).format("epoch_millis")))),
-            "sourceType", Property.of(property ->
-                    property.keyword(KeywordProperty.of(
-                            keywordProperty -> keywordProperty.index(true)))),
-            "metricType", Property.of(property ->
-                    property.keyword(KeywordProperty.of(
-                            keywordProperty -> keywordProperty.index(true))))
+            "sourceType", EsProperties.keywordIndexProperty,
+            "metricType", EsProperties.keywordIndexProperty
     );
 
     protected Metric(String name, String description,

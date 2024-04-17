@@ -1,6 +1,6 @@
 package edu.npu.arktouros.mapper.otel.search;
 
-import edu.npu.arktouros.model.dto.BaseQueryDto;
+import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
@@ -15,7 +15,7 @@ import java.util.List;
  * @description : 抽象搜索Mapper
  */
 public abstract class SearchMapper {
-    public abstract R getServiceList(BaseQueryDto queryDto);
+    public abstract R getServiceList(ServiceQueryDto queryDto);
 
     public abstract List<Service> getServiceListFromNamespace(String namespace);
 
@@ -32,4 +32,6 @@ public abstract class SearchMapper {
     public abstract List<String> getMetricsNames(String serviceName, Integer metricNameLimit);
 
     public abstract List<Metric> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp);
+
+    public abstract R getNamespaceList(String query);
 }

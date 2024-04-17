@@ -1,6 +1,6 @@
 package edu.npu.arktouros.controller;
 
-import edu.npu.arktouros.model.dto.BaseQueryDto;
+import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.service.otel.search.SearchService;
 import jakarta.annotation.Resource;
@@ -26,8 +26,13 @@ public class ServiceController {
 
     // 获取服务列表
     @GetMapping
-    public R getServiceList(@Validated BaseQueryDto query) {
+    public R getServiceList(@Validated ServiceQueryDto query) {
         return searchService.getServiceList(query);
+    }
+
+    @GetMapping("/namespace")
+    public R getNamespaceList(@RequestParam("query") String query) {
+        return searchService.getNamespaceList(query);
     }
 
     @GetMapping("/topology")

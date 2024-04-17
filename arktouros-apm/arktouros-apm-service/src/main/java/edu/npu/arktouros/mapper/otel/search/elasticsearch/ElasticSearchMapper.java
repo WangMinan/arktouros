@@ -5,8 +5,9 @@ import co.elastic.clients.elasticsearch._types.FieldSort;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
@@ -19,9 +20,9 @@ import co.elastic.clients.json.JsonData;
 import edu.npu.arktouros.mapper.otel.search.SearchMapper;
 import edu.npu.arktouros.model.common.ElasticSearchIndex;
 import edu.npu.arktouros.model.common.ResponseCodeEnum;
-import edu.npu.arktouros.model.dto.BaseQueryDto;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
+import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;
 import edu.npu.arktouros.model.otel.metric.Gauge;
@@ -53,16 +54,22 @@ import java.util.stream.Collectors;
 public class ElasticSearchMapper extends SearchMapper {
 
     @Override
-    public R getServiceList(BaseQueryDto queryDto) {
+    public R getServiceList(ServiceQueryDto queryDto) {
         MatchQuery.Builder queryBuilder = new MatchQuery.Builder();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         if (StringUtils.isNotEmpty(queryDto.query())) {
             queryBuilder.field("name").query(queryDto.query());
             Query matchQuery = queryBuilder.build()._toQuery();
             searchRequestBuilder.query(matchQuery);
+        }
+        if (StringUtils.isNotEmpty(queryDto.namespace())) {
+            queryBuilder.field("namespace").query(queryDto.namespace());
+            Query matchQuery = queryBuilder.build()._toQuery();
+            searchRequestBuilder.query(matchQuery);
         } else {
-            // match_all
-            searchRequestBuilder.query(new MatchAllQuery.Builder().build()._toQuery());
+            queryBuilder.field("namespace").query("default");
+            Query matchQuery = queryBuilder.build()._toQuery();
+            searchRequestBuilder.query(matchQuery);
         }
         int pageSize = queryDto.pageSize();
         int pageNum = queryDto.pageNum();
@@ -87,7 +94,7 @@ public class ElasticSearchMapper extends SearchMapper {
     public List<Service> getServiceListFromNamespace(String namespace) {
         MatchQuery.Builder queryBuilder = new MatchQuery.Builder();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
-        queryBuilder.field("nameSpace").query(namespace);
+        queryBuilder.field("namespace").query(namespace);
         SearchRequest searchRequest = searchRequestBuilder
                 .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
                 .query(queryBuilder.build()._toQuery()).build();
@@ -379,6 +386,54 @@ public class ElasticSearchMapper extends SearchMapper {
             throw new RuntimeException(e);
         }
         return metrics;
+    }
+
+    @Override
+    public R getNamespaceList(String query) {
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        if (StringUtils.isNotEmpty(query)) {
+            searchRequestBuilder.query(new MatchQuery.Builder()
+                    .field("namespace")
+                    .query(query)
+                    .build()._toQuery());
+        } else {
+            // group by
+            searchRequestBuilder.aggregations("namespaceAgg",
+                    agg -> agg.terms(term -> term.field("namespace")));
+        }
+        searchRequestBuilder.index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
+                .size(10);
+        try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+            SearchResponse<Service> searchResponse =
+                    esClient.search(searchRequestBuilder.build(), Service.class);
+            ElasticsearchClientPool.returnClient(esClient);
+            List<String> namespaceList = new ArrayList<>();
+            if (StringUtils.isNotEmpty(query)) {
+                namespaceList =
+                        searchResponse.hits().hits().stream()
+                                .map(hit -> {
+                                    if (hit.source() != null) {
+                                        return hit.source().getNamespace();
+                                    }
+                                    return null;
+                                })
+                                .distinct()
+                                .toList();
+            } else {
+                Aggregate namespaceAgg = searchResponse.aggregations().get("namespaceAgg");
+                List<StringTermsBucket> buckets = namespaceAgg.sterms().buckets().array();
+                for (StringTermsBucket bucket : buckets) {
+                    namespaceList.add(bucket.key().stringValue());
+                }
+            }
+            R r = new R();
+            r.put("result", namespaceList);
+            return r;
+        } catch (IOException e) {
+            log.error("Search for namespace list error:{}", e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     private <T extends Metric> List<Metric> getMetricsFromBoolQuery(

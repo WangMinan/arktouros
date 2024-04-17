@@ -1,7 +1,7 @@
 package edu.npu.arktouros.service.otel.search;
 
 import edu.npu.arktouros.mapper.otel.search.SearchMapper;
-import edu.npu.arktouros.model.dto.BaseQueryDto;
+import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.MetricQueryDto;
@@ -32,7 +32,7 @@ public class SearchServiceImpl implements SearchService {
 
 
     @Override
-    public R getServiceList(BaseQueryDto queryDto) {
+    public R getServiceList(ServiceQueryDto queryDto) {
         return searchMapper.getServiceList(queryDto);
     }
 
@@ -162,6 +162,11 @@ public class SearchServiceImpl implements SearchService {
         R r = new R();
         r.put("result", metricVoList);
         return r;
+    }
+
+    @Override
+    public R getNamespaceList(String query) {
+        return searchMapper.getNamespaceList(query);
     }
 
     private void handleOtherSpansForTraceTopology(

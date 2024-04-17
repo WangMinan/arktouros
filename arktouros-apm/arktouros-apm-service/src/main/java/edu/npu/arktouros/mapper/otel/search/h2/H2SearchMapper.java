@@ -1,7 +1,7 @@
 package edu.npu.arktouros.mapper.otel.search.h2;
 
 import edu.npu.arktouros.mapper.otel.search.SearchMapper;
-import edu.npu.arktouros.model.dto.BaseQueryDto;
+import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class H2SearchMapper extends SearchMapper {
     @Override
-    public R getServiceList(BaseQueryDto queryDto) {
+    public R getServiceList(ServiceQueryDto queryDto) {
         return R.ok();
     }
 
@@ -59,6 +59,11 @@ public class H2SearchMapper extends SearchMapper {
     @Override
     public List<Metric> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp) {
         return List.of();
+    }
+
+    @Override
+    public R getNamespaceList(String query) {
+        return null;
     }
 
 }

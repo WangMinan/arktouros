@@ -33,7 +33,7 @@ public class Service implements Source {
     private static final String DEFAULT_NAMESPACE = "default";
     private String nodeId;
     private SourceType type = SourceType.SERVICE;
-    private String nameSpace;
+    private String namespace;
     // GET_XXX; POST_XXX; RPC_XXX
     private String nodeName;
     private int latency;
@@ -47,19 +47,12 @@ public class Service implements Source {
     public static final Map<String, Property> documentMap = new HashMap<>();
 
     static {
-        documentMap.put("id", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)));
-        documentMap.put("name", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)));
-        documentMap.put("nameSpace", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)));
-        documentMap.put("nodeId", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)));
-        documentMap.put("type", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))));
-        documentMap.put("nodeName", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)));
+        documentMap.put("id", EsProperties.keywordIndexProperty);
+        documentMap.put("name", EsProperties.keywordIndexProperty);
+        documentMap.put("namespace", EsProperties.keywordIndexProperty);
+        documentMap.put("nodeId", EsProperties.keywordIndexProperty);
+        documentMap.put("type", EsProperties.keywordIndexProperty);
+        documentMap.put("nodeName", EsProperties.keywordIndexProperty);
         documentMap.put("latency", Property.of(property ->
                 property.integer(IntegerNumberProperty.of(
                         integerNumberProperty ->
@@ -69,7 +62,7 @@ public class Service implements Source {
                         integerNumberProperty ->
                                 integerNumberProperty.index(true).store(true)))));
         documentMap.put("rpcStatusCode", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)));
+                property.text(EsProperties.textKeywordProperty)));
         documentMap.put("status", Property.of(property ->
                 property.boolean_(BooleanProperty.of(
                         booleanProperty -> booleanProperty.index(true).store(true)))));
@@ -77,19 +70,19 @@ public class Service implements Source {
 
     @Builder
     public Service(String name) {
-        this.nameSpace = DEFAULT_NAMESPACE;
+        this.namespace = DEFAULT_NAMESPACE;
         this.name = name;
         this.id = generateServiceId();
     }
 
-    public Service(String nameSpace, String name) {
-        this.nameSpace = nameSpace;
+    public Service(String namespace, String name) {
+        this.namespace = namespace;
         this.name = name;
         this.id = generateServiceId();
     }
 
     private String generateServiceId() {
-        String fullName = "service." + nameSpace + "." + name;
+        String fullName = "service." + namespace + "." + name;
         return new String(
                 Base64.getEncoder().encode(fullName.getBytes(StandardCharsets.UTF_8)),
                 StandardCharsets.UTF_8);

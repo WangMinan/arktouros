@@ -48,13 +48,8 @@ public class EndPoint implements Source {
     public static final Map<String, Property> documentMap = new HashMap<>();
 
     static {
-        documentMap.put("serviceName", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)
-        ));
-        documentMap.put("ip", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))
-        ));
+        documentMap.put("serviceName", EsProperties.keywordIndexProperty);
+        documentMap.put("ip", EsProperties.keywordIndexProperty);
         documentMap.put("port", Property.of(property ->
                 property.integer(IntegerNumberProperty.of(integerNumberProperty
                         -> integerNumberProperty.index(true))
@@ -65,9 +60,6 @@ public class EndPoint implements Source {
                         -> integerNumberProperty.index(true))
                 )
         ));
-        documentMap.put("type", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))
-        ));
+        documentMap.put("type", EsProperties.keywordIndexProperty);
     }
 }

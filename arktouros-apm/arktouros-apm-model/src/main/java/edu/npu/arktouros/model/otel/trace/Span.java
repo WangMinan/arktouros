@@ -79,28 +79,15 @@ public class Span implements Source {
     }
 
     static {
-        documentMap.put("name", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)
-        ));
-        documentMap.put("id", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))
-        ));
-        documentMap.put("serviceName", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)
-        ));
+        documentMap.put("name", EsProperties.keywordIndexProperty);
+        documentMap.put("id", EsProperties.keywordIndexProperty);
+        documentMap.put("serviceName", EsProperties.keywordIndexProperty);
         documentMap.put("traceId", Property.of(property ->
                 property.keyword(KeywordProperty.of(
                         keywordProperty -> keywordProperty.index(true)))
         ));
-        documentMap.put("parentSpanId", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))
-        ));
-        documentMap.put("type", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))
-        ));
+        documentMap.put("parentSpanId", EsProperties.keywordIndexProperty);
+        documentMap.put("type", EsProperties.keywordIndexProperty);
         documentMap.put("startTime", Property.of(property ->
                 property.date(DateProperty.of(
                         date -> date.index(true).format("epoch_millis")))

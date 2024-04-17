@@ -1,6 +1,9 @@
 package edu.npu.arktouros.mapper;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
@@ -12,6 +15,7 @@ import edu.npu.arktouros.model.common.ElasticSearchIndex;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
+import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.util.pool.ElasticsearchClientPool;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -137,5 +143,15 @@ public class ElasticSearchClientTest {
     void getMetricNames() {
         List<String> metricsNames = searchMapper.getMetricsNames("otelcol-contrib", null);
         log.info("metricsNames:{}", metricsNames);
+    }
+
+    @Test
+    void aggTest() throws IOException {
+        R namespaceList = searchMapper.getNamespaceList(null);
+        log.info("namespaceList:{}", namespaceList);
+        R namespaceList1 = searchMapper.getNamespaceList("def");
+        log.info("namespaceList1:{}", namespaceList1);
+        R namespaceList2 = searchMapper.getNamespaceList("default");
+        log.info("namespaceList2:{}", namespaceList2);
     }
 }

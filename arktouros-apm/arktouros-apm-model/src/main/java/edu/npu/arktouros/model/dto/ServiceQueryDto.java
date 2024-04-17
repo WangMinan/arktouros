@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Positive;
  * @author : [wangminan]
  * @description : 基础搜索Dto
  */
-public record BaseQueryDto(
+public record ServiceQueryDto(
 
         @NotNull(message = "pageNum should not be empty")
         @Positive(message = "pageNum should be positive")
@@ -17,6 +17,7 @@ public record BaseQueryDto(
         @Positive(message = "pageSize should be positive")
         int pageSize,
 
-        String query
+        String query,
+        String namespace
 ) {
 }

@@ -96,28 +96,14 @@ public class Log implements Source {
     }
 
     static {
-        documentMap.put("serviceName", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)
-        ));
-        documentMap.put("traceId", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))
-        ));
-        documentMap.put("spanId", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))
-        ));
-        documentMap.put("type", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true)))
-        ));
+        documentMap.put("serviceName", EsProperties.keywordIndexProperty);
+        documentMap.put("traceId", EsProperties.keywordIndexProperty);
+        documentMap.put("spanId", EsProperties.keywordIndexProperty);
+        documentMap.put("type", EsProperties.keywordIndexProperty);
         documentMap.put("content", Property.of(property ->
-                property.text(EsProperties.keywordTextProperty)
+                property.text(EsProperties.textKeywordProperty)
         ));
-        documentMap.put("severityText", Property.of(property ->
-                property.keyword(KeywordProperty.of(
-                        keywordProperty -> keywordProperty.index(true))
-                )));
+        documentMap.put("severityText", EsProperties.keywordIndexProperty);
         documentMap.put("tags", Property.of(property ->
                 property.nested(NestedProperty.of(
                         na -> na.properties(Tag.documentMap)))

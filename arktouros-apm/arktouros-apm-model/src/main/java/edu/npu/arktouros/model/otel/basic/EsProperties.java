@@ -12,7 +12,11 @@ import java.util.Map;
  */
 public class EsProperties {
 
-    public static TextProperty keywordTextProperty = TextProperty.of(
+    public static Property keywordIndexProperty = Property.of(property ->
+            property.keyword(KeywordProperty.of(
+                    keywordProperty -> keywordProperty.index(true))));
+
+    public static TextProperty textKeywordProperty = TextProperty.of(
             textProperty -> textProperty.index(true)
                     .fields(Map.of("keyword", Property.of(
                             property -> property.keyword(
