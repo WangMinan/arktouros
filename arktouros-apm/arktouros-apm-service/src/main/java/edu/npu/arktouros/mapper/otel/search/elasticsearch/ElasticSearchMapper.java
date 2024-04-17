@@ -392,10 +392,12 @@ public class ElasticSearchMapper extends SearchMapper {
     public R getNamespaceList(String query) {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         if (StringUtils.isNotEmpty(query)) {
-            searchRequestBuilder.query(new MatchQuery.Builder()
-                    .field("namespace")
-                    .query(query)
-                    .build()._toQuery());
+            searchRequestBuilder.query(new Query.Builder()
+                    .prefix(prefixBuilder ->
+                            prefixBuilder.field("namespace")
+                                    .value(query))
+                    .build()
+            );
         } else {
             // group by
             searchRequestBuilder.aggregations("namespaceAgg",
