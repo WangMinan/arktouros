@@ -151,9 +151,10 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
                         .map(entry -> Tag.builder().key(entry.getKey()).value(entry.getValue())
                                 .build())
                         .toList());
-
+        Span span = builder.build();
+        span.setRoot(span.getParentSpanId() == null || span.getParentSpanId().isEmpty());
         try {
-            sinkService.sink(builder.build());
+            sinkService.sink(span);
         } catch (IOException e) {
             log.error("Failed to sink span after retry.", e);
             throw new RuntimeException(e);

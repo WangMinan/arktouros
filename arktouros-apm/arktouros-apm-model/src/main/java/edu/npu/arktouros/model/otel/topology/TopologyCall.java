@@ -2,6 +2,7 @@ package edu.npu.arktouros.model.otel.topology;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author : [wangminan]
@@ -9,6 +10,7 @@ import lombok.Data;
  */
 @Data
 @Builder
+@EqualsAndHashCode(of = {"source", "target"})
 public class TopologyCall <T> {
     private TopologyNode<T> source;
     private TopologyNode<T> target;

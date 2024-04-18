@@ -6,7 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Singular;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author : [wangminan]
@@ -17,13 +19,13 @@ import java.util.List;
 @Builder
 public class Topology<T> {
     @Builder.Default
-    private List<TopologyNode<T>> nodes = new ArrayList<>();
+    private Set<TopologyNode<T>> nodes = new HashSet<>();
     @Builder.Default
-    private List<TopologyCall<T>> calls = new ArrayList<>();
+    private Set<TopologyCall<T>> calls = new HashSet<>();
 
     @Builder
-    public Topology(@Singular List<TopologyNode<T>> nodes,
-                    @Singular List<TopologyCall<T>> calls) {
+    public Topology(@Singular Set<TopologyNode<T>> nodes,
+                    @Singular Set<TopologyCall<T>> calls) {
         this.nodes = nodes;
         this.calls = calls;
     }

@@ -18,7 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author : [wangminan]
@@ -53,9 +55,13 @@ public class SearchServiceImpl implements SearchService {
                 searchMapper.getSpanListByServiceNames(serviceNames);
         // 组织成有序的拓扑
         // 注意 可能有多条链路
-        List<Span> rootSpans = originalSpanList.stream().filter(Span::isRoot).toList();
-        List<TopologyNode<Service>> topologyNodes = new ArrayList<>();
-        List<TopologyCall<Service>> topologyCalls = new ArrayList<>();
+        List<Span> rootSpans = originalSpanList.stream()
+                .filter(span -> span.isRoot()
+                        || span.getParentSpanId() == null
+                        || span.getParentSpanId().isEmpty())
+                .toList();
+        Set<TopologyNode<Service>> topologyNodes = new HashSet<>();
+        Set<TopologyCall<Service>> topologyCalls = new HashSet<>();
         rootSpans.forEach(rootSpan -> {
             Service rootService = searchMapper.getServiceByName(rootSpan.getServiceName());
             TopologyNode<Service> rootNode = new TopologyNode<>(rootService);
@@ -63,8 +69,8 @@ public class SearchServiceImpl implements SearchService {
             // 递归查找
             handleOtherSpansForServiceTopology(rootSpan,
                     rootNode,
-                    // 过滤掉rootSpan
-                    rootSpans.stream().filter(span -> !span.equals(rootSpan)).toList(),
+                    // 过滤掉rootSpans中的
+                    originalSpanList.stream().filter(span -> !rootSpans.contains(span)).toList(),
                     topologyNodes, topologyCalls);
         });
         topology.setNodes(topologyNodes);
@@ -77,15 +83,18 @@ public class SearchServiceImpl implements SearchService {
     private void handleOtherSpansForServiceTopology(
             Span formerSpan, TopologyNode<Service> formerNode,
             List<Span> otherSpans,
-            List<TopologyNode<Service>> topologyNodes,
-            List<TopologyCall<Service>> topologyCalls) {
+            Set<TopologyNode<Service>> topologyNodes,
+            Set<TopologyCall<Service>> topologyCalls) {
         otherSpans.forEach(otherSpan -> {
             if (otherSpan.getParentSpanId().equals(formerSpan.getId())) {
                 Service otherService = searchMapper.getServiceByName(otherSpan.getServiceName());
                 TopologyNode<Service> otherNode = new TopologyNode<>(otherService);
-                topologyNodes.add(otherNode);
-                TopologyCall<Service> topologyCall = new TopologyCall<>(formerNode, otherNode);
-                topologyCalls.add(topologyCall);
+                if (!formerNode.equals(otherNode)) {
+                    topologyNodes.add(otherNode);
+                    TopologyCall<Service> topologyCall =
+                            new TopologyCall<>(formerNode, otherNode);
+                    topologyCalls.add(topologyCall);
+                }
                 handleOtherSpansForServiceTopology(otherSpan, otherNode,
                         otherSpans.stream().filter(span -> !span.equals(otherSpan)).toList(),
                         topologyNodes, topologyCalls);
@@ -107,8 +116,8 @@ public class SearchServiceImpl implements SearchService {
     public R getSpanTopologyByTraceId(String traceId) {
         List<Span> originalSpanList = searchMapper.getSpanListByTraceId(traceId);
         Topology<Span> topology = new Topology<>();
-        List<TopologyNode<Span>> topologyNodes = new ArrayList<>();
-        List<TopologyCall<Span>> topologyCalls = new ArrayList<>();
+        Set<TopologyNode<Span>> topologyNodes = new HashSet<>();
+        Set<TopologyCall<Span>> topologyCalls = new HashSet<>();
         // 找到唯一的rootSpan
         Span rootSpan = originalSpanList.stream()
                 .filter(Span::isRoot).findFirst().orElse(null);
@@ -174,8 +183,8 @@ public class SearchServiceImpl implements SearchService {
     private void handleOtherSpansForTraceTopology(
             Span formerSpan, TopologyNode<Span> formerNode,
             List<Span> otherSpans,
-            List<TopologyNode<Span>> topologyNodes,
-            List<TopologyCall<Span>> topologyCalls) {
+            Set<TopologyNode<Span>> topologyNodes,
+            Set<TopologyCall<Span>> topologyCalls) {
         otherSpans.forEach(otherSpan -> {
             if (otherSpan.getParentSpanId().equals(formerSpan.getId())) {
                 TopologyNode<Span> otherNode = new TopologyNode<>(otherSpan);
