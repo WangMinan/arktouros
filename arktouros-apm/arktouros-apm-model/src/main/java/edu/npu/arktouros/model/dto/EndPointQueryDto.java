@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Positive;
  * @description : 端点搜索
  */
 public record EndPointQueryDto(
-        @NotEmpty(message = "serviceName should not be empty")
         String serviceName,
         @NotNull(message = "pageNum should not be null")
         @Positive(message = "pageNum should be positive")

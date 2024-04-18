@@ -1,13 +1,11 @@
-package edu.npu.arktouros.model.otel.topology;
+package edu.npu.arktouros.model.otel.topology.service;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**

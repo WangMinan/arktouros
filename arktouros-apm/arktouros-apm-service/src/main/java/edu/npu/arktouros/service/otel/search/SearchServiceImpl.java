@@ -7,15 +7,14 @@ import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.MetricQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
-import edu.npu.arktouros.model.otel.topology.Topology;
-import edu.npu.arktouros.model.otel.topology.TopologyCall;
-import edu.npu.arktouros.model.otel.topology.TopologyNode;
+import edu.npu.arktouros.model.otel.topology.service.Topology;
+import edu.npu.arktouros.model.otel.topology.service.TopologyCall;
+import edu.npu.arktouros.model.otel.topology.service.TopologyNode;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.MetricVo;
 import edu.npu.arktouros.model.vo.R;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -114,6 +113,7 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public R getSpanTopologyByTraceId(String traceId) {
+        // TODO 这个位置要改 数据结构要符合https://echarts.apache.org/zh/option.html#series-tree.data的要求
         List<Span> originalSpanList = searchMapper.getSpanListByTraceId(traceId);
         Topology<Span> topology = new Topology<>();
         Set<TopologyNode<Span>> topologyNodes = new HashSet<>();

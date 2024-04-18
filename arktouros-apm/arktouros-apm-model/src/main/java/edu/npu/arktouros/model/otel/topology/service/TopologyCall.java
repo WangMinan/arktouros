@@ -1,4 +1,4 @@
-package edu.npu.arktouros.model.otel.topology;
+package edu.npu.arktouros.model.otel.topology.service;
 
 import lombok.Builder;
 import lombok.Data;
