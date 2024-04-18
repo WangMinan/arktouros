@@ -6,6 +6,7 @@ import edu.npu.arktouros.service.otel.search.SearchService;
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +37,10 @@ public class ServiceController {
     }
 
     @GetMapping("/topology")
-    public R getTopology(@NotBlank @RequestParam("namespace") String namespace) {
+    public R getTopology(@RequestParam(value = "namespace", required = false) String namespace) {
+        if (StringUtils.isEmpty(namespace)) {
+            namespace = "default";
+        }
         return searchService.getServiceTopology(namespace);
     }
 }

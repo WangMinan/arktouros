@@ -15,6 +15,7 @@ import edu.npu.arktouros.model.vo.MetricVo;
 import edu.npu.arktouros.model.vo.R;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,7 @@ public class SearchServiceImpl implements SearchService {
         List<String> serviceNames = serviceList.stream()
                 .map(Service::getName)
                 // 过滤到空串
-                .filter(name -> !name.isEmpty())
+                .filter(name -> name != null && !name.isEmpty())
                 .toList();
         List<Span> originalSpanList =
                 searchMapper.getSpanListByServiceNames(serviceNames);
@@ -109,7 +110,8 @@ public class SearchServiceImpl implements SearchService {
         List<TopologyNode<Span>> topologyNodes = new ArrayList<>();
         List<TopologyCall<Span>> topologyCalls = new ArrayList<>();
         // 找到唯一的rootSpan
-        Span rootSpan = originalSpanList.stream().filter(Span::isRoot).findFirst().orElse(null);
+        Span rootSpan = originalSpanList.stream()
+                .filter(Span::isRoot).findFirst().orElse(null);
         if (rootSpan == null) {
             log.warn("Can't find root span for traceId: {}", traceId);
             return R.ok();
