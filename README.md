@@ -4,6 +4,14 @@
 
 Arktouros项目将是我的本科毕业设计，这是一个轻量级的APM系统，用于适配中航工业西安计算所的天脉3操作系统。
 
+如果不需要ui项目，可以直接clone；如果需要ui项目，请使用--recursive参数进行clone。
+
+```shell
+git clone --recursive https://github.com/WangMinan/Arktouros-ui
+# 或者
+git submodule update --init --recursive
+```
+
 本地编译至少需要JDK21的基础环境，推荐选用Graal-JDK-21
 
 执行命令
