@@ -17,14 +17,14 @@ import java.util.List;
 @Data
 public class SpanTreeNodeVo {
     private String name;
-    private String value;
+    private int value;
     @Builder.Default
     private boolean collapsed = false;
     @Builder.Default
     private List<SpanTreeNodeVo> children = new ArrayList<>();
 
     @Builder
-    public SpanTreeNodeVo(String name, String value,
+    public SpanTreeNodeVo(String name, int value,
                         boolean collapsed, @Singular List<SpanTreeNodeVo> children) {
         this.name = name;
         this.value = value;
@@ -35,7 +35,7 @@ public class SpanTreeNodeVo {
     // 直接递归
     public SpanTreeNodeVo(SpanTreeNode spanTreeNode) {
         this.name = spanTreeNode.getSpan().getName();
-        this.value = spanTreeNode.getSpan().toString();
+        // value我暂时还没想好怎么转
         this.children = new ArrayList<>();
         for (SpanTreeNode child : spanTreeNode.getChildren()) {
             this.children.add(new SpanTreeNodeVo(child));
