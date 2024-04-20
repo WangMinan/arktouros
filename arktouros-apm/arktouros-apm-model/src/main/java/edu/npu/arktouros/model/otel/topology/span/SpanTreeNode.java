@@ -1,5 +1,6 @@
 package edu.npu.arktouros.model.otel.topology.span;
 
+import edu.npu.arktouros.model.otel.trace.Span;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
@@ -14,19 +15,13 @@ import java.util.List;
 @Builder
 @Data
 public class SpanTreeNode {
-    private String name;
-    private String value;
-    @Builder.Default
-    private boolean collapsed = false;
+    private Span span;
     @Builder.Default
     private List<SpanTreeNode> children = new ArrayList<>();
 
     @Builder
-    public SpanTreeNode(String name, String value,
-                        boolean collapsed, @Singular List<SpanTreeNode> children) {
-        this.name = name;
-        this.value = value;
-        this.collapsed = collapsed;
+    public SpanTreeNode(Span span, @Singular List<SpanTreeNode> children) {
+        this.span = span;
         this.children = children;
     }
 }

@@ -10,9 +10,11 @@ import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.topology.service.Topology;
 import edu.npu.arktouros.model.otel.topology.service.TopologyCall;
 import edu.npu.arktouros.model.otel.topology.service.TopologyNode;
+import edu.npu.arktouros.model.otel.topology.span.SpanTreeNode;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.MetricVo;
 import edu.npu.arktouros.model.vo.R;
+import edu.npu.arktouros.model.vo.SpanTreeNodeVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
@@ -113,11 +115,7 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public R getSpanTopologyByTraceId(String traceId) {
-        // TODO 这个位置要改 数据结构要符合https://echarts.apache.org/zh/option.html#series-tree.data的要求
         List<Span> originalSpanList = searchMapper.getSpanListByTraceId(traceId);
-        Topology<Span> topology = new Topology<>();
-        Set<TopologyNode<Span>> topologyNodes = new HashSet<>();
-        Set<TopologyCall<Span>> topologyCalls = new HashSet<>();
         // 找到唯一的rootSpan
         Span rootSpan = originalSpanList.stream()
                 .filter(Span::isRoot).findFirst().orElse(null);
@@ -125,19 +123,36 @@ public class SearchServiceImpl implements SearchService {
             log.warn("Can't find root span for traceId: {}", traceId);
             return R.ok();
         }
-        TopologyNode<Span> rootNode = new TopologyNode<>(rootSpan);
-        topologyNodes.add(rootNode);
-        // 递归查找
-        handleOtherSpansForTraceTopology(rootSpan,
-                rootNode,
-                // 过滤掉rootSpan
-                originalSpanList.stream().filter(span -> !span.equals(rootSpan)).toList(),
-                topologyNodes, topologyCalls);
-        topology.setNodes(topologyNodes);
-        topology.setCalls(topologyCalls);
+        SpanTreeNode.SpanTreeNodeBuilder rootBuilder = SpanTreeNode.builder();
+        rootBuilder.span(rootSpan);
+        SpanTreeNode rootTreeNode = rootBuilder.build();
+        // 广度优先搜索
+        buildTraceTree(List.of(rootTreeNode),
+                originalSpanList.stream().filter(span -> !span.equals(rootSpan)).toList());
         R r = new R();
-        r.put("result", topology);
+        r.put("result", new SpanTreeNodeVo(rootTreeNode));
         return r;
+    }
+
+    private void buildTraceTree(List<SpanTreeNode> formerLayerSpans, List<Span> otherSpans) {
+        List<Span> currentLayerSpans = new ArrayList<>();
+        List<SpanTreeNode> currentLayerNodes = new ArrayList<>();
+        formerLayerSpans.forEach(formerSpan -> {
+            otherSpans.forEach(otherSpan -> {
+                if (otherSpan.getParentSpanId().equals(formerSpan.getSpan().getId())) {
+                    SpanTreeNode.SpanTreeNodeBuilder otherBuilder =
+                            SpanTreeNode.builder().span(otherSpan);
+                    SpanTreeNode spanTreeNode = otherBuilder.build();
+                    currentLayerSpans.add(otherSpan);
+                    currentLayerNodes.add(spanTreeNode);
+                    formerSpan.getChildren().add(spanTreeNode);
+                }
+            });
+        });
+        if (!currentLayerSpans.isEmpty()) {
+            buildTraceTree(currentLayerNodes, otherSpans.stream()
+                    .filter(span -> !currentLayerSpans.contains(span)).toList());
+        }
     }
 
     @Override
@@ -179,23 +194,4 @@ public class SearchServiceImpl implements SearchService {
     public R getNamespaceList(String query) {
         return searchMapper.getNamespaceList(query);
     }
-
-    private void handleOtherSpansForTraceTopology(
-            Span formerSpan, TopologyNode<Span> formerNode,
-            List<Span> otherSpans,
-            Set<TopologyNode<Span>> topologyNodes,
-            Set<TopologyCall<Span>> topologyCalls) {
-        otherSpans.forEach(otherSpan -> {
-            if (otherSpan.getParentSpanId().equals(formerSpan.getId())) {
-                TopologyNode<Span> otherNode = new TopologyNode<>(otherSpan);
-                topologyNodes.add(otherNode);
-                TopologyCall<Span> topologyCall = new TopologyCall<>(formerNode, otherNode);
-                topologyCalls.add(topologyCall);
-                handleOtherSpansForTraceTopology(otherSpan, otherNode,
-                        otherSpans.stream().filter(span -> !span.equals(otherSpan)).toList(),
-                        topologyNodes, topologyCalls);
-            }
-        });
-    }
-
 }
