@@ -52,25 +52,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
     public void run() {
         log.info("this is OtlpLogFileReceiver, start working");
         try {
-            /*Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        prepare();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    if (currentFile != null) {
-                        this.cancel();
-                    } else {
-                        log.info("No log file found. Waiting for new input.");
-                    }
-                }
-            }, 0, 2000);*/
-
             prepare();
-
             while (true) {
                 readFile();
             }
@@ -189,7 +171,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
             String line;
             try {
                 List<String> lines = FileUtils.readLines(indexFile, StandardCharsets.UTF_8);
-                if (lines.isEmpty() || StringUtils.isNotEmpty(lines.getFirst())) {
+                if (lines.isEmpty() || StringUtils.isEmpty(lines.getFirst())) {
                     initEmptyIndexFile();
                     return;
                 }
