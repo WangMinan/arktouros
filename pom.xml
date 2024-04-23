@@ -44,9 +44,10 @@
         <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
         <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <!-- maven plugin -->
 
-        <springboot.version>3.2.3</springboot.version>
+        <springboot.version>3.2.5</springboot.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <antlr.version>4.13.1</antlr.version>
         <lombok.version>1.18.30</lombok.version>
@@ -248,6 +249,15 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${maven-jar-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <version>${native-maven-plugin.version}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <skipNativeTests>true</skipNativeTests>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -353,6 +363,12 @@
                         </fileset>
                     </filesets>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin.version}</version>
             </plugin>
 
             <plugin>

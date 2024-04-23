@@ -19,8 +19,8 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>${native-maven-plugin.version}</version>
                         <extensions>true</extensions>
+                        <version>${native-maven-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>build-native</id>
@@ -40,10 +40,17 @@
                         <configuration>
                             <fallback>false</fallback>
                             <imageName>${project.artifactId}</imageName>
-                            <mainClass>edu.npu.arktouros.CollectorMain</mainClass>
+                            <mainClass>${mainClass}</mainClass>
+                            <verbose>true</verbose>
+                            <!-- For Quick Build (22.1+) -->
+                            <quickBuild>true</quickBuild>
                             <buildArgs>
-                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                                 <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
+                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <!-- For mostly static native image (only on Linux AMD64 systems) -->
+                                <buildArg>-H:+StaticExecutableWithDynamicLibC</buildArg>
+                                <!-- To generate the Native Image build output JSON (22.3+) -->
+                                <buildArg>-H:BuildOutputJSONFile=build.json</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>

@@ -24,10 +24,30 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <image>
+                                <builder>paketobuildpacks/builder:tiny</builder>
+                                <env>
+                                    <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+                                </env>
+                            </image>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>process-aot</id>
+                                <goals>
+                                    <goal>process-aot</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>${native-maven-plugin.version}</version>
                         <extensions>true</extensions>
+                        <version>${native-maven-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>build-native</id>
@@ -35,6 +55,12 @@
                                     <goal>compile-no-fork</goal>
                                 </goals>
                                 <phase>package</phase>
+                            </execution>
+                            <execution>
+                                <id>add-reachability-metadata</id>
+                                <goals>
+                                    <goal>add-reachability-metadata</goal>
+                                </goals>
                             </execution>
                             <execution>
                                 <id>test-native</id>
@@ -47,11 +73,21 @@
                         <configuration>
                             <fallback>false</fallback>
                             <imageName>${project.artifactId}</imageName>
-                            <mainClass>edu.npu.arktouros.ApmMain</mainClass>
+                            <mainClass>${mainClass}</mainClass>
+                            <verbose>true</verbose>
+                            <!-- For Quick Build (22.1+) -->
+                            <quickBuild>true</quickBuild>
                             <buildArgs>
-                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                                 <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
+                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <!-- For mostly static native image (only on Linux AMD64 systems) -->
+                                <buildArg>-H:+StaticExecutableWithDynamicLibC</buildArg>
+                                <!-- To generate the Native Image build output JSON (22.3+) -->
+                                <buildArg>-H:BuildOutputJSONFile=build.json</buildArg>
                             </buildArgs>
+                            <metadataRepository>
+                                <enabled>true</enabled>
+                            </metadataRepository>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -70,57 +106,6 @@
 
     <build>
         <plugins>
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-jar-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <archive>-->
-<!--                        <manifest>-->
-<!--                            <addClasspath>true</addClasspath>-->
-<!--                            <classpathPrefix>lib/</classpathPrefix>-->
-<!--                            <mainClass>${mainClass}</mainClass>-->
-<!--                        </manifest>-->
-<!--                        &lt;!&ndash; 指定配置文件所在的文件夹 &ndash;&gt;-->
-<!--                        <manifestEntries>-->
-<!--                            <Class-Path>config/</Class-Path>-->
-<!--                        </manifestEntries>-->
-<!--                    </archive>-->
-<!--                    &lt;!&ndash;将配置文件排除掉，不打包到jar文件内&ndash;&gt;-->
-<!--                    <excludes>-->
-<!--                        <exclude>*.properties</exclude>-->
-<!--                        <exclude>**/*.properties</exclude>-->
-<!--                        <exclude>*.yml</exclude>-->
-<!--                        <exclude>*.xml</exclude>-->
-<!--                        <exclude>**/*.xml</exclude>-->
-<!--                        <exclude>*.conf</exclude>-->
-<!--                    </excludes>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-
-<!--            &lt;!&ndash; assembly插件 &ndash;&gt;-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-assembly-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <finalName>${project.artifactId}</finalName>-->
-<!--                    &lt;!&ndash;指定assembly配置文件配置&ndash;&gt;-->
-<!--                    <descriptors>-->
-<!--                        <descriptor>/src/main/resources/assembly.xml</descriptor>-->
-<!--                    </descriptors>-->
-<!--                    &lt;!&ndash;打包tar.gz输出位置&ndash;&gt;-->
-<!--                    <outputDirectory>../../build</outputDirectory>-->
-<!--                    &lt;!&ndash; <appendAssemblyId>false</appendAssemblyId> &ndash;&gt;-->
-<!--                </configuration>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>single</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -128,15 +113,40 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>${mainClass}</mainClass>
                         </manifest>
+                        <!-- 指定配置文件所在的文件夹 -->
+                        <manifestEntries>
+                            <Class-Path>config/</Class-Path>
+                        </manifestEntries>
                     </archive>
+                    <!--将配置文件排除掉，不打包到jar文件内-->
+                    <excludes>
+                        <exclude>*.properties</exclude>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>*.yml</exclude>
+                        <exclude>*.xml</exclude>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>*.conf</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 
+            <!-- assembly插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <finalName>${project.artifactId}</finalName>
+                    <!--指定assembly配置文件配置-->
+                    <descriptors>
+                        <descriptor>/src/main/resources/assembly.xml</descriptor>
+                    </descriptors>
+                    <!--打包tar.gz输出位置-->
+                    <outputDirectory>../../build</outputDirectory>
+                    <!-- <appendAssemblyId>false</appendAssemblyId> -->
+                </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -145,17 +155,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>${mainClass}</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
             </plugin>
         </plugins>
     </build>
