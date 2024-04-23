@@ -1,7 +1,6 @@
 package edu.npu.arktouros.model.otel.structure;
 
 import co.elastic.clients.elasticsearch._types.mapping.IntegerNumberProperty;
-import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.EsProperties;

@@ -2,7 +2,6 @@ package edu.npu.arktouros.model.otel.log;
 
 import co.elastic.clients.elasticsearch._types.mapping.BooleanProperty;
 import co.elastic.clients.elasticsearch._types.mapping.DateProperty;
-import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import com.fasterxml.jackson.annotation.JsonCreator;

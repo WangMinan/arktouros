@@ -1,7 +1,6 @@
 package edu.npu.arktouros.model.vo;
 
 import edu.npu.arktouros.model.otel.topology.span.SpanTreeNode;
-import edu.npu.arktouros.model.otel.trace.Span;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;

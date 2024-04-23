@@ -17,7 +17,6 @@
 
 package edu.npu.arktouros.model.otel.basic;
 
-import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

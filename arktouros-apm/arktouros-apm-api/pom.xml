@@ -81,13 +81,18 @@
                                 <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                                 <!-- For mostly static native image (only on Linux AMD64 systems) -->
-                                <buildArg>-H:+StaticExecutableWithDynamicLibC</buildArg>
+                                <!-- <buildArg>-H:+StaticExecutableWithDynamicLibC</buildArg> -->
                                 <!-- To generate the Native Image build output JSON (22.3+) -->
                                 <buildArg>-H:BuildOutputJSONFile=build.json</buildArg>
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
                             </metadataRepository>
+                            <classpath>
+                                <param>
+                                    ${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar
+                                </param>
+                            </classpath>
                         </configuration>
                     </plugin>
                 </plugins>

@@ -4,7 +4,6 @@ import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.service.otel.search.SearchService;
 import jakarta.annotation.Resource;
-import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
