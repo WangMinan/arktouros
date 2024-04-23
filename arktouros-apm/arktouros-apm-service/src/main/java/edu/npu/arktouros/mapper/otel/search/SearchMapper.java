@@ -34,4 +34,6 @@ public abstract class SearchMapper {
     public abstract List<Metric> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp);
 
     public abstract R getNamespaceList(String query);
+
+    public abstract R getAllLogLevels(String query);
 }

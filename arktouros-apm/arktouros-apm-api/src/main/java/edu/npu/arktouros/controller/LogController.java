@@ -7,6 +7,7 @@ import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -23,5 +24,10 @@ public class LogController {
     @GetMapping
     public R getLogList(@Validated LogQueryDto logQueryDto) {
         return searchService.getLogList(logQueryDto);
+    }
+
+    @GetMapping("/level")
+    public R getAllLogLevels(@RequestParam(value = "query", required = false) String query) {
+        return searchService.getAllLogLevels(query);
     }
 }

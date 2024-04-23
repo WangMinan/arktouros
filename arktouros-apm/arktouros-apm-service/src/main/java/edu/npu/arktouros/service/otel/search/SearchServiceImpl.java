@@ -194,4 +194,9 @@ public class SearchServiceImpl implements SearchService {
     public R getNamespaceList(String query) {
         return searchMapper.getNamespaceList(query);
     }
+
+    @Override
+    public R getAllLogLevels(String query) {
+        return searchMapper.getAllLogLevels(query);
+    }
 }

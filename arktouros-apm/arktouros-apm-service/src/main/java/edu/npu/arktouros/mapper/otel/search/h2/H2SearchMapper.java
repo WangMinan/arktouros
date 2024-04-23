@@ -66,4 +66,9 @@ public class H2SearchMapper extends SearchMapper {
         return null;
     }
 
+    @Override
+    public R getAllLogLevels(String query) {
+        return null;
+    }
+
 }

@@ -438,6 +438,55 @@ public class ElasticSearchMapper extends SearchMapper {
         }
     }
 
+    @Override
+    public R getAllLogLevels(String query) {
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        if (StringUtils.isNotEmpty(query)) {
+            searchRequestBuilder.query(new Query.Builder()
+                    .prefix(prefixBuilder ->
+                            prefixBuilder.field("severityText")
+                                    .value(query))
+                    .build()
+            );
+        } else {
+            // group by
+            searchRequestBuilder.aggregations("severityAgg",
+                    agg -> agg.terms(term -> term.field("severityText")));
+        }
+        searchRequestBuilder.index(ElasticSearchIndex.LOG_INDEX.getIndexName());
+        try {
+            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+            SearchResponse<Log> searchResponse =
+                    esClient.search(searchRequestBuilder.build(), Log.class);
+            ElasticsearchClientPool.returnClient(esClient);
+            List<String> severityList = new ArrayList<>();
+            if (StringUtils.isNotEmpty(query)) {
+                severityList =
+                        searchResponse.hits().hits().stream()
+                                .map(hit -> {
+                                    if (hit.source() != null) {
+                                        return hit.source().getSeverityText();
+                                    }
+                                    return null;
+                                })
+                                .distinct()
+                                .toList();
+            } else {
+                Aggregate severityAgg = searchResponse.aggregations().get("severityAgg");
+                List<StringTermsBucket> buckets = severityAgg.sterms().buckets().array();
+                for (StringTermsBucket bucket : buckets) {
+                    severityList.add(bucket.key().stringValue());
+                }
+            }
+            R r = new R();
+            r.put("result", severityList);
+            return r;
+        } catch (IOException e) {
+            log.error("Search for log levels error:{}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
     private <T extends Metric> List<Metric> getMetricsFromBoolQuery(
             String indexName, Query query, Class<T> clazz) throws IOException {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
