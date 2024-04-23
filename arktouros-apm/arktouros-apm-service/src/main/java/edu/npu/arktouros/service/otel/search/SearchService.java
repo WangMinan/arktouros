@@ -20,4 +20,6 @@ public interface SearchService {
     R getMetrics(MetricQueryDto metricQueryDto);
 
     R getNamespaceList(String query);
+
+    R getAllLogLevels(String query);
 }
