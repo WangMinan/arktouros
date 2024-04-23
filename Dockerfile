@@ -1,4 +1,4 @@
-FROM ghcr.io/graalvm/jdk-community:21
+FROM almalinux:9-minimal
 LABEL authors="wangminan"
 COPY arktouros-apm/arktouros-apm-api/target/arktouros-apm-api /
 EXPOSE 63060

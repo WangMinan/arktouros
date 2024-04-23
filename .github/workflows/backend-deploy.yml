@@ -59,12 +59,12 @@ jobs:
 
       - name: 传输docker-compose到服务器
         run: |
-          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources/docker-compose.yaml root@${{secrets.REMOTE_IP}}:/root/arktourous
+          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources/docker-compose.yaml root@${{secrets.REMOTE_IP}}:/root/arktouros
 
       - name: 传输部署脚本到服务器
         run: |
-          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources/run.sh root@${{secrets.REMOTE_IP}}:/root/arktourous
+          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources/run.sh root@${{secrets.REMOTE_IP}}:/root/arktouros
 
       - name: 授权并执行部署脚本
         run: |
-          sshpass -p ${{secrets.REMOTE_PWD}} ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP}} "chmod +x /root/arktourous/run.sh && /root/arktourous/run.sh"
+          sshpass -p ${{secrets.REMOTE_PWD}} ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP}} "chmod +x /root/arktouros/run.sh && /root/arktouros/run.sh"
