@@ -24,7 +24,9 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven in native env
-        run: mvn -Dmaven.test.skip=true -Pnative clean package
+        run: |
+          mvn -Dmaven.test.skip=true -Pnative clean package
+          tar -zxvf ../../build/arktouros-collector-leaves.tar.gz
 
 #      - name: 传输部署脚本到服务器
 #        run: |
