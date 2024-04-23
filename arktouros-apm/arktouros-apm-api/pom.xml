@@ -88,11 +88,6 @@
                             <metadataRepository>
                                 <enabled>true</enabled>
                             </metadataRepository>
-                            <classpath>
-                                <param>
-                                    ${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar
-                                </param>
-                            </classpath>
                         </configuration>
                     </plugin>
                 </plugins>
