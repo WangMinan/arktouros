@@ -23,8 +23,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
 
-      - name: Build with Maven with native env
+      - name: Build with Maven in native env
         run: |
+          rm -rf ./target
           mvn -Dmaven.test.skip=true -Pnative clean package
           cd build
           tar -zxvf arktouros-apm-api-leaves.tar.gz
