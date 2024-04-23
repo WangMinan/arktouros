@@ -1,4 +1,4 @@
-version: "3"
+version: "3.8"
 
 services:
   arktouros-apm-server:
@@ -13,4 +13,4 @@ services:
 
 networks:
   arktouros-network:
-    external: true
+    driver: bridge
