@@ -2,6 +2,8 @@ FROM ghcr.io/graalvm/jdk-community:21
 LABEL authors="wangminan"
 RUN mkdir arktouros
 COPY build/arktouros-apm-api/* /arktouros/
-EXPOSE 63060
+EXPOSE 50050
+EXPOSE 50051
 ENV TZ Asia/Shanghai
-ENTRYPOINT java -jar /arktouros/arktouros-apm-api-0.0.1.jar
+WORKDIR /arktouros
+ENTRYPOINT java -jar arktouros-apm-api-0.0.1.jar
