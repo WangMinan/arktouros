@@ -6,4 +6,6 @@ EXPOSE 50050
 EXPOSE 50051
 ENV TZ Asia/Shanghai
 WORKDIR /arktouros
-ENTRYPOINT java -jar arktouros-apm-api-0.0.1.jar
+RUN pwd
+RUN ls -l
+ENTRYPOINT java -jar -Dloader.path=lib arktouros-apm-api-0.0.1.jar
