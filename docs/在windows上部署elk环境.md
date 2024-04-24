@@ -5,9 +5,11 @@
 参考[Install Kibana with Docker | Kibana Guide [8.12\] | Elastic](https://www.elastic.co/guide/en/kibana/current/docker.html)
 
 ```bash
-docker network create elastic
-docker run --name elasticsearch --net elastic -p 9200:9200 -p 9300:9300 -it -m 1GB ne
+docker network create --subnet=192.168.1.0/24 elastic
+docker run --name elasticsearch --net elastic --ip 192.168.1.10 -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" --memory=1G --privileged=true -d docker.elastic.co/elasticsearch/elasticsearch:8.12.2
 ```
+
+注意一定要固定IP，因为生成的enrollment token和IP是绑死的
 
 ![image-20240318155015301](https://cdn.jsdelivr.net/gh/WangMinan/Pics/image-20240318155015301.png)
 
@@ -37,7 +39,7 @@ docker run --name elasticsearch --net elastic -p 9200:9200 -p 9300:9300 -it -m 1
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ```
-docker run --name kibana --net elastic -p 5601:5601 docker.elastic.co/kibana/kibana:8.12.2
+docker run --name kibana --net elastic --ip 192.168.1.11 -p 5601:5601 --privileged=true -d docker.elastic.co/kibana/kibana:8.12.2
 ```
 
 ![image-20240318155413286](https://cdn.jsdelivr.net/gh/WangMinan/Pics/image-20240318155413286.png)

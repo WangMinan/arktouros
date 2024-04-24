@@ -7,6 +7,8 @@ services:
     image: wangminan/arktouros-apm-server:latest
     networks:
       - arktouros-network
+    volumes:
+      - /root/arktouros/config:/arktouros/config
     ports:
       - "50050:50050"
       - "50051:50051"
