@@ -26,11 +26,16 @@ jobs:
       - name: Build with Maven in native env
         run: |
           mvn -Dmaven.test.skip=true -Pnative clean package
+          echo "unzipping"
           tar -zxvf build/arktouros-collector-leaves.tar.gz
 
-#      - name: 传输部署脚本到服务器
-#        run: |
-#          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources/run.sh root@${{secrets.REMOTE_IP}}:/root/arktouros
+      - name: show files in build directory
+        run: |
+          ls -l build
+
+      #      - name: 传输部署脚本到服务器
+      #        run: |
+      #          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources/run.sh root@${{secrets.REMOTE_IP}}:/root/arktouros
 
 
       - name: Login to Docker Hub
