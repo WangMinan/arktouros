@@ -26,9 +26,11 @@ mvn -Dmaven.test.skip=true clean package -Pnative
 
 编译产出工件将在${project.basedir}/build/下生成，分别是arktouros-collector与arktouros-apm-api的tar包。
 
-解压后的运行命令
+解压后的运行命令，您需要在本地运行与elasticsearch-java这一新client版本对应的elasticsearch，建议使用elasticsearch8.7.0及以上版本，使用较低版本的elasticsearch会出现连接问题。
 ```shell
 java -jar -Djava.library.path=lib/ *.jar
 ```
 
-如有需要可自行改动config目录下的对应配置文件
+如有需要可自行改动config目录下的对应配置文件。
+
+如果需要使用docker运行请自行修改apm-api的resources目录下的[docker-compose](arktouros-apm/arktouros-apm-api/src/main/resources/docker-compose.yaml)文件，注意config文件夹映射。

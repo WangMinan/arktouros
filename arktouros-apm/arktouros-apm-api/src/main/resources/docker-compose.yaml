@@ -1,18 +1,17 @@
-version: "3.8"
+version: '3.8'
 
 services:
   arktouros-apm-server:
-    container_name: arktouros-apm-server
-    restart: always
     image: wangminan/arktouros-apm-server:latest
-    networks:
-      - arktouros-network
-    volumes:
-      - /root/arktouros/config:/arktouros/config
+    container_name: arktouros-apm-server
     ports:
       - "50050:50050"
       - "50051:50051"
+    volumes:
+      - /root/arktouros/config:/arktouros/config
+    networks:
+      - elastic
 
 networks:
-  arktouros-network:
-    driver: bridge
+  elastic:
+    external: true

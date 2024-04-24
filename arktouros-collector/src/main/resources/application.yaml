@@ -10,7 +10,7 @@ receiver:
 
 emitter:
   grpc:
-    host: 127.0.0.1
+    host: 38.147.172.149
     port: 50051
     keepAlive:
       enabled: false # 是否进行连接检查 置空默认true
