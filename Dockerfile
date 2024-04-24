@@ -6,7 +6,7 @@ WORKDIR /arktouros
 COPY build/arktouros-apm-api/config ./config
 COPY build/arktouros-apm-api/lib ./lib
 COPY build/arktouros-apm-api/arktouros-apm-api-0.0.1.jar ./arktouros-apm-api-0.0.1.jar
-RUN ls -l
+# RUN ls -l
 EXPOSE 50050
 EXPOSE 50051
 ENV TZ Asia/Shanghai
