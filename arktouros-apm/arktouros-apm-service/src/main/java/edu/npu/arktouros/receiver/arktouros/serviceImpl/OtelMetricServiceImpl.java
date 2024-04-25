@@ -9,6 +9,7 @@ import edu.npu.arktouros.proto.collector.v1.MetricResponse;
 import edu.npu.arktouros.proto.collector.v1.MetricServiceGrpc;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
@@ -16,6 +17,7 @@ import java.io.IOException;
  * @author : [wangminan]
  * @description : arktouros格式的otel metric数据处理器
  */
+@Slf4j
 public class OtelMetricServiceImpl extends MetricServiceGrpc.MetricServiceImplBase {
 
     private final SinkService sinkService;
@@ -26,6 +28,7 @@ public class OtelMetricServiceImpl extends MetricServiceGrpc.MetricServiceImplBa
 
     @Override
     public void export(MetricRequest request, StreamObserver<MetricResponse> responseObserver) {
+        log.debug("Received metric records: {}", request.getMetricsList().size());
         MetricResponse.Builder builder = MetricResponse.newBuilder();
         try {
             for (edu.npu.arktouros.proto.collector.v1.Metric metric : request.getMetricsList()) {

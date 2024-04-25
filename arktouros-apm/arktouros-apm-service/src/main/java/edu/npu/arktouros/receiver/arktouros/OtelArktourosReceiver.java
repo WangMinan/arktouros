@@ -1,7 +1,9 @@
 package edu.npu.arktouros.receiver.arktouros;
 
 import edu.npu.arktouros.receiver.DataReceiver;
+import edu.npu.arktouros.receiver.arktouros.serviceImpl.OtelLogServiceImpl;
 import edu.npu.arktouros.receiver.arktouros.serviceImpl.OtelMetricServiceImpl;
+import edu.npu.arktouros.receiver.arktouros.serviceImpl.OtelSpanServiceImpl;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -24,9 +26,9 @@ public class OtelArktourosReceiver extends DataReceiver {
         this.port = port;
         this.server = ServerBuilder
                 .forPort(port)
+                .addService(new OtelSpanServiceImpl(sinkService))
                 .addService(new OtelMetricServiceImpl(sinkService))
-                .addService(new OtelMetricServiceImpl(sinkService))
-                .addService(new OtelMetricServiceImpl(sinkService))
+                .addService(new OtelLogServiceImpl(sinkService))
                 .build();
     }
 

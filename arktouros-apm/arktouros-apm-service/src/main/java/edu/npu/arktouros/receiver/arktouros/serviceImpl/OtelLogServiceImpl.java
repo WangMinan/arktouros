@@ -6,11 +6,13 @@ import edu.npu.arktouros.proto.collector.v1.LogResponse;
 import edu.npu.arktouros.proto.collector.v1.LogServiceGrpc;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author : [wangminan]
  * @description : arktouros格式的otel service数据处理器
  */
+@Slf4j
 public class OtelLogServiceImpl extends LogServiceGrpc.LogServiceImplBase {
     private final SinkService sinkService;
 
