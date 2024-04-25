@@ -80,9 +80,8 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
                             resourceSpans.getResource().getAttributesList());
             for (ScopeSpans scopeSpans : resourceSpans.getScopeSpansList()) {
                 extractScopeTag(scopeSpans.getScope(), attributes);
-                scopeSpans.getSpansList().forEach(otelSpan -> {
-                    convertAndSinkSpan(otelSpan, attributes);
-                });
+                scopeSpans.getSpansList().forEach(otelSpan ->
+                        convertAndSinkSpan(otelSpan, attributes));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

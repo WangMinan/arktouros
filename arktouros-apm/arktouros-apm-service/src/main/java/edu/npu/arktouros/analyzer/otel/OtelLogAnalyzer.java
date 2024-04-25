@@ -118,13 +118,13 @@ public class OtelLogAnalyzer extends DataAnalyzer {
     }
 
     private String buildTagValue(KeyValue it) {
-        final var value = it.getValue();
-        return value.hasStringValue() ? value.getStringValue() :
-                value.hasIntValue() ? String.valueOf(value.getIntValue()) :
-                        value.hasDoubleValue() ? String.valueOf(value.getDoubleValue()) :
-                                value.hasBoolValue() ? String.valueOf(value.getBoolValue()) :
-                                        value.hasArrayValue() ? value.getArrayValue().toString() :
-                                                "";
+        var value = it.getValue();
+        if (value.hasStringValue()) return value.getStringValue();
+        if (value.hasIntValue()) return String.valueOf(value.getIntValue());
+        if (value.hasDoubleValue()) return String.valueOf(value.getDoubleValue());
+        if (value.hasBoolValue()) return String.valueOf(value.getBoolValue());
+        if (value.hasArrayValue()) return value.getArrayValue().toString();
+        return "";
     }
 
     @Override

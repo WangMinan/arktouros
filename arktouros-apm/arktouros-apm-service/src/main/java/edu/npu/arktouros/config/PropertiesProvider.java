@@ -19,6 +19,8 @@ public class PropertiesProvider {
 
     private static Map<String, Object> map;
 
+    private PropertiesProvider(){}
+
     public static void init() {
         Yaml yaml = new Yaml();
         // 读取配置文件 application.yaml

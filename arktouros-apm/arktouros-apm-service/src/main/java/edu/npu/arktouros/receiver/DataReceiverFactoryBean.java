@@ -6,6 +6,7 @@ import edu.npu.arktouros.service.otel.queue.LogQueueService;
 import edu.npu.arktouros.service.otel.queue.MetricsQueueService;
 import edu.npu.arktouros.service.otel.queue.TraceQueueService;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @DependsOn("dataSource")
+@Slf4j
 public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
 
     @Value("${instance.active.dataReceiver}")

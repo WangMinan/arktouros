@@ -32,7 +32,7 @@ import java.util.List;
 @SpringBootTest
 @Slf4j
 @Disabled // junit4 @Ignore = junit5 @Disabled
-public class ElasticSearchClientTest {
+class ElasticSearchClientTest {
 
     @Resource
     private SearchMapper searchMapper;

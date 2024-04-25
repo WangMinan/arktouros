@@ -23,7 +23,7 @@ import java.sql.Statement;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @Slf4j
-public class JdbcTemplateTest {
+class JdbcTemplateTest {
 
     @Resource
     private LogQueueMapper mapper;

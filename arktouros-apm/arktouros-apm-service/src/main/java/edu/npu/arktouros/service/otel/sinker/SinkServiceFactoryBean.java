@@ -2,6 +2,7 @@ package edu.npu.arktouros.service.otel.sinker;
 
 import edu.npu.arktouros.service.otel.sinker.elasticsearch.ElasticSearchSinkService;
 import edu.npu.arktouros.service.otel.sinker.h2.H2SinkService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.util.Locale;
  * @description : 数据持久化工厂
  */
 @Component
+@Slf4j
 public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
 
     @Value("${instance.active.sinker}")
@@ -31,6 +33,7 @@ public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
                 throw new IllegalArgumentException("Invalid sinker type: " + activeSinker);
             }
         }
+        log.info("SinkServiceFactory init, current sinker:{}", activeSinker);
         return sinkService;
     }
 

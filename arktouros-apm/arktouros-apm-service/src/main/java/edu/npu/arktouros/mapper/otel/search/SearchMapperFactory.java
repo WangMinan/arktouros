@@ -2,6 +2,7 @@ package edu.npu.arktouros.mapper.otel.search;
 
 import edu.npu.arktouros.mapper.otel.search.elasticsearch.ElasticSearchMapper;
 import edu.npu.arktouros.mapper.otel.search.h2.H2SearchMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.util.Locale;
  * @description : 搜索Mapper工厂
  */
 @Component
+@Slf4j
 public class SearchMapperFactory implements FactoryBean<SearchMapper> {
 
     @Value("${instance.active.searchMapper}")
@@ -21,7 +23,7 @@ public class SearchMapperFactory implements FactoryBean<SearchMapper> {
     private SearchMapper searchMapper;
 
     @Override
-    public SearchMapper getObject() throws Exception {
+    public SearchMapper getObject() {
         if (activeSearchMapper.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
             searchMapper = new ElasticSearchMapper();
         } else if (activeSearchMapper.toLowerCase(Locale.ROOT).equals("h2")) {
@@ -29,6 +31,7 @@ public class SearchMapperFactory implements FactoryBean<SearchMapper> {
         } else {
             throw new IllegalArgumentException("Invalid searchMapper type: " + activeSearchMapper);
         }
+        log.info("SearchMapperFactory init, current searchMapper:{}", activeSearchMapper);
         return searchMapper;
     }
 

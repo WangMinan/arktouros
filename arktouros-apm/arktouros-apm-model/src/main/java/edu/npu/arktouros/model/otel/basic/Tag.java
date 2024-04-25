@@ -41,7 +41,7 @@ public class Tag {
     public static final int TAG_LENGTH = 256;
     private String key;
     private String value;
-    public static Map<String, Property> documentMap = new HashMap<>();
+    public static final Map<String, Property> documentMap = new HashMap<>();
 
     public Tag(edu.npu.arktouros.proto.common.v1.Tag tag) {
         this.key = tag.getKey();

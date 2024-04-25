@@ -188,7 +188,6 @@
                     </descriptors>
                     <!--打包tar.gz输出位置-->
                     <outputDirectory>../build</outputDirectory>
-                    <!-- <appendAssemblyId>false</appendAssemblyId> -->
                 </configuration>
                 <executions>
                     <execution>

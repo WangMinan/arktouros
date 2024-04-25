@@ -7,4 +7,7 @@ package edu.npu.arktouros.model.common;
 public class ElasticSearchConstants {
     // elasticsearch一次性最多允许查询的数量
     public static Integer MAX_PAGE_SIZE = 10000;
+
+    // 私有构造函数
+    private ElasticSearchConstants() {}
 }
