@@ -57,7 +57,7 @@ public class H2SearchMapper extends SearchMapper {
     }
 
     @Override
-    public List<Metric> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp) {
+    public List<Metric> getMetricsValues(List<String> metricNames, String serviceName, Long startTimestamp, Long endTimestamp) {
         return List.of();
     }
 

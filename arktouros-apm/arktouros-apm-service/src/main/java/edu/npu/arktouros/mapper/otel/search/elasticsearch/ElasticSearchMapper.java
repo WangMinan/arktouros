@@ -18,6 +18,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import edu.npu.arktouros.mapper.otel.search.SearchMapper;
+import edu.npu.arktouros.model.common.ElasticSearchConstants;
 import edu.npu.arktouros.model.common.ElasticSearchIndex;
 import edu.npu.arktouros.model.common.ResponseCodeEnum;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
@@ -97,7 +98,9 @@ public class ElasticSearchMapper extends SearchMapper {
         queryBuilder.field("namespace").query(namespace);
         SearchRequest searchRequest = searchRequestBuilder
                 .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
-                .query(queryBuilder.build()._toQuery()).build();
+                .query(queryBuilder.build()._toQuery())
+                .size(ElasticSearchConstants.MAX_PAGE_SIZE)
+                .build();
         try {
             ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Service> searchResponse =
@@ -123,7 +126,8 @@ public class ElasticSearchMapper extends SearchMapper {
                 .terms(builder -> builder.value(fieldValues));
         searchRequestBuilder
                 .index(ElasticSearchIndex.SPAN_INDEX.getIndexName())
-                .query(termsQueryBuilder.build()._toQuery());
+                .query(termsQueryBuilder.build()._toQuery())
+                .size(ElasticSearchConstants.MAX_PAGE_SIZE);
         try {
             ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Span> searchResponse =
@@ -336,7 +340,10 @@ public class ElasticSearchMapper extends SearchMapper {
         MatchQuery.Builder matchQueryBuilder = new MatchQuery.Builder();
         matchQueryBuilder.field("serviceName").query(serviceName);
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
-        searchRequestBuilder.index(indexName).query(matchQueryBuilder.build()._toQuery());
+        searchRequestBuilder
+                .index(indexName)
+                .query(matchQueryBuilder.build()._toQuery())
+                .size(ElasticSearchConstants.MAX_PAGE_SIZE);
         ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         SearchResponse<T> searchResponse = esClient.search(searchRequestBuilder.build(), clazz);
         ElasticsearchClientPool.returnClient(esClient);
@@ -348,7 +355,7 @@ public class ElasticSearchMapper extends SearchMapper {
     }
 
     @Override
-    public List<Metric> getMetricsValues(List<String> metricNames,
+    public List<Metric> getMetricsValues(List<String> metricNames, String serviceName,
                                          Long startTimestamp, Long endTimestamp) {
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         TermsQuery.Builder termQueryBuilder = new TermsQuery.Builder();
@@ -358,6 +365,8 @@ public class ElasticSearchMapper extends SearchMapper {
         }
         termQueryBuilder.field("name").terms(builder -> builder.value(fieldValues));
         boolQueryBuilder.must(termQueryBuilder.build()._toQuery());
+        boolQueryBuilder.must(new TermQuery.Builder()
+                .field("serviceName").value(serviceName).build()._toQuery());
         if (startTimestamp != null) {
             RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
             rangeQueryBuilder.field("timestamp")
@@ -373,13 +382,17 @@ public class ElasticSearchMapper extends SearchMapper {
         Query query = boolQueryBuilder.build()._toQuery();
         List<Metric> metrics = new ArrayList<>();
         try {
-            metrics.addAll(getMetricsFromBoolQuery(ElasticSearchIndex.GAUGE_INDEX.getIndexName(),
+            metrics.addAll(getMetricsFromBoolQuery(
+                    ElasticSearchIndex.GAUGE_INDEX.getIndexName(),
                     query, Gauge.class));
-            metrics.addAll(getMetricsFromBoolQuery(ElasticSearchIndex.COUNTER_INDEX.getIndexName(),
+            metrics.addAll(getMetricsFromBoolQuery(
+                    ElasticSearchIndex.COUNTER_INDEX.getIndexName(),
                     query, Counter.class));
-            metrics.addAll(getMetricsFromBoolQuery(ElasticSearchIndex.HISTOGRAM_INDEX.getIndexName(),
+            metrics.addAll(getMetricsFromBoolQuery(
+                    ElasticSearchIndex.HISTOGRAM_INDEX.getIndexName(),
                     query, Histogram.class));
-            metrics.addAll(getMetricsFromBoolQuery(ElasticSearchIndex.SUMMARY_INDEX.getIndexName(),
+            metrics.addAll(getMetricsFromBoolQuery(
+                    ElasticSearchIndex.SUMMARY_INDEX.getIndexName(),
                     query, Summary.class));
         } catch (IOException e) {
             log.error("Search for metric values error:{}", e.getMessage());
@@ -453,7 +466,8 @@ public class ElasticSearchMapper extends SearchMapper {
             searchRequestBuilder.aggregations("severityAgg",
                     agg -> agg.terms(term -> term.field("severityText")));
         }
-        searchRequestBuilder.index(ElasticSearchIndex.LOG_INDEX.getIndexName());
+        searchRequestBuilder.index(ElasticSearchIndex.LOG_INDEX.getIndexName())
+                .size(ElasticSearchConstants.MAX_PAGE_SIZE);
         try {
             ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Log> searchResponse =
@@ -489,8 +503,16 @@ public class ElasticSearchMapper extends SearchMapper {
 
     private <T extends Metric> List<Metric> getMetricsFromBoolQuery(
             String indexName, Query query, Class<T> clazz) throws IOException {
+        SortOptions sort = new SortOptions.Builder()
+                .field(new FieldSort.Builder()
+                        .field("timestamp")
+                        .order(SortOrder.Asc)
+                        .build())
+                .build();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
-        searchRequestBuilder.index(indexName).query(query);
+        searchRequestBuilder.index(indexName).query(query)
+                .size(ElasticSearchConstants.MAX_PAGE_SIZE)
+                .sort(sort);
         ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         SearchResponse<T> searchResponse =
                 esClient.search(searchRequestBuilder.build(), clazz);

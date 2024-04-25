@@ -31,7 +31,8 @@ public abstract class SearchMapper {
 
     public abstract List<String> getMetricsNames(String serviceName, Integer metricNameLimit);
 
-    public abstract List<Metric> getMetricsValues(List<String> metricNames, Long startTimestamp, Long endTimestamp);
+    public abstract List<Metric> getMetricsValues(List<String> metricNames, String serviceName,
+                                                  Long startTimestamp, Long endTimestamp);
 
     public abstract R getNamespaceList(String query);
 
