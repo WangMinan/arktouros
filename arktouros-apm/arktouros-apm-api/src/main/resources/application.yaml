@@ -48,3 +48,5 @@ elasticsearch:
     maxTotal: 10
     minIdle: 1
     maxWait: 3000
+  scroll:
+    maxWait: 5000

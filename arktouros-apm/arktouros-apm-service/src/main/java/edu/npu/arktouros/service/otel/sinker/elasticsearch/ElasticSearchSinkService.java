@@ -15,7 +15,7 @@ import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
-import edu.npu.arktouros.util.pool.ElasticsearchClientPool;
+import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.retry.annotation.Backoff;

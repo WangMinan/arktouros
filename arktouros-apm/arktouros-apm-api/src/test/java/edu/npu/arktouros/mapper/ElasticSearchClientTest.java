@@ -10,10 +10,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.npu.arktouros.mapper.otel.search.SearchMapper;
 import edu.npu.arktouros.model.common.ElasticSearchIndex;
 import edu.npu.arktouros.model.otel.log.Log;
+import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.R;
-import edu.npu.arktouros.util.pool.ElasticsearchClientPool;
+import edu.npu.arktouros.util.elasticsearch.ElasticSearchUtil;
+import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
@@ -148,5 +150,15 @@ public class ElasticSearchClientTest {
         log.info("namespaceList1:{}", namespaceList1);
         R namespaceList2 = searchMapper.getNamespaceList("default");
         log.info("namespaceList2:{}", namespaceList2);
+    }
+
+    @Test
+    void scrollSearchTest() {
+        SearchRequest.Builder searchRequestBuilder =
+                new SearchRequest.Builder()
+                        .index(ElasticSearchIndex.GAUGE_INDEX.getIndexName())
+                        .size(10);
+        List<Gauge> gauges = ElasticSearchUtil.scrollSearch(searchRequestBuilder, Gauge.class);
+        log.info("result:{}", gauges);
     }
 }

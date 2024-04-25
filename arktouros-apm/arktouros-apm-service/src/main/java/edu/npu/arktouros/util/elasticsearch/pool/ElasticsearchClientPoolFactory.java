@@ -1,4 +1,4 @@
-package edu.npu.arktouros.util.pool;
+package edu.npu.arktouros.util.elasticsearch.pool;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;

@@ -36,7 +36,8 @@ import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.PageResultVo;
 import edu.npu.arktouros.model.vo.R;
-import edu.npu.arktouros.util.pool.ElasticsearchClientPool;
+import edu.npu.arktouros.util.elasticsearch.ElasticSearchUtil;
+import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -74,21 +75,13 @@ public class ElasticSearchMapper extends SearchMapper {
 
         int pageSize = queryDto.pageSize();
         int pageNum = queryDto.pageNum();
-        SearchRequest searchRequest =
-                searchRequestBuilder
-                        .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
-                        .from(pageSize * (pageNum - 1))
-                        .size(pageSize).build();
-        try {
-            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-            SearchResponse<Service> searchResponse =
-                    esClient.search(searchRequest, Service.class);
-            ElasticsearchClientPool.returnClient(esClient);
-            return transformListResponseToR(searchResponse);
-        } catch (IOException e) {
-            log.error("Search for service list error:{}", e.getMessage());
-            throw new RuntimeException(e);
-        }
+        searchRequestBuilder
+                .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
+                .from(pageSize * (pageNum - 1))
+                .size(pageSize);
+        SearchResponse<Service> searchResponse =
+                ElasticSearchUtil.simpleSearch(searchRequestBuilder, Service.class);
+        return transformListResponseToR(searchResponse);
     }
 
     @Override
@@ -225,16 +218,9 @@ public class ElasticSearchMapper extends SearchMapper {
                 .size(logQueryDto.pageSize())
                 .sort(sort);
 
-        try {
-            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-            SearchResponse<Log> searchResponse = esClient.search(
-                    searchRequestBuilder.build(), Log.class);
-            ElasticsearchClientPool.returnClient(esClient);
-            return transformListResponseToR(searchResponse);
-        } catch (IOException e) {
-            log.error("Search for log list error:{}", e.getMessage());
-            throw new RuntimeException(e);
-        }
+        SearchResponse<Log> searchResponse =
+                ElasticSearchUtil.simpleSearch(searchRequestBuilder, Log.class);
+        return transformListResponseToR(searchResponse);
     }
 
     @Override
@@ -243,76 +229,58 @@ public class ElasticSearchMapper extends SearchMapper {
         termQueryBuilder
                 .field("serviceName")
                 .value(endPointQueryDto.serviceName());
-        SearchRequest searchRequest = new SearchRequest.Builder()
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticSearchIndex.SPAN_INDEX.getIndexName())
                 .query(termQueryBuilder.build()._toQuery())
                 .from(endPointQueryDto.pageSize() * (endPointQueryDto.pageNum() - 1))
-                .size(endPointQueryDto.pageSize())
-                .build();
-        try {
-            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-            SearchResponse<Span> searchResponse =
-                    esClient.search(searchRequest, Span.class);
-            ElasticsearchClientPool.returnClient(esClient);
-            List<Hit<Span>> hits = searchResponse.hits().hits();
-            R r = new R();
-            r.put("code", ResponseCodeEnum.SUCCESS.getValue());
-            Set<EndPoint> endPointSet = new HashSet<>();
-            List<EndPointTraceIdVo> endPointTraceIdVoList = new ArrayList<>();
-            if (hits.isEmpty()) {
-                r.put("result", new ArrayList<>());
-            } else {
-                hits.forEach(hit -> {
-                    if (hit.source() != null) {
-                        EndPoint localEndPoint = hit.source().getLocalEndPoint();
-                        if (endPointSet.contains(localEndPoint)) {
-                            // endPointTraceIdDtoList中找到对应记录 并在traceIds中做添加
-                            for (EndPointTraceIdVo endPointTraceIdVo :
-                                    endPointTraceIdVoList) {
-                                if (endPointTraceIdVo.endPoint().equals(localEndPoint)) {
-                                    endPointTraceIdVo
-                                            .traceIds()
-                                            .add(hit.source().getTraceId());
-                                    break;
-                                }
+                .size(endPointQueryDto.pageSize());
+        SearchResponse<Span> searchResponse =
+                ElasticSearchUtil.simpleSearch(searchRequestBuilder, Span.class);
+        List<Hit<Span>> hits = searchResponse.hits().hits();
+        R r = new R();
+        r.put("code", ResponseCodeEnum.SUCCESS.getValue());
+        Set<EndPoint> endPointSet = new HashSet<>();
+        List<EndPointTraceIdVo> endPointTraceIdVoList = new ArrayList<>();
+        if (hits.isEmpty()) {
+            r.put("result", new ArrayList<>());
+        } else {
+            hits.forEach(hit -> {
+                if (hit.source() != null) {
+                    EndPoint localEndPoint = hit.source().getLocalEndPoint();
+                    if (endPointSet.contains(localEndPoint)) {
+                        // endPointTraceIdDtoList中找到对应记录 并在traceIds中做添加
+                        for (EndPointTraceIdVo endPointTraceIdVo :
+                                endPointTraceIdVoList) {
+                            if (endPointTraceIdVo.endPoint().equals(localEndPoint)) {
+                                endPointTraceIdVo
+                                        .traceIds()
+                                        .add(hit.source().getTraceId());
+                                break;
                             }
-                        } else {
-                            endPointSet.add(localEndPoint);
-                            EndPointTraceIdVo endPointTraceIdVo =
-                                    new EndPointTraceIdVo(localEndPoint,
-                                            new HashSet<>());
-                            endPointTraceIdVo.traceIds().add(hit.source().getTraceId());
-                            endPointTraceIdVoList.add(endPointTraceIdVo);
                         }
+                    } else {
+                        endPointSet.add(localEndPoint);
+                        EndPointTraceIdVo endPointTraceIdVo =
+                                new EndPointTraceIdVo(localEndPoint,
+                                        new HashSet<>());
+                        endPointTraceIdVo.traceIds().add(hit.source().getTraceId());
+                        endPointTraceIdVoList.add(endPointTraceIdVo);
                     }
-                });
-                r.put("result", endPointTraceIdVoList);
-            }
-            return r;
-        } catch (IOException e) {
-            log.error("Search for traceId list by service name error:{}", e.getMessage());
-            throw new RuntimeException(e);
+                }
+            });
+            r.put("result", endPointTraceIdVoList);
         }
+        return r;
     }
 
     @Override
     public List<Span> getSpanListByTraceId(String traceId) {
         TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
         termQueryBuilder.field("traceId").value(traceId);
-        SearchRequest searchRequest = new SearchRequest.Builder()
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticSearchIndex.SPAN_INDEX.getIndexName())
-                .query(termQueryBuilder.build()._toQuery())
-                .build();
-        try {
-            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-            SearchResponse<Span> searchResponse =
-                    esClient.search(searchRequest, Span.class);
-            ElasticsearchClientPool.returnClient(esClient);
-            return searchResponse.hits().hits().stream().map(Hit::source).toList();
-        } catch (IOException e) {
-            log.error("Search for span list by trace query error:{}", e.getMessage());
-            throw new RuntimeException(e);
-        }
+                .query(termQueryBuilder.build()._toQuery());
+        return ElasticSearchUtil.scrollSearch(searchRequestBuilder, Span.class);
     }
 
     @Override
@@ -327,7 +295,6 @@ public class ElasticSearchMapper extends SearchMapper {
                     ElasticSearchIndex.HISTOGRAM_INDEX.getIndexName(), Histogram.class));
             allNames.addAll(getMetricNamesFromIndex(serviceName,
                     ElasticSearchIndex.SUMMARY_INDEX.getIndexName(), Summary.class));
-
             return metricNameLimit == null ? allNames : allNames.stream().limit(metricNameLimit).toList();
         } catch (IOException e) {
             log.error("Search for metric names error:{}", e.getMessage());
@@ -342,15 +309,10 @@ public class ElasticSearchMapper extends SearchMapper {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         searchRequestBuilder
                 .index(indexName)
-                .query(matchQueryBuilder.build()._toQuery())
-                .size(ElasticSearchConstants.MAX_PAGE_SIZE);
-        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-        SearchResponse<T> searchResponse = esClient.search(searchRequestBuilder.build(), clazz);
-        ElasticsearchClientPool.returnClient(esClient);
-        return searchResponse.hits().hits()
+                .query(matchQueryBuilder.build()._toQuery());
+        return ElasticSearchUtil.scrollSearch(searchRequestBuilder, clazz)
                 .stream()
-                .filter(hit -> hit.source() != null)
-                .map(hit -> hit.source().getName())
+                .map(Metric::getName)
                 .collect(Collectors.toList());
     }
 
@@ -416,39 +378,34 @@ public class ElasticSearchMapper extends SearchMapper {
             searchRequestBuilder.aggregations("namespaceAgg",
                     agg -> agg.terms(term -> term.field("namespace")));
         }
-        searchRequestBuilder.index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
-                .size(10);
-        try {
-            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-            SearchResponse<Service> searchResponse =
-                    esClient.search(searchRequestBuilder.build(), Service.class);
-            ElasticsearchClientPool.returnClient(esClient);
-            List<String> namespaceList = new ArrayList<>();
-            if (StringUtils.isNotEmpty(query)) {
-                namespaceList =
-                        searchResponse.hits().hits().stream()
-                                .map(hit -> {
-                                    if (hit.source() != null) {
-                                        return hit.source().getNamespace();
-                                    }
-                                    return null;
-                                })
-                                .distinct()
-                                .toList();
-            } else {
-                Aggregate namespaceAgg = searchResponse.aggregations().get("namespaceAgg");
-                List<StringTermsBucket> buckets = namespaceAgg.sterms().buckets().array();
-                for (StringTermsBucket bucket : buckets) {
-                    namespaceList.add(bucket.key().stringValue());
-                }
+        searchRequestBuilder.index(ElasticSearchIndex.SERVICE_INDEX.getIndexName());
+        List<String> namespaceList = new ArrayList<>();
+        if (StringUtils.isNotEmpty(query)) {
+            List<Service> serviceList =
+                    ElasticSearchUtil.scrollSearch(searchRequestBuilder, Service.class);
+            namespaceList =
+                    serviceList.stream()
+                            .map(hit -> {
+                                if (hit != null) {
+                                    return hit.getNamespace();
+                                }
+                                return null;
+                            })
+                            .distinct()
+                            .toList();
+        } else {
+            searchRequestBuilder.size(ElasticSearchConstants.MAX_PAGE_SIZE);
+            SearchResponse<Service> searchResponse = ElasticSearchUtil
+                    .simpleSearch(searchRequestBuilder, Service.class);
+            Aggregate namespaceAgg = searchResponse.aggregations().get("namespaceAgg");
+            List<StringTermsBucket> buckets = namespaceAgg.sterms().buckets().array();
+            for (StringTermsBucket bucket : buckets) {
+                namespaceList.add(bucket.key().stringValue());
             }
-            R r = new R();
-            r.put("result", namespaceList);
-            return r;
-        } catch (IOException e) {
-            log.error("Search for namespace list error:{}", e.getMessage());
-            throw new RuntimeException(e);
         }
+        R r = new R();
+        r.put("result", namespaceList);
+        return r;
     }
 
     @Override
@@ -466,42 +423,37 @@ public class ElasticSearchMapper extends SearchMapper {
             searchRequestBuilder.aggregations("severityAgg",
                     agg -> agg.terms(term -> term.field("severityText")));
         }
-        searchRequestBuilder.index(ElasticSearchIndex.LOG_INDEX.getIndexName())
-                .size(ElasticSearchConstants.MAX_PAGE_SIZE);
-        try {
-            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+        List<String> severityList = new ArrayList<>();
+        searchRequestBuilder.index(ElasticSearchIndex.LOG_INDEX.getIndexName());
+        if (StringUtils.isNotEmpty(query)) {
+            List<Log> logList =
+                    ElasticSearchUtil.scrollSearch(searchRequestBuilder, Log.class);
+            severityList =
+                    logList.stream()
+                            .map(hit -> {
+                                if (hit != null) {
+                                    return hit.getSeverityText();
+                                }
+                                return null;
+                            })
+                            .distinct()
+                            .toList();
+        } else {
+            searchRequestBuilder.size(ElasticSearchConstants.MAX_PAGE_SIZE);
             SearchResponse<Log> searchResponse =
-                    esClient.search(searchRequestBuilder.build(), Log.class);
-            ElasticsearchClientPool.returnClient(esClient);
-            List<String> severityList = new ArrayList<>();
-            if (StringUtils.isNotEmpty(query)) {
-                severityList =
-                        searchResponse.hits().hits().stream()
-                                .map(hit -> {
-                                    if (hit.source() != null) {
-                                        return hit.source().getSeverityText();
-                                    }
-                                    return null;
-                                })
-                                .distinct()
-                                .toList();
-            } else {
-                Aggregate severityAgg = searchResponse.aggregations().get("severityAgg");
-                List<StringTermsBucket> buckets = severityAgg.sterms().buckets().array();
-                for (StringTermsBucket bucket : buckets) {
-                    severityList.add(bucket.key().stringValue());
-                }
+                    ElasticSearchUtil.simpleSearch(searchRequestBuilder, Log.class);
+            Aggregate severityAgg = searchResponse.aggregations().get("severityAgg");
+            List<StringTermsBucket> buckets = severityAgg.sterms().buckets().array();
+            for (StringTermsBucket bucket : buckets) {
+                severityList.add(bucket.key().stringValue());
             }
-            R r = new R();
-            r.put("result", severityList);
-            return r;
-        } catch (IOException e) {
-            log.error("Search for log levels error:{}", e.getMessage());
-            throw new RuntimeException(e);
         }
+        R r = new R();
+        r.put("result", severityList);
+        return r;
     }
 
-    private <T extends Metric> List<Metric> getMetricsFromBoolQuery(
+    private <T extends Metric> List<T> getMetricsFromBoolQuery(
             String indexName, Query query, Class<T> clazz) throws IOException {
         SortOptions sort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()
@@ -510,18 +462,10 @@ public class ElasticSearchMapper extends SearchMapper {
                         .build())
                 .build();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
-        searchRequestBuilder.index(indexName).query(query)
-                .size(ElasticSearchConstants.MAX_PAGE_SIZE)
+        searchRequestBuilder.index(indexName)
+                .query(query)
                 .sort(sort);
-        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-        SearchResponse<T> searchResponse =
-                esClient.search(searchRequestBuilder.build(), clazz);
-        ElasticsearchClientPool.returnClient(esClient);
-        return searchResponse.hits().hits()
-                .stream()
-                .filter(hit -> hit.source() != null)
-                .map(Hit::source)
-                .collect(Collectors.toList());
+        return ElasticSearchUtil.scrollSearch(searchRequestBuilder, clazz);
     }
 
     private <T> R transformListResponseToR(SearchResponse<T> searchResponse) {

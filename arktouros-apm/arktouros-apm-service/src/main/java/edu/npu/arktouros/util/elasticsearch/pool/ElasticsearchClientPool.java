@@ -1,4 +1,4 @@
-package edu.npu.arktouros.util.pool;
+package edu.npu.arktouros.util.elasticsearch.pool;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import lombok.extern.slf4j.Slf4j;
