@@ -85,7 +85,7 @@ public class GrpcEmitter extends AbstractEmitter {
         Thread checkConnectThread = new Thread(() -> {
             try {
                 if (waitForFirstConnectLatch.getCount() == 1) {
-                    log.info("Waiting for the first connection to apm.");
+                    log.info("Waiting for the first connection to apwm. Will take seconds to establish the connection.");
                 }
                 ConnectivityState state = channel.getState(true);
                 if (state.equals(ConnectivityState.READY) &&
@@ -168,11 +168,17 @@ public class GrpcEmitter extends AbstractEmitter {
                         .newBuilder()
                         .addAllResourceLogs(logsData.getResourceLogsList())
                         .build();
-        ExportLogsServiceResponse export = logsServiceBlockingStub.export(request);
-        if (export.getPartialSuccess().getRejectedLogRecords() != 0) {
-            log.error("Failed to send logs data to apm, rejected log records: {}, error message: {}.",
-                    export.getPartialSuccess().getRejectedLogRecords(),
-                    export.getPartialSuccess().getErrorMessage()
+        try {
+            ExportLogsServiceResponse export = logsServiceBlockingStub.export(request);
+            if (export.getPartialSuccess().getRejectedLogRecords() != 0) {
+                log.error("Failed to send logs data to apm, rejected log records: {}, error message: {}.",
+                        export.getPartialSuccess().getRejectedLogRecords(),
+                        export.getPartialSuccess().getErrorMessage()
+                );
+            }
+        } catch (StatusRuntimeException e) {
+            log.error("Failed to send logs data to apm, error message: {}.",
+                    e.getMessage()
             );
         }
     }
@@ -187,11 +193,17 @@ public class GrpcEmitter extends AbstractEmitter {
                         .newBuilder()
                         .addAllResourceMetrics(metricsData.getResourceMetricsList())
                         .build();
-        ExportMetricsServiceResponse export = metricsServiceBlockingStub.export(request);
-        if (export.getPartialSuccess().getRejectedDataPoints() != 0) {
-            log.error("Failed to send metrics data to apm, rejected data points: {}, error message: {}.",
-                    export.getPartialSuccess().getRejectedDataPoints(),
-                    export.getPartialSuccess().getErrorMessage()
+        try {
+            ExportMetricsServiceResponse export = metricsServiceBlockingStub.export(request);
+            if (export.getPartialSuccess().getRejectedDataPoints() != 0) {
+                log.error("Failed to send metrics data to apm, rejected data points: {}, error message: {}.",
+                        export.getPartialSuccess().getRejectedDataPoints(),
+                        export.getPartialSuccess().getErrorMessage()
+                );
+            }
+        } catch (StatusRuntimeException e) {
+            log.error("Failed to send metrics data to apm, error message: {}.",
+                    e.getMessage()
             );
         }
     }
@@ -206,11 +218,17 @@ public class GrpcEmitter extends AbstractEmitter {
                         .newBuilder()
                         .addAllResourceSpans(tracesData.getResourceSpansList())
                         .build();
-        ExportTraceServiceResponse export = traceServiceBlockingStub.export(request);
-        if (export.getPartialSuccess().getRejectedSpans() != 0) {
-            log.error("Failed to send trace data to apm, rejected spans: {}, error message: {}.",
-                    export.getPartialSuccess().getRejectedSpans(),
-                    export.getPartialSuccess().getErrorMessage()
+        try {
+            ExportTraceServiceResponse export = traceServiceBlockingStub.export(request);
+            if (export.getPartialSuccess().getRejectedSpans() != 0) {
+                log.error("Failed to send trace data to apm, rejected spans: {}, error message: {}.",
+                        export.getPartialSuccess().getRejectedSpans(),
+                        export.getPartialSuccess().getErrorMessage()
+                );
+            }
+        } catch (StatusRuntimeException e) {
+            log.error("Failed to send trace data to apm, error message: {}.",
+                    e.getMessage()
             );
         }
     }
