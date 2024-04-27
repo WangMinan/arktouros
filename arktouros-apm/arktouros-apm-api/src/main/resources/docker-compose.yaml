@@ -8,7 +8,10 @@ services:
       - "50050:50050"
       - "50051:50051"
     volumes:
+      # 配置文件目录映射进去
       - /root/arktouros/config:/arktouros/config
+      # 日志目录映射出来
+      - /root/arktouros/logs:/arktouros/logs
     networks:
       - elastic
 
