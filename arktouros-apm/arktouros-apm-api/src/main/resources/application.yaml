@@ -24,7 +24,7 @@ var:
 # 对象选择，目前只完善了otelGrpc->elasticsearch全链路,h2暂不可选
 instance:
   active:
-    dataReceiver: otelGrpc
+    dataReceiver: arktourosGrpc # otelGrpc/arktourosGrpc
     sinker: elasticsearch # elasticsearch/h2
     searchMapper: elasticsearch # elasticsearch/h2
   number:
