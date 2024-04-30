@@ -1,6 +1,6 @@
 package edu.npu.arktouros.mapper.otel.search;
 
-import edu.npu.arktouros.mapper.otel.search.elasticsearch.ElasticSearchMapper;
+import edu.npu.arktouros.mapper.otel.search.elasticsearch.ElasticsearchMapper;
 import edu.npu.arktouros.mapper.otel.search.h2.H2SearchMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
@@ -25,7 +25,7 @@ public class SearchMapperFactory implements FactoryBean<SearchMapper> {
     @Override
     public SearchMapper getObject() {
         if (activeSearchMapper.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
-            searchMapper = new ElasticSearchMapper();
+            searchMapper = new ElasticsearchMapper();
         } else if (activeSearchMapper.toLowerCase(Locale.ROOT).equals("h2")) {
             searchMapper = new H2SearchMapper();
         } else {

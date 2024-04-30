@@ -18,8 +18,8 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import edu.npu.arktouros.mapper.otel.search.SearchMapper;
-import edu.npu.arktouros.model.common.ElasticSearchConstants;
-import edu.npu.arktouros.model.common.ElasticSearchIndex;
+import edu.npu.arktouros.model.common.ElasticsearchConstants;
+import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.common.ResponseCodeEnum;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
@@ -52,7 +52,7 @@ import java.util.Set;
  * @description : ElasticSearch Mapper
  */
 @Slf4j
-public class ElasticSearchMapper extends SearchMapper {
+public class ElasticsearchMapper extends SearchMapper {
 
     @Override
     public R getServiceList(ServiceQueryDto queryDto) {
@@ -75,7 +75,7 @@ public class ElasticSearchMapper extends SearchMapper {
         int pageSize = queryDto.pageSize();
         int pageNum = queryDto.pageNum();
         searchRequestBuilder
-                .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
+                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
                 .from(pageSize * (pageNum - 1))
                 .size(pageSize);
         SearchResponse<Service> searchResponse =
@@ -89,9 +89,9 @@ public class ElasticSearchMapper extends SearchMapper {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         queryBuilder.field("namespace").query(namespace);
         SearchRequest searchRequest = searchRequestBuilder
-                .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
+                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
                 .query(queryBuilder.build()._toQuery())
-                .size(ElasticSearchConstants.MAX_PAGE_SIZE)
+                .size(ElasticsearchConstants.MAX_PAGE_SIZE)
                 .build();
         try {
             ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
@@ -117,9 +117,9 @@ public class ElasticSearchMapper extends SearchMapper {
                 .field("serviceName")
                 .terms(builder -> builder.value(fieldValues));
         searchRequestBuilder
-                .index(ElasticSearchIndex.SPAN_INDEX.getIndexName())
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(termsQueryBuilder.build()._toQuery())
-                .size(ElasticSearchConstants.MAX_PAGE_SIZE);
+                .size(ElasticsearchConstants.MAX_PAGE_SIZE);
         try {
             ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
             SearchResponse<Span> searchResponse =
@@ -138,7 +138,7 @@ public class ElasticSearchMapper extends SearchMapper {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         termQueryBuilder.field("name").value(serviceName);
         SearchRequest searchRequest = searchRequestBuilder
-                .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
+                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
                 .query(termQueryBuilder.build()._toQuery()).build();
         try {
             ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
@@ -211,7 +211,7 @@ public class ElasticSearchMapper extends SearchMapper {
         }
 
         searchRequestBuilder
-                .index(ElasticSearchIndex.LOG_INDEX.getIndexName())
+                .index(ElasticsearchIndex.LOG_INDEX.getIndexName())
                 .query(boolQueryBuilder.build()._toQuery())
                 .from(logQueryDto.pageSize() * (logQueryDto.pageNum() - 1))
                 .size(logQueryDto.pageSize())
@@ -229,7 +229,7 @@ public class ElasticSearchMapper extends SearchMapper {
                 .field("serviceName")
                 .value(endPointQueryDto.serviceName());
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
-                .index(ElasticSearchIndex.SPAN_INDEX.getIndexName())
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(termQueryBuilder.build()._toQuery())
                 .from(endPointQueryDto.pageSize() * (endPointQueryDto.pageNum() - 1))
                 .size(endPointQueryDto.pageSize());
@@ -277,7 +277,7 @@ public class ElasticSearchMapper extends SearchMapper {
         TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
         termQueryBuilder.field("traceId").value(traceId);
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
-                .index(ElasticSearchIndex.SPAN_INDEX.getIndexName())
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(termQueryBuilder.build()._toQuery());
         return ElasticSearchUtil.scrollSearch(searchRequestBuilder, Span.class);
     }
@@ -287,13 +287,13 @@ public class ElasticSearchMapper extends SearchMapper {
         try {
             List<String> allNames = new ArrayList<>();
             allNames.addAll(getMetricNamesFromIndex(serviceName,
-                    ElasticSearchIndex.GAUGE_INDEX.getIndexName(), Gauge.class));
+                    ElasticsearchIndex.GAUGE_INDEX.getIndexName(), Gauge.class));
             allNames.addAll(getMetricNamesFromIndex(serviceName,
-                    ElasticSearchIndex.COUNTER_INDEX.getIndexName(), Counter.class));
+                    ElasticsearchIndex.COUNTER_INDEX.getIndexName(), Counter.class));
             allNames.addAll(getMetricNamesFromIndex(serviceName,
-                    ElasticSearchIndex.HISTOGRAM_INDEX.getIndexName(), Histogram.class));
+                    ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName(), Histogram.class));
             allNames.addAll(getMetricNamesFromIndex(serviceName,
-                    ElasticSearchIndex.SUMMARY_INDEX.getIndexName(), Summary.class));
+                    ElasticsearchIndex.SUMMARY_INDEX.getIndexName(), Summary.class));
             return metricNameLimit == null ? allNames : allNames.stream().limit(metricNameLimit).toList();
         } catch (IOException e) {
             log.error("Search for metric names error:{}", e.getMessage());
@@ -344,16 +344,16 @@ public class ElasticSearchMapper extends SearchMapper {
         List<Metric> metrics = new ArrayList<>();
         try {
             metrics.addAll(getMetricsFromBoolQuery(
-                    ElasticSearchIndex.GAUGE_INDEX.getIndexName(),
+                    ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
                     query, Gauge.class));
             metrics.addAll(getMetricsFromBoolQuery(
-                    ElasticSearchIndex.COUNTER_INDEX.getIndexName(),
+                    ElasticsearchIndex.COUNTER_INDEX.getIndexName(),
                     query, Counter.class));
             metrics.addAll(getMetricsFromBoolQuery(
-                    ElasticSearchIndex.HISTOGRAM_INDEX.getIndexName(),
+                    ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName(),
                     query, Histogram.class));
             metrics.addAll(getMetricsFromBoolQuery(
-                    ElasticSearchIndex.SUMMARY_INDEX.getIndexName(),
+                    ElasticsearchIndex.SUMMARY_INDEX.getIndexName(),
                     query, Summary.class));
         } catch (IOException e) {
             log.error("Search for metric values error:{}", e.getMessage());
@@ -377,7 +377,7 @@ public class ElasticSearchMapper extends SearchMapper {
             searchRequestBuilder.aggregations("namespaceAgg",
                     agg -> agg.terms(term -> term.field("namespace")));
         }
-        searchRequestBuilder.index(ElasticSearchIndex.SERVICE_INDEX.getIndexName());
+        searchRequestBuilder.index(ElasticsearchIndex.SERVICE_INDEX.getIndexName());
         List<String> namespaceList = new ArrayList<>();
         if (StringUtils.isNotEmpty(query)) {
             List<Service> serviceList =
@@ -393,7 +393,7 @@ public class ElasticSearchMapper extends SearchMapper {
                             .distinct()
                             .toList();
         } else {
-            searchRequestBuilder.size(ElasticSearchConstants.MAX_PAGE_SIZE);
+            searchRequestBuilder.size(ElasticsearchConstants.MAX_PAGE_SIZE);
             SearchResponse<Service> searchResponse = ElasticSearchUtil
                     .simpleSearch(searchRequestBuilder, Service.class);
             Aggregate namespaceAgg = searchResponse.aggregations().get("namespaceAgg");
@@ -423,7 +423,7 @@ public class ElasticSearchMapper extends SearchMapper {
                     agg -> agg.terms(term -> term.field("severityText")));
         }
         List<String> severityList = new ArrayList<>();
-        searchRequestBuilder.index(ElasticSearchIndex.LOG_INDEX.getIndexName());
+        searchRequestBuilder.index(ElasticsearchIndex.LOG_INDEX.getIndexName());
         if (StringUtils.isNotEmpty(query)) {
             List<Log> logList =
                     ElasticSearchUtil.scrollSearch(searchRequestBuilder, Log.class);
@@ -438,7 +438,7 @@ public class ElasticSearchMapper extends SearchMapper {
                             .distinct()
                             .toList();
         } else {
-            searchRequestBuilder.size(ElasticSearchConstants.MAX_PAGE_SIZE);
+            searchRequestBuilder.size(ElasticsearchConstants.MAX_PAGE_SIZE);
             SearchResponse<Log> searchResponse =
                     ElasticSearchUtil.simpleSearch(searchRequestBuilder, Log.class);
             Aggregate severityAgg = searchResponse.aggregations().get("severityAgg");

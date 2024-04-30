@@ -5,7 +5,7 @@ import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import edu.npu.arktouros.model.otel.Source;
-import edu.npu.arktouros.model.otel.basic.EsProperties;
+import edu.npu.arktouros.model.otel.basic.ElasticsearchProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import io.micrometer.common.util.StringUtils;
 import lombok.Data;
@@ -44,18 +44,18 @@ public abstract class Metric implements Source {
                                     keywordProperty -> keywordProperty.index(true)))));
 
     protected static Map<String, Property> metricBaseMap = Map.of(
-            "name",EsProperties.keywordIndexProperty,
-            "serviceName", EsProperties.keywordIndexProperty,
+            "name", ElasticsearchProperties.keywordIndexProperty,
+            "serviceName", ElasticsearchProperties.keywordIndexProperty,
             "description", Property.of(property ->
-                    property.text(EsProperties.textKeywordProperty)),
+                    property.text(ElasticsearchProperties.textKeywordProperty)),
             "labels", Property.of(property ->
                     property.nested(NestedProperty.of(
                             ne -> ne.properties(labelProperty)))),
             "timestamp", Property.of(property ->
                     property.date(DateProperty.of(
                             date -> date.index(true).format("epoch_millis")))),
-            "sourceType", EsProperties.keywordIndexProperty,
-            "metricType", EsProperties.keywordIndexProperty
+            "sourceType", ElasticsearchProperties.keywordIndexProperty,
+            "metricType", ElasticsearchProperties.keywordIndexProperty
     );
 
     protected Metric(String name, String description,

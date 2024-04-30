@@ -7,7 +7,7 @@ import co.elastic.clients.elasticsearch._types.mapping.Property;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.npu.arktouros.model.otel.Source;
-import edu.npu.arktouros.model.otel.basic.EsProperties;
+import edu.npu.arktouros.model.otel.basic.ElasticsearchProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import edu.npu.arktouros.model.otel.basic.Tag;
 import lombok.AllArgsConstructor;
@@ -95,14 +95,14 @@ public class Log implements Source {
     }
 
     static {
-        documentMap.put("serviceName", EsProperties.keywordIndexProperty);
-        documentMap.put("traceId", EsProperties.keywordIndexProperty);
-        documentMap.put("spanId", EsProperties.keywordIndexProperty);
-        documentMap.put("type", EsProperties.keywordIndexProperty);
+        documentMap.put("serviceName", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("traceId", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("spanId", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("type", ElasticsearchProperties.keywordIndexProperty);
         documentMap.put("content", Property.of(property ->
-                property.text(EsProperties.textKeywordProperty)
+                property.text(ElasticsearchProperties.textKeywordProperty)
         ));
-        documentMap.put("severityText", EsProperties.keywordIndexProperty);
+        documentMap.put("severityText", ElasticsearchProperties.keywordIndexProperty);
         documentMap.put("tags", Property.of(property ->
                 property.nested(NestedProperty.of(
                         na -> na.properties(Tag.documentMap)))

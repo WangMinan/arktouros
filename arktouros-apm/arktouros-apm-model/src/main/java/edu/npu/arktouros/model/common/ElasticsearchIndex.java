@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 
 /**
  * @author : [wangminan]
- * @description : ElasticSearch索引常量
+ * @description : Elasticsearch索引常量
  */
 @Getter
-public enum ElasticSearchIndex {
+public enum ElasticsearchIndex {
     SERVICE_INDEX("arktouros-service"),
     LOG_INDEX("arktouros-log"),
     SPAN_INDEX("arktouros-span"),
@@ -22,13 +22,13 @@ public enum ElasticSearchIndex {
 
     private final String indexName;
 
-    ElasticSearchIndex(String indexName) {
+    ElasticsearchIndex(String indexName) {
         this.indexName = indexName;
     }
 
     public static List<String> getIndexList() {
-        return Arrays.stream(ElasticSearchIndex.values())
-                .map(ElasticSearchIndex::getIndexName)
+        return Arrays.stream(ElasticsearchIndex.values())
+                .map(ElasticsearchIndex::getIndexName)
                 .collect(Collectors.toList());
     }
 }

@@ -4,7 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
-import edu.npu.arktouros.model.common.ElasticSearchIndex;
+import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;
@@ -32,18 +32,18 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author : [wangminan]
- * @description : ElasticSearch数据持久化
+ * @description : Elasticsearch数据持久化
  */
 @Slf4j
-public class ElasticSearchSinkService extends SinkService {
+public class ElasticsearchSinkService extends SinkService {
 
     private final ExecutorService createIndexThreadPool =
             new ThreadPoolExecutor(
-                    ElasticSearchIndex.getIndexList().size(),
-                    ElasticSearchIndex.getIndexList().size(),
+                    ElasticsearchIndex.getIndexList().size(),
+                    ElasticsearchIndex.getIndexList().size(),
                     0L,
                     TimeUnit.MILLISECONDS,
-                    new ArrayBlockingQueue<>(ElasticSearchIndex.getIndexList().size()),
+                    new ArrayBlockingQueue<>(ElasticsearchIndex.getIndexList().size()),
                     new BasicThreadFactory.Builder()
                             .namingPattern("ElasticSearch-init-%d").build(),
                     new ThreadPoolExecutor.AbortPolicy()
@@ -52,10 +52,10 @@ public class ElasticSearchSinkService extends SinkService {
     @Override
     public void init() {
         log.info("Check and init mappings in elasticsearch.");
-        CountDownLatch createIndexLatch = new CountDownLatch(ElasticSearchIndex.getIndexList().size());
+        CountDownLatch createIndexLatch = new CountDownLatch(ElasticsearchIndex.getIndexList().size());
         // 先判断各索引是否存在 不存在则创建 并行操作
         List<Thread> initThreads = new ArrayList<>();
-        ElasticSearchIndex.getIndexList().forEach(indexName -> {
+        ElasticsearchIndex.getIndexList().forEach(indexName -> {
             Thread thread = new Thread(() -> {
                 try {
                     checkAndCreate(indexName, createIndexLatch);
@@ -118,25 +118,25 @@ public class ElasticSearchSinkService extends SinkService {
     private static CreateIndexRequest.Builder getCreateIndexRequestBuilder(String indexName) {
         CreateIndexRequest.Builder createIndexRequestBuilder = new CreateIndexRequest.Builder();
         createIndexRequestBuilder.index(indexName);
-        if (ElasticSearchIndex.SERVICE_INDEX.getIndexName().equals(indexName)) {
+        if (ElasticsearchIndex.SERVICE_INDEX.getIndexName().equals(indexName)) {
             createIndexRequestBuilder.mappings(typeMappingBuilder ->
                     typeMappingBuilder.properties(Service.documentMap));
-        } else if (ElasticSearchIndex.LOG_INDEX.getIndexName().equals(indexName)) {
+        } else if (ElasticsearchIndex.LOG_INDEX.getIndexName().equals(indexName)) {
             createIndexRequestBuilder.mappings(typeMappingBuilder ->
                     typeMappingBuilder.properties(Log.documentMap));
-        } else if (ElasticSearchIndex.SPAN_INDEX.getIndexName().equals(indexName)) {
+        } else if (ElasticsearchIndex.SPAN_INDEX.getIndexName().equals(indexName)) {
             createIndexRequestBuilder.mappings(typeMappingBuilder ->
                     typeMappingBuilder.properties(Span.documentMap));
-        } else if (ElasticSearchIndex.GAUGE_INDEX.getIndexName().equals(indexName)) {
+        } else if (ElasticsearchIndex.GAUGE_INDEX.getIndexName().equals(indexName)) {
             createIndexRequestBuilder.mappings(typeMappingBuilder ->
                     typeMappingBuilder.properties(Gauge.documentMap));
-        } else if (ElasticSearchIndex.COUNTER_INDEX.getIndexName().equals(indexName)) {
+        } else if (ElasticsearchIndex.COUNTER_INDEX.getIndexName().equals(indexName)) {
             createIndexRequestBuilder.mappings(typeMappingBuilder ->
                     typeMappingBuilder.properties(Counter.documentMap));
-        } else if (ElasticSearchIndex.SUMMARY_INDEX.getIndexName().equals(indexName)) {
+        } else if (ElasticsearchIndex.SUMMARY_INDEX.getIndexName().equals(indexName)) {
             createIndexRequestBuilder.mappings(typeMappingBuilder ->
                     typeMappingBuilder.properties(Summary.documentMap));
-        } else if (ElasticSearchIndex.HISTOGRAM_INDEX.getIndexName().equals(indexName)) {
+        } else if (ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName().equals(indexName)) {
             createIndexRequestBuilder.mappings(typeMappingBuilder ->
                     typeMappingBuilder.properties(Histogram.documentMap));
         }
@@ -152,14 +152,14 @@ public class ElasticSearchSinkService extends SinkService {
                     Service.builder().name(sourceMetric.getServiceName()).build();
             esClient.index(builder -> builder
                     .id(service.getId())
-                    .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
+                    .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
                     .document(service)
             );
             switch (sourceMetric.getMetricType()) {
                 case COUNTER:
                     try {
                         esClient.index(builder -> builder
-                                .index(ElasticSearchIndex.COUNTER_INDEX.getIndexName())
+                                .index(ElasticsearchIndex.COUNTER_INDEX.getIndexName())
                                 .document(sourceMetric)
                         );
                     } catch (IOException e) {
@@ -170,7 +170,7 @@ public class ElasticSearchSinkService extends SinkService {
                 case GAUGE:
                     try {
                         esClient.index(builder -> builder
-                                .index(ElasticSearchIndex.GAUGE_INDEX.getIndexName())
+                                .index(ElasticsearchIndex.GAUGE_INDEX.getIndexName())
                                 .document(sourceMetric)
                         );
                         log.info("Sink gauge to elasticsearch success.");
@@ -182,7 +182,7 @@ public class ElasticSearchSinkService extends SinkService {
                 case SUMMARY:
                     try {
                         esClient.index(builder -> builder
-                                .index(ElasticSearchIndex.SUMMARY_INDEX.getIndexName())
+                                .index(ElasticsearchIndex.SUMMARY_INDEX.getIndexName())
                                 .document(sourceMetric)
                         );
                         log.info("Sink summary to elasticsearch success.");
@@ -194,7 +194,7 @@ public class ElasticSearchSinkService extends SinkService {
                 case HISTOGRAM:
                     try {
                         esClient.index(builder -> builder
-                                .index(ElasticSearchIndex.HISTOGRAM_INDEX.getIndexName())
+                                .index(ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName())
                                 .document(sourceMetric)
                         );
                         log.info("Sink histogram to elasticsearch success.");
@@ -214,11 +214,11 @@ public class ElasticSearchSinkService extends SinkService {
                         Service service = Service.builder().name(sourceLog.getServiceName()).build();
                         esClient.index(builder -> builder
                                 .id(service.getId())
-                                .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
+                                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
                                 .document(service)
                         );
                         esClient.index(builder -> builder
-                                .index(ElasticSearchIndex.LOG_INDEX.getIndexName())
+                                .index(ElasticsearchIndex.LOG_INDEX.getIndexName())
                                 .document(sourceLog)
                         );
                         log.info("Sink log to elasticsearch success.");
@@ -232,11 +232,11 @@ public class ElasticSearchSinkService extends SinkService {
                         Service service = Service.builder().name(sourceSpan.getServiceName()).build();
                         esClient.index(builder -> builder
                                 .id(service.getId())
-                                .index(ElasticSearchIndex.SERVICE_INDEX.getIndexName())
+                                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
                                 .document(service)
                         );
                         esClient.index(builder -> builder
-                                .index(ElasticSearchIndex.SPAN_INDEX.getIndexName())
+                                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                                 .id(sourceSpan.getId())
                                 .document(sourceSpan)
                         );

@@ -5,7 +5,7 @@ import co.elastic.clients.elasticsearch._types.mapping.DateProperty;
 import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import edu.npu.arktouros.model.otel.Source;
-import edu.npu.arktouros.model.otel.basic.EsProperties;
+import edu.npu.arktouros.model.otel.basic.ElasticsearchProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
@@ -81,15 +81,15 @@ public class Span implements Source {
     }
 
     static {
-        documentMap.put("name", EsProperties.keywordIndexProperty);
-        documentMap.put("id", EsProperties.keywordIndexProperty);
-        documentMap.put("serviceName", EsProperties.keywordIndexProperty);
+        documentMap.put("name", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("id", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("serviceName", ElasticsearchProperties.keywordIndexProperty);
         documentMap.put("traceId", Property.of(property ->
                 property.keyword(KeywordProperty.of(
                         keywordProperty -> keywordProperty.index(true)))
         ));
-        documentMap.put("parentSpanId", EsProperties.keywordIndexProperty);
-        documentMap.put("type", EsProperties.keywordIndexProperty);
+        documentMap.put("parentSpanId", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("type", ElasticsearchProperties.keywordIndexProperty);
         documentMap.put("startTime", Property.of(property ->
                 property.date(DateProperty.of(
                         date -> date.index(true).format("epoch_millis")))

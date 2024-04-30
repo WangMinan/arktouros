@@ -8,11 +8,11 @@ import java.util.Map;
 
 /**
  * @author : [wangminan]
- * @description : ElasticSearch常用的properties
+ * @description : Elasticsearch常用的properties
  */
-public class EsProperties {
+public class ElasticsearchProperties {
 
-    private EsProperties(){}
+    private ElasticsearchProperties(){}
 
     public static final Property keywordIndexProperty = Property.of(property ->
             property.keyword(KeywordProperty.of(

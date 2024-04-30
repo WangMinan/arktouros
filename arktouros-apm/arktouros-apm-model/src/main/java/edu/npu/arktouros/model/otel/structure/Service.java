@@ -4,7 +4,7 @@ import co.elastic.clients.elasticsearch._types.mapping.BooleanProperty;
 import co.elastic.clients.elasticsearch._types.mapping.IntegerNumberProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import edu.npu.arktouros.model.otel.Source;
-import edu.npu.arktouros.model.otel.basic.EsProperties;
+import edu.npu.arktouros.model.otel.basic.ElasticsearchProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import edu.npu.arktouros.model.otel.basic.Tag;
 import lombok.AllArgsConstructor;
@@ -46,12 +46,12 @@ public class Service implements Source {
     public static final Map<String, Property> documentMap = new HashMap<>();
 
     static {
-        documentMap.put("id", EsProperties.keywordIndexProperty);
-        documentMap.put("name", EsProperties.keywordIndexProperty);
-        documentMap.put("namespace", EsProperties.keywordIndexProperty);
-        documentMap.put("nodeId", EsProperties.keywordIndexProperty);
-        documentMap.put("type", EsProperties.keywordIndexProperty);
-        documentMap.put("nodeName", EsProperties.keywordIndexProperty);
+        documentMap.put("id", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("name", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("namespace", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("nodeId", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("type", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("nodeName", ElasticsearchProperties.keywordIndexProperty);
         documentMap.put("latency", Property.of(property ->
                 property.integer(IntegerNumberProperty.of(
                         integerNumberProperty ->
@@ -61,7 +61,7 @@ public class Service implements Source {
                         integerNumberProperty ->
                                 integerNumberProperty.index(true).store(true)))));
         documentMap.put("rpcStatusCode", Property.of(property ->
-                property.text(EsProperties.textKeywordProperty)));
+                property.text(ElasticsearchProperties.textKeywordProperty)));
         documentMap.put("status", Property.of(property ->
                 property.boolean_(BooleanProperty.of(
                         booleanProperty -> booleanProperty.index(true).store(true)))));

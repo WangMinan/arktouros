@@ -3,7 +3,7 @@ package edu.npu.arktouros.model.otel.structure;
 import co.elastic.clients.elasticsearch._types.mapping.IntegerNumberProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import edu.npu.arktouros.model.otel.Source;
-import edu.npu.arktouros.model.otel.basic.EsProperties;
+import edu.npu.arktouros.model.otel.basic.ElasticsearchProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,8 +49,8 @@ public class EndPoint implements Source {
     public static final Map<String, Property> documentMap = new HashMap<>();
 
     static {
-        documentMap.put("serviceName", EsProperties.keywordIndexProperty);
-        documentMap.put("ip", EsProperties.keywordIndexProperty);
+        documentMap.put("serviceName", ElasticsearchProperties.keywordIndexProperty);
+        documentMap.put("ip", ElasticsearchProperties.keywordIndexProperty);
         documentMap.put("port", Property.of(property ->
                 property.integer(IntegerNumberProperty.of(integerNumberProperty
                         -> integerNumberProperty.index(true))
@@ -61,6 +61,6 @@ public class EndPoint implements Source {
                         -> integerNumberProperty.index(true))
                 )
         ));
-        documentMap.put("type", EsProperties.keywordIndexProperty);
+        documentMap.put("type", ElasticsearchProperties.keywordIndexProperty);
     }
 }

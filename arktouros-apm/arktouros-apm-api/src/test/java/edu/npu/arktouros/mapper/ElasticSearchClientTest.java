@@ -8,7 +8,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.npu.arktouros.mapper.otel.search.SearchMapper;
-import edu.npu.arktouros.model.common.ElasticSearchIndex;
+import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.structure.Service;
@@ -85,7 +85,7 @@ class ElasticSearchClientTest {
                 .value("telemetrygen")
                 .build();
         SearchRequest searchRequest = new SearchRequest.Builder()
-                .index(ElasticSearchIndex.SPAN_INDEX.getIndexName())
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(query._toQuery())
                 .build();
         try {
@@ -105,7 +105,7 @@ class ElasticSearchClientTest {
     void testLogDecode() throws JsonProcessingException {
 
         SearchRequest searchRequest = new SearchRequest.Builder()
-                .index(ElasticSearchIndex.LOG_INDEX.getIndexName())
+                .index(ElasticsearchIndex.LOG_INDEX.getIndexName())
                 .query(new MatchAllQuery.Builder().build()._toQuery())
 //                .sort(sort)
                 .build();
@@ -156,7 +156,7 @@ class ElasticSearchClientTest {
     void scrollSearchTest() {
         SearchRequest.Builder searchRequestBuilder =
                 new SearchRequest.Builder()
-                        .index(ElasticSearchIndex.GAUGE_INDEX.getIndexName())
+                        .index(ElasticsearchIndex.GAUGE_INDEX.getIndexName())
                         .size(10);
         List<Gauge> gauges = ElasticSearchUtil.scrollSearch(searchRequestBuilder, Gauge.class);
         log.info("result:{}", gauges);

@@ -49,9 +49,9 @@ public class Tag {
     }
 
     static {
-        documentMap.put("key", EsProperties.keywordIndexProperty);
+        documentMap.put("key", ElasticsearchProperties.keywordIndexProperty);
         documentMap.put("value", Property.of(property ->
-                property.text(EsProperties.textKeywordProperty)
+                property.text(ElasticsearchProperties.textKeywordProperty)
         ));
     }
 

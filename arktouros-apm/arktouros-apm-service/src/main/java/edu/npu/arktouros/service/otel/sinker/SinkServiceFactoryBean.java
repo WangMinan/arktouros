@@ -1,6 +1,6 @@
 package edu.npu.arktouros.service.otel.sinker;
 
-import edu.npu.arktouros.service.otel.sinker.elasticsearch.ElasticSearchSinkService;
+import edu.npu.arktouros.service.otel.sinker.elasticsearch.ElasticsearchSinkService;
 import edu.npu.arktouros.service.otel.sinker.h2.H2SinkService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
@@ -26,7 +26,7 @@ public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
     public SinkService getObject() {
         if (sinkService == null) {
             if (activeSinker.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
-                sinkService = new ElasticSearchSinkService();
+                sinkService = new ElasticsearchSinkService();
             } else if (activeSinker.toLowerCase(Locale.ROOT).equals("h2")) {
                 sinkService = new H2SinkService();
             } else {
