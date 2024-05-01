@@ -15,6 +15,7 @@ git submodule update --init --recursive
 本地编译至少需要JDK21的基础环境，推荐选用Graal-JDK-21
 
 执行命令
+
 ```shell
 mvn -Dmaven.test.skip=true clean package
 ```
