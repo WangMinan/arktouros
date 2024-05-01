@@ -122,7 +122,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
                             .value(point.hasAsDouble() ?
                                     point.getAsDouble() : point.getAsInt())
                             .timestamp(
-                                    TimeUnit.NANOSECONDS.toMicros(point.getTimeUnixNano()))
+                                    TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
                             .build());
         }
         if (metric.hasSum()) {
@@ -138,7 +138,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
                                 buildLabels(point.getAttributesList())))
                         .description(metric.getDescription())
                         .value(point.hasAsDouble() ? point.getAsDouble() : point.getAsInt())
-                        .timestamp(TimeUnit.NANOSECONDS.toMicros(point.getTimeUnixNano()))
+                        .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
                         .build());
             }
             if (sum.getIsMonotonic()) {
@@ -150,7 +150,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
                                 .description(metric.getDescription())
                                 .labels(mergeLabels(nodeLabels, buildLabels(point.getAttributesList())))
                                 .value(point.hasAsDouble() ? point.getAsDouble() : point.getAsInt())
-                                .timestamp(TimeUnit.NANOSECONDS.toMicros(point.getTimeUnixNano()))
+                                .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
                                 .build()
                         );
             } else {
@@ -162,7 +162,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
                                         buildLabels(point.getAttributesList())))
                                 .description(metric.getDescription())
                                 .value(point.hasAsDouble() ? point.getAsDouble() : point.getAsInt())
-                                .timestamp(TimeUnit.NANOSECONDS.toMicros(point.getTimeUnixNano()))
+                                .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
                                 .build());
             }
         }
@@ -179,7 +179,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
                             .sampleSum(point.getSum())
                             .buckets(buildBuckets(point.getBucketCountsList(),
                                     point.getExplicitBoundsList()))
-                            .timestamp(TimeUnit.NANOSECONDS.toMicros(point.getTimeUnixNano()))
+                            .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
                             .build()
                     );
         }
@@ -198,7 +198,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
                                     point.getNegative().getOffset(),
                                     point.getNegative().getBucketCountsList(),
                                     point.getScale()))
-                            .timestamp(TimeUnit.NANOSECONDS.toMicros(point.getTimeUnixNano()))
+                            .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
                             .build()
                     );
         }
@@ -216,7 +216,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
                                     .stream()
                                     .collect(toMap(SummaryDataPoint.ValueAtQuantile::getQuantile,
                                             SummaryDataPoint.ValueAtQuantile::getValue)))
-                            .timestamp(TimeUnit.NANOSECONDS.toMicros(point.getTimeUnixNano()))
+                            .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
                             .build()
                     );
         }

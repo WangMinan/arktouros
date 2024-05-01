@@ -66,6 +66,11 @@ public class JacksonConfig {
                     .serializerByType(Long.TYPE, ToStringSerializer.instance);
             jacksonObjectMapperBuilder
                     .serializerByType(Long.class, ToStringSerializer.instance);
+            // gauge修正
+            jacksonObjectMapperBuilder
+                    .serializerByType(Double.TYPE, ToStringSerializer.instance);
+            jacksonObjectMapperBuilder
+                    .serializerByType(Double.class, ToStringSerializer.instance);
             jacksonObjectMapperBuilder
                     .serializerByType(LocalDateTime.class, localDateTimeSerializer());
             jacksonObjectMapperBuilder

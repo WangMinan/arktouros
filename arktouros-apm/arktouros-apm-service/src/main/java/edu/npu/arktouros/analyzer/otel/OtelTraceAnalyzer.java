@@ -131,8 +131,8 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         }
         builder.id(OtelAnalyzerUtil.convertSpanId(otelSpan.getSpanId(), otelSpan.getName()))
                 .parentSpanId(OtelAnalyzerUtil.convertSpanId(otelSpan.getParentSpanId()))
-                .startTime(TimeUnit.NANOSECONDS.toMicros(otelSpan.getStartTimeUnixNano()))
-                .endTime(TimeUnit.NANOSECONDS.toMicros(otelSpan.getStartTimeUnixNano()));
+                .startTime(TimeUnit.NANOSECONDS.toMillis(otelSpan.getStartTimeUnixNano()))
+                .endTime(TimeUnit.NANOSECONDS.toMillis(otelSpan.getStartTimeUnixNano()));
         final Set<String> redundantKeys = new HashSet<>();
         builder.localEndPoint((convertEndpointFromTags(tags, serviceName,
                 false, redundantKeys)));

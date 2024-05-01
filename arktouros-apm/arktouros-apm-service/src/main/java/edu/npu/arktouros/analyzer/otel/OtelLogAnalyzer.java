@@ -83,7 +83,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
                             logRecord -> {
                                 Log sourceLog = Log.builder()
                                         .serviceName(nodeLabels.get("job_name"))
-                                        .timestamp(TimeUnit.NANOSECONDS.toMicros(
+                                        .timestamp(TimeUnit.NANOSECONDS.toMillis(
                                                 logRecord.getTimeUnixNano()))
                                         .content(logRecord.getBody().getStringValue())
                                         .spanId(OtelAnalyzerUtil.convertSpanId(logRecord.getSpanId()))
