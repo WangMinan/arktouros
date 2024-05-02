@@ -1,4 +1,4 @@
-package edu.npu.config;
+package edu.npu.arktouros.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;

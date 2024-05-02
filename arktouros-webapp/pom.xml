@@ -123,12 +123,12 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>npm ci</id>
+                        <id>npm install</id>
                         <goals>
                             <goal>npm</goal>
                         </goals>
                         <configuration>
-                            <arguments>ci --registry=https://registry.npmjs.org/</arguments>
+                            <arguments>install --registry=https://registry.npmjs.org/</arguments>
                         </configuration>
                     </execution>
                     <execution>
@@ -189,7 +189,7 @@
                 <configuration>
                     <excludes>
                         <exclude>application.yaml</exclude>
-                        <exclude>log4j2.xml</exclude>
+                        <exclude>logback.xml</exclude>
                     </excludes>
                 </configuration>
             </plugin>

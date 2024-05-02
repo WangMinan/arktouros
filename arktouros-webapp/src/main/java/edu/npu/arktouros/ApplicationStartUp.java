@@ -1,11 +1,11 @@
-package edu.npu;
+package edu.npu.arktouros;
 
 import com.linecorp.armeria.common.SessionProtocol;
 import com.linecorp.armeria.server.HttpService;
 import com.linecorp.armeria.server.Server;
 import com.linecorp.armeria.server.file.FileService;
 import com.linecorp.armeria.server.file.HttpFile;
-import edu.npu.config.PropertiesProvider;
+import edu.npu.arktouros.config.PropertiesProvider;
 import lombok.extern.slf4j.Slf4j;
 
 /**
