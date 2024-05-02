@@ -31,7 +31,7 @@ public class PropertiesProvider {
                                      "config", "application.yaml"))) {
             map = yaml.load(propertiesFileInputStream);
         } catch (IOException e) {
-            log.warn("Failed to load properties file from config. Trying to find it from resource dir");
+            log.warn("Failed to load properties file from config/application.yaml. Trying to find it from resource dir");
             try (InputStream propertiesFileInputStream =
                          PropertiesProvider.class.getResourceAsStream("/application.yaml")) {
                 map = yaml.load(propertiesFileInputStream);
