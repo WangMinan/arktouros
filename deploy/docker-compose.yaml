@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  arktouros-apm-server:
+    image: wangminan/arktouros-apm-server:latest
+    container_name: arktouros-apm-server
+    ports:
+      - "50050:50050"
+      - "50051:50051"
+    volumes:
+      # 配置文件目录映射进去
+      - /root/arktouros/apm/config:/arktouros/config
+      # 日志目录映射出来
+      - /root/arktouros/apm/logs:/arktouros/logs
+    networks:
+      - elastic
+    privileged: true
+  arktouros-ui:
+    image: wangminan/arktouros-ui:latest
+    container_name: arktouros-ui
+    ports:
+      - "50052:50052"
+    # 后于apm启动
+    depends_on:
+      - arktouros-apm-server
+    volumes:
+      - /root/arktouros/ui/config:/arktouros/config
+      - /root/arktouros/ui/logs:/arktouros/logs
+    networks:
+      - elastic
+    privileged: true
+
+networks:
+  elastic:
+    external: true

@@ -1,4 +1,4 @@
-name: backend-deploy.yml
+name: build-and-deploy.yml
 on:
   push:
     tags:
@@ -44,13 +44,22 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push Apm
-        id: docker_build_user
+        id: docker_build_apm
         uses: docker/build-push-action@v4
         with:
           context: ./
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:latest
+
+      - name: Build and push UI
+        id: docker_build_ui
+        uses: docker/build-push-action@v4
+        with:
+          context: ./arktouros-webapp
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-ui:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,13 +70,21 @@ jobs:
         with:
           submodules: 'recursive'
 
+#      - name: 传输apm-config文件夹到服务器
+#        run: |
+#          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources root@${{secrets.REMOTE_IP}}:/root/arktouros/apm/config
+#
+#      - name: 传输webapp-config文件夹到服务器
+#        run: |
+#          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-webapp/src/main/resources root@${{secrets.REMOTE_IP}}:/root/arktouros/ui/config
+
       - name: 传输docker-compose到服务器
         run: |
-          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources/docker-compose.yaml root@${{secrets.REMOTE_IP}}:/root/arktouros
+          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no deploy/docker-compose.yaml root@${{secrets.REMOTE_IP}}:/root/arktouros
 
       - name: 传输部署脚本到服务器
         run: |
-          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources/run.sh root@${{secrets.REMOTE_IP}}:/root/arktouros
+          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no deploy/run.sh root@${{secrets.REMOTE_IP}}:/root/arktouros
 
       - name: 授权并执行部署脚本
         run: |

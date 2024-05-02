@@ -186,6 +186,7 @@
 
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
+                <!-- 加上这两行配置之后需要你手动把配置文件拷到config目录下 -->
                 <configuration>
                     <excludes>
                         <exclude>application.yaml</exclude>
