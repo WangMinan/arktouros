@@ -1,4 +1,4 @@
-name: build-and-deploy.yml
+name: build-and-deploy-apm.yml
 on:
   push:
     tags:
@@ -52,15 +52,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:latest
 
-      - name: Build and push UI
-        id: docker_build_ui
-        uses: docker/build-push-action@v4
-        with:
-          context: ./arktouros-webapp
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-ui:latest
-
   deploy:
     runs-on: ubuntu-latest
     needs: build-and-push-image
@@ -84,8 +75,8 @@ jobs:
 
       - name: 传输部署脚本到服务器
         run: |
-          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no deploy/run.sh root@${{secrets.REMOTE_IP}}:/root/arktouros
+          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no deploy/run-backend.sh root@${{secrets.REMOTE_IP}}:/root/arktouros
 
       - name: 授权并执行部署脚本
         run: |
-          sshpass -p ${{secrets.REMOTE_PWD}} ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP}} "chmod +x /root/arktouros/run.sh && /root/arktouros/run.sh"
+          sshpass -p ${{secrets.REMOTE_PWD}} ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP}} "chmod +x /root/arktouros/run-backend && /root/arktouros/run-backend"

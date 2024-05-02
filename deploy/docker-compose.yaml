@@ -20,9 +20,6 @@ services:
     container_name: arktouros-ui
     ports:
       - "50052:50052"
-    # 后于apm启动
-    depends_on:
-      - arktouros-apm-server
     volumes:
       - /root/arktouros/ui/config:/arktouros/config
       - /root/arktouros/ui/logs:/arktouros/logs
