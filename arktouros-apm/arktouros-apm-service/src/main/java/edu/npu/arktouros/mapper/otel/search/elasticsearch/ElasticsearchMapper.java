@@ -197,16 +197,17 @@ public class ElasticsearchMapper extends SearchMapper {
                     .value(logQueryDto.severityText())
                     .build()._toQuery());
         }
+        RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
         if (logQueryDto.startTimestamp() != null) {
-            RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
             rangeQueryBuilder.field("timestamp")
                     .gte(JsonData.of(logQueryDto.startTimestamp()));
-            boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
         }
         if (logQueryDto.endTimestamp() != null) {
-            RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
             rangeQueryBuilder.field("timestamp")
                     .lte(JsonData.of(logQueryDto.endTimestamp()));
+        }
+
+        if (logQueryDto.startTimestamp() != null || logQueryDto.endTimestamp() != null) {
             boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
         }
 
@@ -328,16 +329,16 @@ public class ElasticsearchMapper extends SearchMapper {
         boolQueryBuilder.must(termQueryBuilder.build()._toQuery());
         boolQueryBuilder.must(new TermQuery.Builder()
                 .field("serviceName").value(serviceName).build()._toQuery());
+        RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
         if (startTimestamp != null) {
-            RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
             rangeQueryBuilder.field("timestamp")
                     .gte(JsonData.of(startTimestamp));
-            boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
         }
         if (endTimestamp != null) {
-            RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
             rangeQueryBuilder.field("timestamp")
                     .lte(JsonData.of(endTimestamp));
+        }
+        if (startTimestamp != null || endTimestamp != null) {
             boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
         }
         Query query = boolQueryBuilder.build()._toQuery();
