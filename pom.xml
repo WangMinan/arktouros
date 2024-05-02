@@ -13,6 +13,7 @@
         <module>arktouros-collector</module>
         <module>arktouros-apm</module>
         <module>arktouros-protocol</module>
+        <module>arktouros-webapp</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -45,6 +46,7 @@
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
         <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+        <front-end-maven-plugin.version>1.15.0</front-end-maven-plugin.version>
         <!-- maven plugin -->
 
         <springboot.version>3.2.5</springboot.version>
@@ -55,6 +57,7 @@
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
         <jackson.version>2.17.0-rc1</jackson.version>
         <elasticsearch-java.version>8.12.2</elasticsearch-java.version>
+        <armeria.version>1.28.4</armeria.version>
 
         <!-- commons -->
         <commons-lang3.version>3.14.0</commons-lang3.version>
@@ -233,6 +236,18 @@
                 <version>${jackson.version}</version>
             </dependency>
             <!-- jackson全家桶 -->
+
+            <dependency>
+                <groupId>com.linecorp.armeria</groupId>
+                <artifactId>armeria</artifactId>
+                <version>${armeria.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.aayushatharva.brotli4j</groupId>
+                        <artifactId>native-osx-x86_64</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -385,6 +400,12 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>${front-end-maven-plugin.version}</version>
             </plugin>
         </plugins>
     </build>

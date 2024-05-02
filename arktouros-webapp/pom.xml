@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>edu.npu</groupId>
+        <artifactId>arktouros</artifactId>
+        <version>0.0.1</version>
+    </parent>
+
+    <artifactId>arktouros-webapp</artifactId>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <version>${native-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>build-native</id>
+                                <goals>
+                                    <goal>compile-no-fork</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                            <execution>
+                                <id>test-native</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>test</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <fallback>false</fallback>
+                            <imageName>${project.artifactId}</imageName>
+                            <mainClass>${mainClass}</mainClass>
+                            <verbose>true</verbose>
+                            <!-- For Quick Build (22.1+) -->
+                            <quickBuild>true</quickBuild>
+                            <buildArgs>
+                                <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
+                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <!-- For mostly static native image (only on Linux AMD64 systems) -->
+                                <buildArg>-H:+StaticExecutableWithDynamicLibC</buildArg>
+                                <!-- To generate the Native Image build output JSON (22.3+) -->
+                                <buildArg>-H:BuildOutputJSONFile=build.json</buildArg>
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <properties>
+        <mainClass>edu.npu.arktouros.ApplicationStartUp</mainClass>
+        <ui.path>${project.parent.basedir}/arktouros-ui</ui.path>
+    </properties>
+
+    <dependencies>
+        <!-- armeria line开源的下一代高性能服务器 -->
+        <dependency>
+            <groupId>com.linecorp.armeria</groupId>
+            <artifactId>armeria</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.aayushatharva.brotli4j</groupId>
+                    <artifactId>native-osx-x86_64</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- logback全家桶 -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+        </dependency>
+        <!-- logback全家桶 -->
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>arktouros-webapp</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <configuration>
+                    <workingDirectory>${ui.path}</workingDirectory>
+                    <nodeVersion>v20.10.0</nodeVersion>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install node and npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>npm ci</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>ci --registry=https://registry.npmjs.org/</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm run build</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                    <resources>
+                        <resource>
+                            <targetPath>${basedir}/target/classes/public</targetPath>
+                            <directory>${ui.path}/dist</directory>
+                        </resource>
+                        <resource>
+                            <targetPath>${basedir}/target/classes</targetPath>
+                            <directory>src/main/resources</directory>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>${mainClass}</mainClass>
+                        </manifest>
+                    </archive>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>application.yaml</exclude>
+                        <exclude>log4j2.xml</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
