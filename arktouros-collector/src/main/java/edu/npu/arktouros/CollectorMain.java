@@ -2,8 +2,8 @@ package edu.npu.arktouros;
 
 import edu.npu.arktouros.config.InstanceProvider;
 import edu.npu.arktouros.config.PropertiesProvider;
-import edu.npu.arktouros.emit.AbstractEmitter;
-import edu.npu.arktouros.emit.grpc.GrpcEmitter;
+import edu.npu.arktouros.emitter.AbstractEmitter;
+import edu.npu.arktouros.emitter.grpc.GrpcEmitter;
 import edu.npu.arktouros.preHandler.AbstractPreHandler;
 import edu.npu.arktouros.receiver.AbstractReceiver;
 import lombok.extern.slf4j.Slf4j;

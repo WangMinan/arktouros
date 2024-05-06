@@ -1,4 +1,4 @@
-package edu.npu.arktouros.emit;
+package edu.npu.arktouros.emitter;
 
 import edu.npu.arktouros.cache.AbstractCache;
 import lombok.Getter;

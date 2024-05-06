@@ -1,10 +1,10 @@
-package edu.npu.arktouros.emit.grpc;
+package edu.npu.arktouros.emitter.grpc;
 
 import edu.npu.arktouros.cache.AbstractCache;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
 import edu.npu.arktouros.config.PropertiesProvider;
-import edu.npu.arktouros.emit.AbstractEmitter;
-import edu.npu.arktouros.emit.EmitterFactory;
+import edu.npu.arktouros.emitter.AbstractEmitter;
+import edu.npu.arktouros.emitter.EmitterFactory;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
