@@ -166,9 +166,9 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
             tags.put("otlp.link." + i,
                     idToHexString(link.getTraceId()) + "|" + idToHexString(link.getSpanId()) + "|" +
                             link.getTraceState() + "|" +
-                            link.getAttributesList().stream().flatMap(attr -> {
-                                return Stream.of(attr.getKey() + "=" + attr.getValue().getStringValue());
-                            }).collect(Collectors.joining(",")) + "|" +
+                            link.getAttributesList().stream().flatMap(
+                                    attr ->
+                                            Stream.of(attr.getKey() + "=" + attr.getValue().getStringValue())).collect(Collectors.joining(",")) + "|" +
                             link.getDroppedAttributesCount());
         }
     }

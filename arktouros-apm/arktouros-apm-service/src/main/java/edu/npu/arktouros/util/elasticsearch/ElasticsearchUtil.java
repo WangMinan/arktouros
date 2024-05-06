@@ -17,10 +17,10 @@ import java.util.List;
 
 /**
  * @author : [wangminan]
- * @description : ElasticSearchClient的进一步封装
+ * @description : ElasticsearchClient的进一步封装
  */
 @Slf4j
-public class ElasticSearchUtil {
+public class ElasticsearchUtil {
 
     public static <T> SearchResponse<T> simpleSearch(
             SearchRequest.Builder searchRequestBuilder, Class<T> clazz

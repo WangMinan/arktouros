@@ -14,7 +14,7 @@ import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.R;
-import edu.npu.arktouros.util.elasticsearch.ElasticSearchUtil;
+import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -158,7 +158,7 @@ class ElasticSearchClientTest {
                 new SearchRequest.Builder()
                         .index(ElasticsearchIndex.GAUGE_INDEX.getIndexName())
                         .size(10);
-        List<Gauge> gauges = ElasticSearchUtil.scrollSearch(searchRequestBuilder, Gauge.class);
+        List<Gauge> gauges = ElasticsearchUtil.scrollSearch(searchRequestBuilder, Gauge.class);
         log.info("result:{}", gauges);
     }
 }

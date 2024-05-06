@@ -36,7 +36,7 @@ import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.PageResultVo;
 import edu.npu.arktouros.model.vo.R;
-import edu.npu.arktouros.util.elasticsearch.ElasticSearchUtil;
+import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -79,7 +79,7 @@ public class ElasticsearchMapper extends SearchMapper {
                 .from(pageSize * (pageNum - 1))
                 .size(pageSize);
         SearchResponse<Service> searchResponse =
-                ElasticSearchUtil.simpleSearch(searchRequestBuilder, Service.class);
+                ElasticsearchUtil.simpleSearch(searchRequestBuilder, Service.class);
         return transformListResponseToR(searchResponse);
     }
 
@@ -219,7 +219,7 @@ public class ElasticsearchMapper extends SearchMapper {
                 .sort(sort);
 
         SearchResponse<Log> searchResponse =
-                ElasticSearchUtil.simpleSearch(searchRequestBuilder, Log.class);
+                ElasticsearchUtil.simpleSearch(searchRequestBuilder, Log.class);
         return transformListResponseToR(searchResponse);
     }
 
@@ -235,7 +235,7 @@ public class ElasticsearchMapper extends SearchMapper {
                 .from(endPointQueryDto.pageSize() * (endPointQueryDto.pageNum() - 1))
                 .size(endPointQueryDto.pageSize());
         SearchResponse<Span> searchResponse =
-                ElasticSearchUtil.simpleSearch(searchRequestBuilder, Span.class);
+                ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
         List<Hit<Span>> hits = searchResponse.hits().hits();
         R r = new R();
         r.put("code", ResponseCodeEnum.SUCCESS.getValue());
@@ -280,7 +280,7 @@ public class ElasticsearchMapper extends SearchMapper {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(termQueryBuilder.build()._toQuery());
-        return ElasticSearchUtil.scrollSearch(searchRequestBuilder, Span.class);
+        return ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
     }
 
     @Override
@@ -310,7 +310,7 @@ public class ElasticsearchMapper extends SearchMapper {
         searchRequestBuilder
                 .index(indexName)
                 .query(matchQueryBuilder.build()._toQuery());
-        return ElasticSearchUtil.scrollSearch(searchRequestBuilder, clazz)
+        return ElasticsearchUtil.scrollSearch(searchRequestBuilder, clazz)
                 .stream()
                 .map(Metric::getName)
                 .toList();
@@ -382,7 +382,7 @@ public class ElasticsearchMapper extends SearchMapper {
         List<String> namespaceList = new ArrayList<>();
         if (StringUtils.isNotEmpty(query)) {
             List<Service> serviceList =
-                    ElasticSearchUtil.scrollSearch(searchRequestBuilder, Service.class);
+                    ElasticsearchUtil.scrollSearch(searchRequestBuilder, Service.class);
             namespaceList =
                     serviceList.stream()
                             .map(hit -> {
@@ -395,7 +395,7 @@ public class ElasticsearchMapper extends SearchMapper {
                             .toList();
         } else {
             searchRequestBuilder.size(ElasticsearchConstants.MAX_PAGE_SIZE);
-            SearchResponse<Service> searchResponse = ElasticSearchUtil
+            SearchResponse<Service> searchResponse = ElasticsearchUtil
                     .simpleSearch(searchRequestBuilder, Service.class);
             Aggregate namespaceAgg = searchResponse.aggregations().get("namespaceAgg");
             List<StringTermsBucket> buckets = namespaceAgg.sterms().buckets().array();
@@ -427,7 +427,7 @@ public class ElasticsearchMapper extends SearchMapper {
         searchRequestBuilder.index(ElasticsearchIndex.LOG_INDEX.getIndexName());
         if (StringUtils.isNotEmpty(query)) {
             List<Log> logList =
-                    ElasticSearchUtil.scrollSearch(searchRequestBuilder, Log.class);
+                    ElasticsearchUtil.scrollSearch(searchRequestBuilder, Log.class);
             severityList =
                     logList.stream()
                             .map(hit -> {
@@ -441,7 +441,7 @@ public class ElasticsearchMapper extends SearchMapper {
         } else {
             searchRequestBuilder.size(ElasticsearchConstants.MAX_PAGE_SIZE);
             SearchResponse<Log> searchResponse =
-                    ElasticSearchUtil.simpleSearch(searchRequestBuilder, Log.class);
+                    ElasticsearchUtil.simpleSearch(searchRequestBuilder, Log.class);
             Aggregate severityAgg = searchResponse.aggregations().get("severityAgg");
             List<StringTermsBucket> buckets = severityAgg.sterms().buckets().array();
             for (StringTermsBucket bucket : buckets) {
@@ -465,7 +465,7 @@ public class ElasticsearchMapper extends SearchMapper {
         searchRequestBuilder.index(indexName)
                 .query(query)
                 .sort(sort);
-        return ElasticSearchUtil.scrollSearch(searchRequestBuilder, clazz);
+        return ElasticsearchUtil.scrollSearch(searchRequestBuilder, clazz);
     }
 
     private <T> R transformListResponseToR(SearchResponse<T> searchResponse) {
