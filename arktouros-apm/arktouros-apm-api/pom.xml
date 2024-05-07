@@ -125,6 +125,7 @@
                     <excludes>
                         <exclude>*.properties</exclude>
                         <exclude>**/*.properties</exclude>
+                        <exclude>*.yaml</exclude>
                         <exclude>*.yml</exclude>
                         <exclude>*.xml</exclude>
                         <exclude>**/*.xml</exclude>

@@ -77,11 +77,6 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-
         <!-- logback全家桶 -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -98,6 +93,38 @@
             <artifactId>logback-core</artifactId>
         </dependency>
         <!-- logback全家桶 -->
+
+        <!-- commons -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <!-- commons -->
+
+        <!-- Unit Test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Unit Test -->
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.yaml</groupId>
@@ -159,40 +186,56 @@
                     </resources>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>${mainClass}</mainClass>
+                        </manifest>
+                        <!-- 指定配置文件所在的文件夹 -->
+                        <manifestEntries>
+                            <Class-Path>config/</Class-Path>
+                        </manifestEntries>
+                    </archive>
+                    <!--将配置文件排除掉，不打包到jar文件内-->
+                    <excludes>
+                        <exclude>*.properties</exclude>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>*.yaml</exclude>
+                        <exclude>*.yml</exclude>
+                        <exclude>*.xml</exclude>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>*.conf</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <!-- assembly插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>${mainClass}</mainClass>
-                        </manifest>
-                    </archive>
-                    <appendAssemblyId>false</appendAssemblyId>
+                    <finalName>${project.artifactId}</finalName>
+                    <!--指定assembly配置文件配置-->
+                    <descriptors>
+                        <descriptor>/src/main/resources/assembly.xml</descriptor>
+                    </descriptors>
+                    <!--打包tar.gz输出位置-->
+                    <outputDirectory>../build</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <!-- 加上这两行配置之后需要你手动把配置文件拷到config目录下 -->
-                <configuration>
-                    <excludes>
-                        <exclude>application.yaml</exclude>
-                        <exclude>logback.xml</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
         </plugins>
     </build>

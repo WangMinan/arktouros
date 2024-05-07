@@ -120,11 +120,11 @@
 
     <!-- 根记录器 -->
     <root level="info">
-        <appender-ref ref="STDOUT_DEBUG"/>
+<!--        <appender-ref ref="STDOUT_DEBUG"/>-->
         <!-- 使用 STDOUT、ROLLING 输出记录的日志-->
         <appender-ref ref="STDOUT_INFO"/>
         <appender-ref ref="STDOUT_WARN"/>
         <appender-ref ref="STDOUT_ERROR"/>
-        <appender-ref ref="ROLLING"/>
+<!--        <appender-ref ref="ROLLING"/>-->
     </root>
 </configuration>

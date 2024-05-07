@@ -111,20 +111,20 @@
     </appender>
 
     <!-- 记录器 name : 包名或类名， level : 要记录的日志的起始级别， additivity : 是否追加父类的 appender -->
-<!--    <logger name="com.wqlm.boot" level="debug" additivity="false">-->
-<!--        <appender-ref ref="STDOUT_DEBUG"/>-->
-<!--        <appender-ref ref="STDOUT_INFO"/>-->
-<!--        <appender-ref ref="STDOUT_WARN"/>-->
-<!--        <appender-ref ref="STDOUT_ERROR"/>-->
-<!--    </logger>-->
+    <!--    <logger name="com.wqlm.boot" level="debug" additivity="false">-->
+    <!--        <appender-ref ref="STDOUT_DEBUG"/>-->
+    <!--        <appender-ref ref="STDOUT_INFO"/>-->
+    <!--        <appender-ref ref="STDOUT_WARN"/>-->
+    <!--        <appender-ref ref="STDOUT_ERROR"/>-->
+    <!--    </logger>-->
 
     <!-- 根记录器 -->
     <root level="info">
-        <appender-ref ref="STDOUT_DEBUG"/>
+        <!--        <appender-ref ref="STDOUT_DEBUG"/>-->
         <!-- 使用 STDOUT、ROLLING 输出记录的日志-->
         <appender-ref ref="STDOUT_INFO"/>
         <appender-ref ref="STDOUT_WARN"/>
         <appender-ref ref="STDOUT_ERROR"/>
-        <appender-ref ref="ROLLING"/>
+        <!--        <appender-ref ref="ROLLING"/>-->
     </root>
 </configuration>
