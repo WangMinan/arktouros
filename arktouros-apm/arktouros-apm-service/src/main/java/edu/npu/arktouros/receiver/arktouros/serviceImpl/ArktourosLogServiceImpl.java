@@ -13,10 +13,10 @@ import lombok.extern.slf4j.Slf4j;
  * @description : arktouros格式的otel service数据处理器
  */
 @Slf4j
-public class OtelLogServiceImpl extends LogServiceGrpc.LogServiceImplBase {
+public class ArktourosLogServiceImpl extends LogServiceGrpc.LogServiceImplBase {
     private final SinkService sinkService;
 
-    public OtelLogServiceImpl(SinkService sinkService) {
+    public ArktourosLogServiceImpl(SinkService sinkService) {
         this.sinkService = sinkService;
     }
 

@@ -1,9 +1,9 @@
 package edu.npu.arktouros.receiver.arktouros;
 
 import edu.npu.arktouros.receiver.DataReceiver;
-import edu.npu.arktouros.receiver.arktouros.serviceImpl.OtelLogServiceImpl;
-import edu.npu.arktouros.receiver.arktouros.serviceImpl.OtelMetricServiceImpl;
-import edu.npu.arktouros.receiver.arktouros.serviceImpl.OtelSpanServiceImpl;
+import edu.npu.arktouros.receiver.arktouros.serviceImpl.ArktourosLogServiceImpl;
+import edu.npu.arktouros.receiver.arktouros.serviceImpl.ArktourosMetricServiceImpl;
+import edu.npu.arktouros.receiver.arktouros.serviceImpl.ArktourosSpanServiceImpl;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -17,18 +17,18 @@ import java.util.concurrent.TimeUnit;
  * @description : Arktouros私有格式的otel数据接收器
  */
 @Slf4j
-public class OtelArktourosReceiver extends DataReceiver {
+public class ArktourosReceiver extends DataReceiver {
 
     private final int port;
     private final Server server;
 
-    public OtelArktourosReceiver(SinkService sinkService, int port) {
+    public ArktourosReceiver(SinkService sinkService, int port) {
         this.port = port;
         this.server = ServerBuilder
                 .forPort(port)
-                .addService(new OtelSpanServiceImpl(sinkService))
-                .addService(new OtelMetricServiceImpl(sinkService))
-                .addService(new OtelLogServiceImpl(sinkService))
+                .addService(new ArktourosSpanServiceImpl(sinkService))
+                .addService(new ArktourosMetricServiceImpl(sinkService))
+                .addService(new ArktourosLogServiceImpl(sinkService))
                 .build();
     }
 
@@ -36,7 +36,7 @@ public class OtelArktourosReceiver extends DataReceiver {
     public void start() {
         try {
             server.start();
-            log.info("OtelArktourosReceiver start to receive data, listening on port:{}", port);
+            log.info("ArktourosReceiver start to receive data, listening on port:{}", port);
         } catch (IOException e) {
             log.error("Grpc receiver start error", e);
             throw new RuntimeException(e);

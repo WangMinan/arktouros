@@ -18,11 +18,11 @@ import java.io.IOException;
  * @description : arktouros格式的otel metric数据处理器
  */
 @Slf4j
-public class OtelMetricServiceImpl extends MetricServiceGrpc.MetricServiceImplBase {
+public class ArktourosMetricServiceImpl extends MetricServiceGrpc.MetricServiceImplBase {
 
     private final SinkService sinkService;
 
-    public OtelMetricServiceImpl(SinkService sinkService) {
+    public ArktourosMetricServiceImpl(SinkService sinkService) {
         this.sinkService = sinkService;
     }
 

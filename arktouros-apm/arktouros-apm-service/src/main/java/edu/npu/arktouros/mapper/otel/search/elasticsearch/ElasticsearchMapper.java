@@ -187,11 +187,11 @@ public class ElasticsearchMapper extends SearchMapper {
                     .build()._toQuery());
         }
         if (StringUtils.isNotEmpty(logQueryDto.keywordNotIncluded())) {
-            boolQueryBuilder.filter(new MatchQuery.Builder()
+            boolQueryBuilder.mustNot(new MatchQuery.Builder()
                     .field("content")
                     .query(logQueryDto.keywordNotIncluded()).build()._toQuery());
         }
-        if (StringUtils.isNotEmpty(logQueryDto.severityText())) {
+        if (logQueryDto.severityText() != null) {
             boolQueryBuilder.filter(new TermQuery.Builder()
                     .field("severityText")
                     .value(logQueryDto.severityText())

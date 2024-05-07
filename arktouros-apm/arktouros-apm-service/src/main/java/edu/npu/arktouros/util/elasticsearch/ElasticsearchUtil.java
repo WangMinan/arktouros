@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import edu.npu.arktouros.config.PropertiesProvider;
+import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +22,18 @@ import java.util.List;
  */
 @Slf4j
 public class ElasticsearchUtil {
+
+    public static void sink(String id, String index, Source source) throws IOException {
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+        esClient.index(builder -> builder.id(id).index(index).document(source));
+        ElasticsearchClientPool.returnClient(esClient);
+    }
+
+    public static void sink(String index, Source source) throws IOException {
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+        esClient.index(builder -> builder.index(index).document(source));
+        ElasticsearchClientPool.returnClient(esClient);
+    }
 
     public static <T> SearchResponse<T> simpleSearch(
             SearchRequest.Builder searchRequestBuilder, Class<T> clazz

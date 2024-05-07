@@ -13,11 +13,11 @@ import lombok.extern.slf4j.Slf4j;
  * @description : arktouros格式的otel span数据处理器
  */
 @Slf4j
-public class OtelSpanServiceImpl extends SpanServiceGrpc.SpanServiceImplBase {
+public class ArktourosSpanServiceImpl extends SpanServiceGrpc.SpanServiceImplBase {
 
     private final SinkService sinkService;
 
-    public OtelSpanServiceImpl(SinkService sinkService) {
+    public ArktourosSpanServiceImpl(SinkService sinkService) {
         this.sinkService = sinkService;
     }
 

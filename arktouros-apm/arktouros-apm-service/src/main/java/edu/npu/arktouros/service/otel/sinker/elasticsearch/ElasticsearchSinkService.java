@@ -15,6 +15,7 @@ import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -146,22 +147,16 @@ public class ElasticsearchSinkService extends SinkService {
     @Override
     @Retryable(retryFor = IOException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
     public void sink(Source source) throws IOException {
-        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         if (source instanceof Metric sourceMetric) {
             Service service =
                     Service.builder().name(sourceMetric.getServiceName()).build();
-            esClient.index(builder -> builder
-                    .id(service.getId())
-                    .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
-                    .document(service)
-            );
+            ElasticsearchUtil.sink(service.getId(),
+                    ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);
             switch (sourceMetric.getMetricType()) {
                 case COUNTER:
                     try {
-                        esClient.index(builder -> builder
-                                .index(ElasticsearchIndex.COUNTER_INDEX.getIndexName())
-                                .document(sourceMetric)
-                        );
+                        ElasticsearchUtil.sink(
+                                ElasticsearchIndex.COUNTER_INDEX.getIndexName(), sourceMetric);
                     } catch (IOException e) {
                         log.error("Sink counter error.", e);
                         throw e;
@@ -169,10 +164,8 @@ public class ElasticsearchSinkService extends SinkService {
                     break;
                 case GAUGE:
                     try {
-                        esClient.index(builder -> builder
-                                .index(ElasticsearchIndex.GAUGE_INDEX.getIndexName())
-                                .document(sourceMetric)
-                        );
+                        ElasticsearchUtil.sink(
+                                ElasticsearchIndex.GAUGE_INDEX.getIndexName(), sourceMetric);
                         log.info("Sink gauge to elasticsearch success.");
                     } catch (IOException e) {
                         log.error("Sink gauge error.", e);
@@ -181,10 +174,8 @@ public class ElasticsearchSinkService extends SinkService {
                     break;
                 case SUMMARY:
                     try {
-                        esClient.index(builder -> builder
-                                .index(ElasticsearchIndex.SUMMARY_INDEX.getIndexName())
-                                .document(sourceMetric)
-                        );
+                        ElasticsearchUtil.sink(
+                                ElasticsearchIndex.SUMMARY_INDEX.getIndexName(), sourceMetric);
                         log.info("Sink summary to elasticsearch success.");
                     } catch (IOException e) {
                         log.error("Sink summary error.", e);
@@ -193,10 +184,8 @@ public class ElasticsearchSinkService extends SinkService {
                     break;
                 case HISTOGRAM:
                     try {
-                        esClient.index(builder -> builder
-                                .index(ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName())
-                                .document(sourceMetric)
-                        );
+                        ElasticsearchUtil.sink(
+                                ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName(), sourceMetric);
                         log.info("Sink histogram to elasticsearch success.");
                     } catch (IOException e) {
                         log.error("Sink histogram error.", e);
@@ -212,15 +201,10 @@ public class ElasticsearchSinkService extends SinkService {
                 case Log sourceLog:
                     try {
                         Service service = Service.builder().name(sourceLog.getServiceName()).build();
-                        esClient.index(builder -> builder
-                                .id(service.getId())
-                                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
-                                .document(service)
-                        );
-                        esClient.index(builder -> builder
-                                .index(ElasticsearchIndex.LOG_INDEX.getIndexName())
-                                .document(sourceLog)
-                        );
+                        ElasticsearchUtil.sink(service.getId(),
+                                ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);
+                        ElasticsearchUtil.sink(
+                                ElasticsearchIndex.LOG_INDEX.getIndexName(), sourceLog);
                         log.info("Sink log to elasticsearch success.");
                     } catch (IOException e) {
                         log.error("Sink log error.", e);
@@ -230,16 +214,10 @@ public class ElasticsearchSinkService extends SinkService {
                 case Span sourceSpan:
                     try {
                         Service service = Service.builder().name(sourceSpan.getServiceName()).build();
-                        esClient.index(builder -> builder
-                                .id(service.getId())
-                                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
-                                .document(service)
-                        );
-                        esClient.index(builder -> builder
-                                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
-                                .id(sourceSpan.getId())
-                                .document(sourceSpan)
-                        );
+                        ElasticsearchUtil.sink(service.getId(),
+                                ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);
+                        ElasticsearchUtil.sink(sourceSpan.getId(),
+                                ElasticsearchIndex.SPAN_INDEX.getIndexName(), sourceSpan);
                         log.info("Sink span to elasticsearch success.");
                     } catch (IOException e) {
                         log.error("Sink span error.", e);
@@ -250,6 +228,5 @@ public class ElasticsearchSinkService extends SinkService {
                     throw new IllegalStateException("Unexpected source type value: " + source);
             }
         }
-        ElasticsearchClientPool.returnClient(esClient);
     }
 }
