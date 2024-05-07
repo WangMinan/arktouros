@@ -1,4 +1,4 @@
-name: build-and-deploy-apm.yml
+name: "build-and-deploy-frontend"
 on:
   push:
     tags:
