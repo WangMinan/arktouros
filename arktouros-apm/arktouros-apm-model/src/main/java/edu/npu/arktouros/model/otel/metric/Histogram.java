@@ -48,9 +48,8 @@ public class Histogram extends Metric {
         super(histogram.getMetric());
         this.sampleCount = histogram.getSampleCount();
         this.sampleSum = histogram.getSampleSum();
-        histogram.getBucketsList().forEach(bucket -> {
-            this.buckets.put(bucket.getKey(), bucket.getValue());
-        });
+        histogram.getBucketsList().forEach(bucket ->
+                this.buckets.put(bucket.getKey(), bucket.getValue()));
     }
 
     private static final Map<String, Property> bucketsMap = new HashMap<>();
@@ -96,7 +95,7 @@ public class Histogram extends Metric {
                      @JsonProperty("timestamp") long timestamp) {
         super(name, description, labels, timestamp);
         getLabels().remove("le");
-        this.metricType = MetricType.HISTOGRAM;
+        metricType = MetricType.HISTOGRAM;
         this.sampleCount = sampleCount;
         this.sampleSum = sampleSum;
         this.buckets = buckets;

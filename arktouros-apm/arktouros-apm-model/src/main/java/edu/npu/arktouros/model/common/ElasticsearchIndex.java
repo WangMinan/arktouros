@@ -29,6 +29,6 @@ public enum ElasticsearchIndex {
     public static List<String> getIndexList() {
         return Arrays.stream(ElasticsearchIndex.values())
                 .map(ElasticsearchIndex::getIndexName)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

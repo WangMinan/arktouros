@@ -60,7 +60,7 @@ public class Counter extends Metric {
                    @JsonProperty("timestamp") long timestamp,
                    @JsonProperty("value") double value) {
         super(name, description, labels, timestamp);
-        this.metricType = MetricType.COUNTER;
+        metricType = MetricType.COUNTER;
         this.value = value;
     }
 

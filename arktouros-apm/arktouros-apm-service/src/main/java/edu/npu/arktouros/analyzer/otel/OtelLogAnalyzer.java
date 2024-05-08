@@ -35,10 +35,6 @@ public class OtelLogAnalyzer extends DataAnalyzer {
         this.sinkService = sinkService;
     }
 
-    static {
-
-    }
-
     public static void handle(ResourceLogs resourceLogs) {
         // 在新线程中进行分析
         try {
@@ -99,7 +95,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
                                                         .key(it.getKey())
                                                         .value(it.getValue())
                                                         .build())
-                                                .collect(Collectors.toList()))
+                                                .toList())
                                         .build();
                                 try {
                                     sinkService.sink(sourceLog);

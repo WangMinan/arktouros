@@ -45,7 +45,7 @@ public class Gauge extends Metric {
                  @JsonProperty("timestamp") long timestamp,
                  @JsonProperty("value") double value) {
         super(name, description, labels, timestamp);
-        this.metricType = MetricType.GAUGE;
+        metricType = MetricType.GAUGE;
         this.value = value;
     }
 

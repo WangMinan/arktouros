@@ -28,9 +28,8 @@ public class Summary extends Metric {
         super(summary.getMetric());
         this.sampleCount = summary.getSampleCount();
         this.sampleSum = summary.getSampleSum();
-        summary.getQuantilesList().forEach(quantile -> {
-            this.quantiles.put(quantile.getKey(), quantile.getValue());
-        });
+        summary.getQuantilesList().forEach(quantile ->
+                this.quantiles.put(quantile.getKey(), quantile.getValue()));
     }
 
     public static final Map<String, Property> documentMap = new HashMap<>();
@@ -70,7 +69,7 @@ public class Summary extends Metric {
                    @JsonProperty("quantiles") Map<Double, Double> quantiles) {
         super(name, description, labels, timestamp);
         getLabels().remove("quantile");
-        this.metricType = MetricType.SUMMARY;
+        metricType = MetricType.SUMMARY;
         this.sampleCount = sampleCount;
         this.sampleSum = sampleSum;
         this.quantiles = quantiles;

@@ -11,11 +11,11 @@ public class H2SinkService extends SinkService {
 
     @Override
     public void init() {
-
+        throw new UnsupportedOperationException("This method has not been implemented yet.");
     }
 
     @Override
     public void sink(Source source) {
-
+        throw new UnsupportedOperationException("This method has not been implemented yet.");
     }
 }

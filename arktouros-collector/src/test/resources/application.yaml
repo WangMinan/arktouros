@@ -1,0 +1,18 @@
+instance:
+  cache: LogQueueCache
+  receiver: OtlpLogFileReceiver
+  preHandler: OtlpLogPreHandler
+  emitter: GrpcEmitter
+
+receiver:
+  otlpLogFile:
+    logDir: otel_logs
+
+emitter:
+  grpc:
+    host: 38.147.172.149
+    port: 50051
+    keepAlive:
+      enabled: true # 是否进行连接检查 置空默认true
+      delay: 5 # timeunit seconds
+      maxRetryTimes: 3

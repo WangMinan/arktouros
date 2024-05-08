@@ -17,4 +17,9 @@ public abstract class AbstractEmitter extends Thread{
         this.setName("emitter-thread");
         this.inputCache = inputCache;
     }
+
+    @Override
+    public void run() {
+        super.run();
+    }
 }

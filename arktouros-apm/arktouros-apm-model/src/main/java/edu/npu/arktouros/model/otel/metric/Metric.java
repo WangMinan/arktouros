@@ -25,7 +25,7 @@ public abstract class Metric implements Source {
     protected Map<String, String> labels = new HashMap<>();
     protected long timestamp;
     protected final SourceType sourceType = SourceType.METRIC;
-    protected MetricType metricType = MetricType.METRIC;
+    protected static MetricType metricType = MetricType.METRIC;
 
     public Metric(edu.npu.arktouros.proto.metric.v1.Metric metric) {
         this.name = metric.getName();

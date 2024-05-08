@@ -7,4 +7,9 @@ package edu.npu.arktouros.analyzer;
 public abstract class DataAnalyzer extends Thread {
 
     public abstract void init();
+
+    @Override
+    public void run() {
+        super.run();
+    }
 }

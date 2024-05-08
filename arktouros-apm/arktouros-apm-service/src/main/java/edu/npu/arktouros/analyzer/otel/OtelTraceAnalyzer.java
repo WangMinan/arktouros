@@ -247,7 +247,7 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
 
     private boolean parseIp(String tmpVal) {
         // 是否符合ipv4或ipv6 用正则
-        String ipv4Pattern = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+        String ipv4Pattern = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$";
         String ipv6Pattern = "^([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4})$";
         return tmpVal.matches(ipv4Pattern) || tmpVal.matches(ipv6Pattern);
     }

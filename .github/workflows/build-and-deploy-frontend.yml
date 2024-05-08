@@ -1,11 +1,9 @@
 name: "build-and-deploy-frontend"
 on:
-#  push:
-#    tags:
-#      # 只有有tag的时候才触发部署操作
-#      - 'v*'
   push:
-    branches: [ "main" ]
+    tags:
+      # 只有有tag的时候才触发部署操作
+      - 'v*'
 
 jobs:
   build-and-push-image:
@@ -55,7 +53,6 @@ jobs:
           context: .
           file: ./Dockerfile-frontend
           push: true
-          no-cache: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-ui:latest
 

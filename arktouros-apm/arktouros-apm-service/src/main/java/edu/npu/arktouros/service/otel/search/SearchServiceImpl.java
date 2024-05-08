@@ -34,6 +34,8 @@ public class SearchServiceImpl implements SearchService {
     @Resource
     private SearchMapper searchMapper;
 
+    private static final String RESULT = "result";
+
 
     @Override
     public R getServiceList(ServiceQueryDto queryDto) {
@@ -77,7 +79,7 @@ public class SearchServiceImpl implements SearchService {
         topology.setNodes(topologyNodes);
         topology.setCalls(topologyCalls);
         R r = new R();
-        r.put("result", topology);
+        r.put(RESULT, topology);
         return r;
     }
 
@@ -130,7 +132,7 @@ public class SearchServiceImpl implements SearchService {
         buildTraceTree(List.of(rootTreeNode),
                 originalSpanList.stream().filter(span -> !span.equals(rootSpan)).toList());
         R r = new R();
-        r.put("result", new SpanTreeNodeVo(rootTreeNode));
+        r.put(RESULT, new SpanTreeNodeVo(rootTreeNode));
         return r;
     }
 
@@ -186,7 +188,7 @@ public class SearchServiceImpl implements SearchService {
             }
         });
         R r = new R();
-        r.put("result", metricVoList);
+        r.put(RESULT, metricVoList);
         return r;
     }
 

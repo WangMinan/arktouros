@@ -53,6 +53,7 @@ import java.util.Set;
  */
 @Slf4j
 public class ElasticsearchMapper extends SearchMapper {
+    private static final String RESULT = "result";
 
     @Override
     public R getServiceList(ServiceQueryDto queryDto) {
@@ -242,7 +243,7 @@ public class ElasticsearchMapper extends SearchMapper {
         Set<EndPoint> endPointSet = new HashSet<>();
         List<EndPointTraceIdVo> endPointTraceIdVoList = new ArrayList<>();
         if (hits.isEmpty()) {
-            r.put("result", new ArrayList<>());
+            r.put(RESULT, new ArrayList<>());
         } else {
             hits.forEach(hit -> {
                 if (hit.source() != null) {
@@ -268,7 +269,7 @@ public class ElasticsearchMapper extends SearchMapper {
                     }
                 }
             });
-            r.put("result", endPointTraceIdVoList);
+            r.put(RESULT, endPointTraceIdVoList);
         }
         return r;
     }
@@ -404,7 +405,7 @@ public class ElasticsearchMapper extends SearchMapper {
             }
         }
         R r = new R();
-        r.put("result", namespaceList);
+        r.put(RESULT, namespaceList);
         return r;
     }
 
@@ -449,7 +450,7 @@ public class ElasticsearchMapper extends SearchMapper {
             }
         }
         R r = new R();
-        r.put("result", severityList);
+        r.put(RESULT, severityList);
         return r;
     }
 
@@ -478,7 +479,7 @@ public class ElasticsearchMapper extends SearchMapper {
         }
         List<T> list = hits.stream().map(Hit::source).toList();
         PageResultVo<T> pageResult = new PageResultVo<>(total, list);
-        r.put("result", pageResult);
+        r.put(RESULT, pageResult);
         return r;
     }
 }

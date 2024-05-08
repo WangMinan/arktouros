@@ -110,117 +110,139 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
     // Adapt the OpenTelemetry metrics to Prometheus metrics
     private Stream<? extends Metric> adaptMetrics(final Map<String, String> nodeLabels, final io.opentelemetry.proto.metrics.v1.Metric metric) {
         if (metric.hasGauge()) {
-            return metric.getGauge()
-                    .getDataPointsList()
+            return processGaugeMetric(nodeLabels, metric);
+        }
+        if (metric.hasSum()) {
+            return processSumMetric(nodeLabels, metric);
+        }
+        if (metric.hasHistogram()) {
+            return processHistogramMetric(nodeLabels, metric);
+        }
+        if (metric.hasExponentialHistogram()) {
+            return processExponentialHistogram(nodeLabels, metric);
+        }
+        if (metric.hasSummary()) {
+            return processSummaryMetric(nodeLabels, metric);
+        }
+        throw new UnsupportedOperationException("Unsupported type");
+    }
+
+    private static Stream<Summary> processSummaryMetric(Map<String, String> nodeLabels, io.opentelemetry.proto.metrics.v1.Metric metric) {
+        return metric.getSummary()
+                .getDataPointsList()
+                .stream()
+                .map(point -> Summary.builder()
+                        .name(metric.getName())
+                        .description(metric.getDescription())
+                        .labels(mergeLabels(nodeLabels, buildLabels(point.getAttributesList())))
+                        .sampleCount(point.getCount())
+                        .sampleSum(point.getSum())
+                        .quantiles(point.getQuantileValuesList()
+                                .stream()
+                                .collect(toMap(SummaryDataPoint.ValueAtQuantile::getQuantile,
+                                        SummaryDataPoint.ValueAtQuantile::getValue)))
+                        .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
+                        .build()
+                );
+    }
+
+    private static Stream<Histogram> processExponentialHistogram(Map<String, String> nodeLabels, io.opentelemetry.proto.metrics.v1.Metric metric) {
+        return metric.getExponentialHistogram().getDataPointsList().stream()
+                // exponential histogram也转成histogram
+                .map(point -> Histogram
+                        .builder()
+                        .name(metric.getName())
+                        .description(metric.getDescription())
+                        .labels(mergeLabels(nodeLabels, buildLabels(point.getAttributesList())))
+                        .sampleCount(point.getCount())
+                        .sampleSum(point.getSum())
+                        .buckets(buildBucketsFromExponentialHistogram(point.getPositive().getOffset(),
+                                point.getPositive().getBucketCountsList(),
+                                point.getNegative().getOffset(),
+                                point.getNegative().getBucketCountsList(),
+                                point.getScale()))
+                        .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
+                        .build()
+                );
+    }
+
+    private static Stream<Histogram> processHistogramMetric(Map<String, String> nodeLabels, io.opentelemetry.proto.metrics.v1.Metric metric) {
+        return metric.getHistogram()
+                .getDataPointsList()
+                .stream()
+                .map(point -> Histogram
+                        .builder()
+                        .name(metric.getName())
+                        .description(metric.getDescription())
+                        .labels(mergeLabels(nodeLabels, buildLabels(point.getAttributesList())))
+                        .sampleCount(point.getCount())
+                        .sampleSum(point.getSum())
+                        .buckets(buildBuckets(point.getBucketCountsList(),
+                                point.getExplicitBoundsList()))
+                        .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
+                        .build()
+                );
+    }
+
+    private Stream<? extends Metric> processSumMetric(Map<String, String> nodeLabels, io.opentelemetry.proto.metrics.v1.Metric metric) {
+        final Sum sum = metric.getSum();
+        if (sum.getAggregationTemporality() == AGGREGATION_TEMPORALITY_UNSPECIFIED) {
+            return Stream.empty();
+        }
+        if (sum.getAggregationTemporality() == AGGREGATION_TEMPORALITY_DELTA) {
+            return sum.getDataPointsList().stream().map(point -> Gauge
+                    .builder()
+                    .name(metric.getName())
+                    .labels(mergeLabels(nodeLabels,
+                            buildLabels(point.getAttributesList())))
+                    .description(metric.getDescription())
+                    .value(point.hasAsDouble() ? point.getAsDouble() : point.getAsInt())
+                    .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
+                    .build());
+        }
+        if (sum.getIsMonotonic()) {
+            return sum.getDataPointsList()
                     .stream()
-                    .map(point -> Gauge
+                    .map(point -> Counter
                             .builder()
+                            .name(metric.getName())
+                            .description(metric.getDescription())
+                            .labels(mergeLabels(nodeLabels, buildLabels(point.getAttributesList())))
+                            .value(point.hasAsDouble() ? point.getAsDouble() : point.getAsInt())
+                            .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
+                            .build()
+                    );
+        } else {
+            return sum.getDataPointsList()
+                    .stream()
+                    .map(point -> Gauge.builder()
                             .name(metric.getName())
                             .labels(mergeLabels(nodeLabels,
                                     buildLabels(point.getAttributesList())))
                             .description(metric.getDescription())
-                            .value(point.hasAsDouble() ?
-                                    point.getAsDouble() : point.getAsInt())
-                            .timestamp(
-                                    TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
+                            .value(point.hasAsDouble() ? point.getAsDouble() : point.getAsInt())
+                            .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
                             .build());
         }
-        if (metric.hasSum()) {
-            final Sum sum = metric.getSum();
-            if (sum.getAggregationTemporality() == AGGREGATION_TEMPORALITY_UNSPECIFIED) {
-                return Stream.empty();
-            }
-            if (sum.getAggregationTemporality() == AGGREGATION_TEMPORALITY_DELTA) {
-                return sum.getDataPointsList().stream().map(point -> Gauge
+    }
+
+    private Stream<Gauge> processGaugeMetric(
+            Map<String, String> nodeLabels,
+            io.opentelemetry.proto.metrics.v1.Metric metric) {
+        return metric.getGauge()
+                .getDataPointsList()
+                .stream()
+                .map(point -> Gauge
                         .builder()
                         .name(metric.getName())
                         .labels(mergeLabels(nodeLabels,
                                 buildLabels(point.getAttributesList())))
                         .description(metric.getDescription())
-                        .value(point.hasAsDouble() ? point.getAsDouble() : point.getAsInt())
-                        .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
+                        .value(point.hasAsDouble() ?
+                                point.getAsDouble() : point.getAsInt())
+                        .timestamp(
+                                TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
                         .build());
-            }
-            if (sum.getIsMonotonic()) {
-                return sum.getDataPointsList()
-                        .stream()
-                        .map(point -> Counter
-                                .builder()
-                                .name(metric.getName())
-                                .description(metric.getDescription())
-                                .labels(mergeLabels(nodeLabels, buildLabels(point.getAttributesList())))
-                                .value(point.hasAsDouble() ? point.getAsDouble() : point.getAsInt())
-                                .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
-                                .build()
-                        );
-            } else {
-                return sum.getDataPointsList()
-                        .stream()
-                        .map(point -> Gauge.builder()
-                                .name(metric.getName())
-                                .labels(mergeLabels(nodeLabels,
-                                        buildLabels(point.getAttributesList())))
-                                .description(metric.getDescription())
-                                .value(point.hasAsDouble() ? point.getAsDouble() : point.getAsInt())
-                                .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
-                                .build());
-            }
-        }
-        if (metric.hasHistogram()) {
-            return metric.getHistogram()
-                    .getDataPointsList()
-                    .stream()
-                    .map(point -> Histogram
-                            .builder()
-                            .name(metric.getName())
-                            .description(metric.getDescription())
-                            .labels(mergeLabels(nodeLabels, buildLabels(point.getAttributesList())))
-                            .sampleCount(point.getCount())
-                            .sampleSum(point.getSum())
-                            .buckets(buildBuckets(point.getBucketCountsList(),
-                                    point.getExplicitBoundsList()))
-                            .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
-                            .build()
-                    );
-        }
-        if (metric.hasExponentialHistogram()) {
-            return metric.getExponentialHistogram().getDataPointsList().stream()
-                    // exponential histogram也转成histogram
-                    .map(point -> Histogram
-                            .builder()
-                            .name(metric.getName())
-                            .description(metric.getDescription())
-                            .labels(mergeLabels(nodeLabels, buildLabels(point.getAttributesList())))
-                            .sampleCount(point.getCount())
-                            .sampleSum(point.getSum())
-                            .buckets(buildBucketsFromExponentialHistogram(point.getPositive().getOffset(),
-                                    point.getPositive().getBucketCountsList(),
-                                    point.getNegative().getOffset(),
-                                    point.getNegative().getBucketCountsList(),
-                                    point.getScale()))
-                            .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
-                            .build()
-                    );
-        }
-        if (metric.hasSummary()) {
-            return metric.getSummary()
-                    .getDataPointsList()
-                    .stream()
-                    .map(point -> Summary.builder()
-                            .name(metric.getName())
-                            .description(metric.getDescription())
-                            .labels(mergeLabels(nodeLabels, buildLabels(point.getAttributesList())))
-                            .sampleCount(point.getCount())
-                            .sampleSum(point.getSum())
-                            .quantiles(point.getQuantileValuesList()
-                                    .stream()
-                                    .collect(toMap(SummaryDataPoint.ValueAtQuantile::getQuantile,
-                                            SummaryDataPoint.ValueAtQuantile::getValue)))
-                            .timestamp(TimeUnit.NANOSECONDS.toMillis(point.getTimeUnixNano()))
-                            .build()
-                    );
-        }
-        throw new UnsupportedOperationException("Unsupported type");
     }
 
     private static Map<String, String> buildLabels(List<KeyValue> kvs) {

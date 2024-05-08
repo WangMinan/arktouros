@@ -25,11 +25,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -58,14 +55,5 @@ public class Tag {
     @Override
     public String toString() {
         return key + "=" + value;
-    }
-
-    public static class Util {
-        public static List<String> toStringList(List<Tag> list) {
-            if (list.isEmpty()) {
-                return Collections.emptyList();
-            }
-            return list.stream().map(Tag::toString).collect(Collectors.toList());
-        }
     }
 }

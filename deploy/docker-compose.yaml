@@ -12,8 +12,6 @@ services:
       - /root/arktouros/apm/config:/arktouros/config
       # 日志目录映射出来
       - /root/arktouros/apm/logs:/arktouros/logs
-    networks:
-      - elastic
     privileged: true
   arktouros-ui:
     image: wangminan/arktouros-ui:latest
@@ -21,12 +19,6 @@ services:
     ports:
       - "50052:50052"
     volumes:
-      - /root/arktouros/ui/config:/arktouros/config
-      - /root/arktouros/ui/logs:/arktouros/logs
-    networks:
-      - elastic
+      - /root/arktouros/ui/config:/arktouros-ui/config
+      - /root/arktouros/ui/logs:/arktouros-ui/logs
     privileged: true
-
-networks:
-  elastic:
-    external: true
