@@ -5,6 +5,7 @@ RUN mkdir arktouros-ui
 WORKDIR /arktouros-ui
 COPY build/arktouros-webapp/config ./config
 COPY build/arktouros-webapp/lib ./lib
+RUN ls -l ./lib
 COPY build/arktouros-webapp/arktouros-webapp.jar ./arktouros-webapp.jar
 # RUN ls -l
 EXPOSE 50052
