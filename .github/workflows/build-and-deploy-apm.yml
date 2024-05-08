@@ -26,7 +26,7 @@ jobs:
       - name: Build with Maven
         run: mvn -Dmaven.test.skip=true clean package
 
-      - name: unzip package
+      - name: Unzip package
         run: tar -zxvf build/arktouros-apm-api-leaves.tar.gz -C build/
 
       #      - name: 传输部署脚本到服务器
