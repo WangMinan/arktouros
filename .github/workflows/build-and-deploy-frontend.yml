@@ -1,9 +1,11 @@
 name: "build-and-deploy-frontend"
 on:
+#  push:
+#    tags:
+#      # 只有有tag的时候才触发部署操作
+#      - 'v*'
   push:
-    tags:
-      # 只有有tag的时候才触发部署操作
-      - 'v*'
+    branches: [ "main" ]
 
 jobs:
   build-and-push-image:
@@ -27,7 +29,10 @@ jobs:
         run: mvn -Dmaven.test.skip=true clean package
 
       - name: Unzip package
-        run: tar -zxvf build/arktouros-webapp-leaves.tar.gz -C build/
+        run: |
+          tar -zxvf build/arktouros-webapp-leaves.tar.gz -C build/
+          pwd
+          ls -l build/
 
       #      - name: 传输部署脚本到服务器
       #        run: |
@@ -49,6 +54,7 @@ jobs:
         with:
           file: ./Dockerfile-frontend
           push: true
+          no-cache: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-ui:latest
 
