@@ -69,7 +69,7 @@ public class Summary extends Metric {
                    @JsonProperty("quantiles") Map<Double, Double> quantiles) {
         super(name, description, labels, timestamp);
         getLabels().remove("quantile");
-        metricType = MetricType.SUMMARY;
+        this.metricType = MetricType.SUMMARY;
         this.sampleCount = sampleCount;
         this.sampleSum = sampleSum;
         this.quantiles = quantiles;

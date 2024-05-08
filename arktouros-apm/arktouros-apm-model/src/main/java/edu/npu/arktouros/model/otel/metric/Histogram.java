@@ -95,7 +95,7 @@ public class Histogram extends Metric {
                      @JsonProperty("timestamp") long timestamp) {
         super(name, description, labels, timestamp);
         getLabels().remove("le");
-        metricType = MetricType.HISTOGRAM;
+        this.metricType = MetricType.HISTOGRAM;
         this.sampleCount = sampleCount;
         this.sampleSum = sampleSum;
         this.buckets = buckets;
