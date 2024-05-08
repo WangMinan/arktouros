@@ -47,6 +47,7 @@ jobs:
         id: docker_build_apm
         uses: docker/build-push-action@v4
         with:
+          context: .
           file: ./Dockerfile-apm
           push: true
           platforms: linux/amd64,linux/arm64

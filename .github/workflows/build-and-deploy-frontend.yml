@@ -52,6 +52,7 @@ jobs:
         id: docker_build_frontend
         uses: docker/build-push-action@v4
         with:
+          context: .
           file: ./Dockerfile-frontend
           push: true
           no-cache: true
