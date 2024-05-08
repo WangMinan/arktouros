@@ -32,7 +32,7 @@ jobs:
         run: |
           tar -zxvf build/arktouros-webapp-leaves.tar.gz -C build/
           pwd
-          ls -l build/
+          ls -l build/arktouros-webapp
 
       #      - name: 传输部署脚本到服务器
       #        run: |
