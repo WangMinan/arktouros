@@ -1,4 +1,4 @@
-name: "build-test"
+name: "native-build-test"
 
 on:
   push:
@@ -24,8 +24,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
 
-      - name: Build with Maven without native env
-        run: mvn -Dmaven.test.skip=true clean package
-
+      # 我对native构建的要求是不报错就行
       - name: Build with Maven with native env
         run: mvn -Dmaven.test.skip=true -Pnative clean package

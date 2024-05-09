@@ -40,9 +40,9 @@ public class GrpcEmitter extends AbstractEmitter {
 
     @Getter
     private final ManagedChannel channel;
-    private final LogsServiceGrpc.LogsServiceBlockingStub logsServiceBlockingStub;
-    private final MetricsServiceGrpc.MetricsServiceBlockingStub metricsServiceBlockingStub;
-    private final TraceServiceGrpc.TraceServiceBlockingStub traceServiceBlockingStub;
+    protected LogsServiceGrpc.LogsServiceBlockingStub logsServiceBlockingStub;
+    protected MetricsServiceGrpc.MetricsServiceBlockingStub metricsServiceBlockingStub;
+    protected TraceServiceGrpc.TraceServiceBlockingStub traceServiceBlockingStub;
 
     // 一个探活线程
     private final ScheduledThreadPoolExecutor keepAliveThreadPool =

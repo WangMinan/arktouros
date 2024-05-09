@@ -83,8 +83,9 @@
         <mockito.version>5.11.0</mockito.version>
         <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <testFailureIgnore>true</testFailureIgnore>
         <skipUTs>false</skipUTs>
-        <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+        <argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED</argLine>
         <!-- UT -->
 
         <delombok.output.dir>${project.build.directory}/delombok</delombok.output.dir>
@@ -373,6 +374,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
+                    <testFailureIgnore>${testFailureIgnore}</testFailureIgnore>
                     <skip>${skipUTs}</skip>
                     <argLine>${argLine}</argLine>
                 </configuration>

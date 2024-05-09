@@ -1,8 +1,10 @@
 package edu.npu.arktouros.preHandler;
 
 import edu.npu.arktouros.cache.LogQueueCache;
+import edu.npu.arktouros.config.PropertiesProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,6 +24,11 @@ public class OtlpLogPreHandlerTest {
     private static final ExecutorService executorService =
             Executors.newFixedThreadPool(1);
 
+    @BeforeAll
+    static void initProperties() {
+        PropertiesProvider.init();
+    }
+
     @Test
     void testRunError() {
         LogQueueCache inputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
@@ -30,7 +37,7 @@ public class OtlpLogPreHandlerTest {
                 new OtlpLogPreHandler.Factory().createPreHandler(inputCache, outputCache);
         inputCache.put("abc");
         // 不知道为什么mvn test的时候这个位置会变成nullPointerException 本地跑没问题的
-        Assertions.assertThrows(Exception.class, handler::run);
+        Assertions.assertThrows(IllegalArgumentException.class, handler::run);
         handler.interrupt();
     }
 
