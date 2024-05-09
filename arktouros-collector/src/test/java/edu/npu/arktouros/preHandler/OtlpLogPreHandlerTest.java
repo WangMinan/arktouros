@@ -24,8 +24,8 @@ public class OtlpLogPreHandlerTest {
 
     @Test
     void testRunError() {
-        LogQueueCache inputCache = new LogQueueCache();
-        LogQueueCache outputCache = new LogQueueCache();
+        LogQueueCache inputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
+        LogQueueCache outputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
         AbstractPreHandler handler =
                 new OtlpLogPreHandler.Factory().createPreHandler(inputCache, outputCache);
         inputCache.put("abc");
@@ -36,8 +36,8 @@ public class OtlpLogPreHandlerTest {
 
     @Test
     void testRun() {
-        LogQueueCache inputCache = new LogQueueCache();
-        LogQueueCache outputCache = new LogQueueCache();
+        LogQueueCache inputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
+        LogQueueCache outputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
         AbstractPreHandler handler =
                 new OtlpLogPreHandler.Factory().createPreHandler(inputCache, outputCache);
         inputCache.put("   {}");
