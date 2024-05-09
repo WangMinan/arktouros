@@ -4,6 +4,7 @@ import edu.npu.arktouros.mapper.otel.queue.LogQueueMapper;
 import edu.npu.arktouros.model.queue.LogQueueItem;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -53,6 +54,9 @@ class JdbcTemplateTest {
             LogQueueItem logItem = LogQueueItem.builder().data("234").build();
             mapper.add(logItem);
             log.info("logItem: {}", logItem);
+            LogQueueItem top = mapper.getTop();
+            Assertions.assertEquals("234", top.getData());
+            Assertions.assertFalse(mapper.isEmpty());
         }
     }
 }
