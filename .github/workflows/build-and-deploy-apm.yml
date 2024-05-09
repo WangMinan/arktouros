@@ -14,6 +14,10 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - name: Get version from tag
+        id: vars
+        run: echo "tag=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+
       - name: Set up Graal JDK 21
         uses: graalvm/setup-graalvm@v1
         with:
@@ -51,7 +55,9 @@ jobs:
           file: ./Dockerfile-apm
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:${{ steps.vars.outputs.tag }} 
+            ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:latest
 
   deploy:
     runs-on: ubuntu-latest
