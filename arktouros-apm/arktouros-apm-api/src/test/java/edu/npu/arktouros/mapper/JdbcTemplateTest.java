@@ -6,6 +6,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -33,6 +34,7 @@ class JdbcTemplateTest {
     private DataSource dataSource;
 
     @Test
+    @Timeout(30)
     void testInsert() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             String sql = "insert into APM_METRICS_QUEUE (DATA) values (?);";

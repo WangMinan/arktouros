@@ -3,6 +3,7 @@ package edu.npu.arktouros.cache;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,6 +19,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class LogQueueCacheTest {
 
     @Test
+    @Timeout(30)
     void testPutAndGet() throws Exception {
         LogQueueCache cache = (LogQueueCache) new LogQueueCache.Factory().createCache();
         cache.put("123");

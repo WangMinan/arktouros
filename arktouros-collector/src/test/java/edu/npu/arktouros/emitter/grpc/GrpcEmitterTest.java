@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -62,6 +63,7 @@ public class GrpcEmitterTest {
     }
 
     @Test
+    @Timeout(30)
     void testKeepAlive() throws
             NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         log.info("testKeepAlive");
@@ -75,6 +77,7 @@ public class GrpcEmitterTest {
     }
 
     @Test
+    @Timeout(30)
     void testHandleTrace() throws
             IOException, NoSuchMethodException, InvocationTargetException,
             IllegalAccessException {
@@ -95,6 +98,7 @@ public class GrpcEmitterTest {
     }
 
     @Test
+    @Timeout(30)
     void testHandleTraceWithException() throws NoSuchMethodException {
         log.info("testHandleTraceWithException");
         String inputJson = "{}"; // replace with actual JSON
@@ -107,6 +111,7 @@ public class GrpcEmitterTest {
     }
 
     @Test
+    @Timeout(30)
     void testHandleMetrics() throws
             IOException, NoSuchMethodException, InvocationTargetException,
             IllegalAccessException {
@@ -127,6 +132,7 @@ public class GrpcEmitterTest {
     }
 
     @Test
+    @Timeout(30)
     void testHandleMetricsWithException() throws NoSuchMethodException {
         log.info("testHandleMetricsWithException");
         String inputJson = "{}";
@@ -138,6 +144,7 @@ public class GrpcEmitterTest {
     }
 
     @Test
+    @Timeout(30)
     void testHandleLogs() throws
             IOException, NoSuchMethodException, InvocationTargetException,
             IllegalAccessException {
@@ -158,6 +165,7 @@ public class GrpcEmitterTest {
     }
 
     @Test
+    @Timeout(30)
     void testHandleLogsWithException() throws NoSuchMethodException {
         log.info("testHandleLogsWithException");
         String inputJson = "{}";

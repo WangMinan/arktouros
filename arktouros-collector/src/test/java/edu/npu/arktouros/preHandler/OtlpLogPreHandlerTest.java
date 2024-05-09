@@ -7,11 +7,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author : [wangminan]
@@ -42,6 +44,7 @@ public class OtlpLogPreHandlerTest {
     }
 
     @Test
+    @Timeout(value = 30000, unit = TimeUnit.MILLISECONDS) // 默认单位秒
     void testRun() {
         log.info("testRun");
         inputCache.put("   {}");
@@ -59,6 +62,7 @@ public class OtlpLogPreHandlerTest {
     }
 
     @Test
+    @Timeout(30)
     void testRunError() {
         log.info("testRunError");
         inputCache.put("abc");
