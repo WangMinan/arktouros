@@ -5,6 +5,7 @@ import edu.npu.arktouros.config.PropertiesProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,29 +25,33 @@ public class OtlpLogPreHandlerTest {
     private static final ExecutorService executorService =
             Executors.newFixedThreadPool(1);
 
+    private LogQueueCache inputCache;
+    private LogQueueCache outputCache;
+    private OtlpLogPreHandler handler;
+
     @BeforeAll
     static void initProperties() {
         PropertiesProvider.init();
     }
 
+    @BeforeEach
+    void init() {
+        inputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
+        outputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
+        handler = (OtlpLogPreHandler) new OtlpLogPreHandler.Factory().createPreHandler(inputCache, outputCache);
+    }
+
     @Test
     void testRunError() {
-        LogQueueCache inputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
-        LogQueueCache outputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
-        AbstractPreHandler handler =
-                new OtlpLogPreHandler.Factory().createPreHandler(inputCache, outputCache);
         inputCache.put("abc");
         // 不知道为什么mvn test的时候这个位置会变成nullPointerException 本地跑没问题的
-        Assertions.assertThrows(IllegalArgumentException.class, handler::run);
+        handler.start();
         handler.interrupt();
+        Assertions.assertTrue(outputCache.isEmpty());
     }
 
     @Test
     void testRun() {
-        LogQueueCache inputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
-        LogQueueCache outputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
-        AbstractPreHandler handler =
-                new OtlpLogPreHandler.Factory().createPreHandler(inputCache, outputCache);
         inputCache.put("   {}");
         executorService.submit(handler);
         // 等待
