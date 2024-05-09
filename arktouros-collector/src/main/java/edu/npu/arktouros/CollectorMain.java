@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class CollectorMain {
 
-    private static final CountDownLatch runningLatch = new CountDownLatch(1);
+    protected static CountDownLatch runningLatch = new CountDownLatch(1);
 
     // 线程池 一个线程给receiver 一个线程给analyzer 一个线程给emitter
     private static final ExecutorService executorService =

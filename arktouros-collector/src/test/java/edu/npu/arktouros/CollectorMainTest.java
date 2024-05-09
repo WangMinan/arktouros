@@ -7,9 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -24,28 +21,8 @@ public class CollectorMainTest {
     void testMain() throws Exception {
         CountDownLatch latch = Mockito.mock(CountDownLatch.class);
         Mockito.doThrow(new InterruptedException()).when(latch).await();
-        setFinalStatic(CollectorMain.class.getDeclaredField("runningLatch"), latch);
+        CollectorMain.runningLatch = latch;
         Assertions.assertThrows(InterruptedException.class,
                 () -> CollectorMain.main(new String[]{}));
-    }
-
-    static void setFinalStatic(Field field, Object newValue) throws Exception {
-        field.setAccessible(true);
-        Method getDeclaredFields0 = Class.class.getDeclaredMethod("getDeclaredFields0", boolean.class);
-        getDeclaredFields0.setAccessible(true);
-        Field[] fields = (Field[]) getDeclaredFields0.invoke(Field.class, false);
-        Field modifiers = null;
-        for (Field each : fields) {
-            if ("modifiers".equals(each.getName())) {
-                modifiers = each;
-            }
-        }
-        if (modifiers != null) {
-            modifiers.setAccessible(true);
-            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            field.set(null, newValue);
-        } else {
-            throw new RuntimeException();
-        }
     }
 }

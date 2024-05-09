@@ -10,7 +10,7 @@ public class LogQueueCache implements AbstractCache {
 
     private static final int DEFAULT_CAPACITY = 1000;
 
-    private final ArrayBlockingQueue<String> queue =
+    protected static ArrayBlockingQueue<String> queue =
             new ArrayBlockingQueue<>(DEFAULT_CAPACITY);
 
 

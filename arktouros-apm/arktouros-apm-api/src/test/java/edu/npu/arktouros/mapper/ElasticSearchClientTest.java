@@ -31,7 +31,7 @@ import java.util.List;
  */
 @SpringBootTest
 @Slf4j
-@Disabled // junit4 @Ignore = junit5 @Disabled
+@Disabled("no connection") // junit4 @Ignore = junit5 @Disabled
 class ElasticSearchClientTest {
 
     @Resource

@@ -12,7 +12,7 @@ import java.util.Stack;
 @Slf4j
 public class OtlpLogPreHandler extends AbstractPreHandler{
 
-    private final StringBuilder cacheStringBuilder = new StringBuilder();
+    protected final StringBuilder cacheStringBuilder = new StringBuilder();
 
     public OtlpLogPreHandler(AbstractCache inputCache, AbstractCache outputCache) {
         super(inputCache, outputCache);
