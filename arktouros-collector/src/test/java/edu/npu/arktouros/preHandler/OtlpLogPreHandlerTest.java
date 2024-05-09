@@ -42,16 +42,8 @@ public class OtlpLogPreHandlerTest {
     }
 
     @Test
-    void testRunError() {
-        inputCache.put("abc");
-        // 不知道为什么mvn test的时候这个位置会变成nullPointerException 本地跑没问题的
-        handler.start();
-        handler.interrupt();
-        Assertions.assertTrue(outputCache.isEmpty());
-    }
-
-    @Test
     void testRun() {
+        log.info("testRun");
         inputCache.put("   {}");
         executorService.submit(handler);
         // 等待
@@ -64,5 +56,15 @@ public class OtlpLogPreHandlerTest {
         // 不知道为什么mvn test的时候这个位置会变成nullPointerException 本地跑没问题的
         Assertions.assertEquals("{}", outputCache.get());
         executorService.shutdown();
+    }
+
+    @Test
+    void testRunError() {
+        log.info("testRunError");
+        inputCache.put("abc");
+        // 不知道为什么mvn test的时候这个位置会变成nullPointerException 本地跑没问题的
+        handler.start();
+        handler.interrupt();
+        Assertions.assertTrue(outputCache.isEmpty());
     }
 }

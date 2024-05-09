@@ -64,6 +64,7 @@ public class GrpcEmitterTest {
     @Test
     void testKeepAlive() throws
             NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        log.info("testKeepAlive");
         LogQueueCache cache = (LogQueueCache) new LogQueueCache.Factory().createCache();
         GrpcEmitter emitter = new GrpcEmitter(cache);
         Method keepAliveCheck =
@@ -77,6 +78,7 @@ public class GrpcEmitterTest {
     void testHandleTrace() throws
             IOException, NoSuchMethodException, InvocationTargetException,
             IllegalAccessException {
+        log.info("testHandleTrace");
         String inputJson = "{}"; // replace with actual JSON
         TracesData.Builder builder = TracesData.newBuilder();
         ProtoBufJsonUtils.fromJSON(inputJson, builder);
@@ -94,8 +96,8 @@ public class GrpcEmitterTest {
 
     @Test
     void testHandleTraceWithException() throws NoSuchMethodException {
+        log.info("testHandleTraceWithException");
         String inputJson = "{}"; // replace with actual JSON
-
         Mockito.when(traceServiceBlockingStub.export(any(ExportTraceServiceRequest.class)))
                 .thenThrow(StatusRuntimeException.class);
         Method handleTrace = GrpcEmitter.class.getDeclaredMethod("handleTrace", String.class);
@@ -108,6 +110,7 @@ public class GrpcEmitterTest {
     void testHandleMetrics() throws
             IOException, NoSuchMethodException, InvocationTargetException,
             IllegalAccessException {
+        log.info("testHandleMetrics");
         String inputJson = "{}";
         TracesData.Builder builder = TracesData.newBuilder();
         ProtoBufJsonUtils.fromJSON(inputJson, builder);
@@ -125,6 +128,7 @@ public class GrpcEmitterTest {
 
     @Test
     void testHandleMetricsWithException() throws NoSuchMethodException {
+        log.info("testHandleMetricsWithException");
         String inputJson = "{}";
         Mockito.when(metricsServiceBlockingStub.export(any(ExportMetricsServiceRequest.class)))
                 .thenThrow(StatusRuntimeException.class);
@@ -137,6 +141,7 @@ public class GrpcEmitterTest {
     void testHandleLogs() throws
             IOException, NoSuchMethodException, InvocationTargetException,
             IllegalAccessException {
+        log.info("testHandleLogs");
         String inputJson = "{}";
         TracesData.Builder builder = TracesData.newBuilder();
         ProtoBufJsonUtils.fromJSON(inputJson, builder);
@@ -154,6 +159,7 @@ public class GrpcEmitterTest {
 
     @Test
     void testHandleLogsWithException() throws NoSuchMethodException {
+        log.info("testHandleLogsWithException");
         String inputJson = "{}";
         Mockito.when(logsServiceBlockingStub.export(any(ExportLogsServiceRequest.class)))
                 .thenThrow(StatusRuntimeException.class);
