@@ -49,7 +49,7 @@ public class ElasticsearchClientPoolFactory implements PooledObjectFactory<Elast
 
     private final String password;
 
-    private final String caPos;
+    private final String ca;
 
     private final int maxTotal;
 
@@ -63,7 +63,7 @@ public class ElasticsearchClientPoolFactory implements PooledObjectFactory<Elast
         this.serverUrl = PropertiesProvider.getProperty("elasticsearch.serverUrl");
         this.username = PropertiesProvider.getProperty("elasticsearch.username");
         this.password = PropertiesProvider.getProperty("elasticsearch.password");
-        this.caPos = PropertiesProvider.getProperty("elasticsearch.caPos");
+        this.ca = PropertiesProvider.getProperty("elasticsearch.ca");
         this.maxTotal = Integer.parseInt(PropertiesProvider.getProperty("elasticsearch.pool.maxTotal"));
         this.maxWait = Integer.parseInt(PropertiesProvider.getProperty("elasticsearch.pool.maxWait"));
         this.minIdle = Integer.parseInt(PropertiesProvider.getProperty("elasticsearch.pool.minIdle"));
@@ -131,7 +131,7 @@ public class ElasticsearchClientPoolFactory implements PooledObjectFactory<Elast
         credentialsProvider.setCredentials(
                 AuthScope.ANY, new UsernamePasswordCredentials(username, password));
 
-        if (StringUtils.isNotEmpty(caPos)) {
+        if (StringUtils.isNotEmpty(ca)) {
             SSLContext sslContext = createSSLContext();
             builder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
                     .setDefaultCredentialsProvider(credentialsProvider)
@@ -168,17 +168,29 @@ public class ElasticsearchClientPoolFactory implements PooledObjectFactory<Elast
     }
 
     private SSLContext createSSLContext() throws Exception {
-        log.debug("Ssl config detected. Loading ca certificate from {}", caPos);
-        Path caCertificatePath = Paths.get(caPos);
+        log.debug("Ssl config detected. Loading ca certificate from {}", ca);
+        Path caCertificatePath = Paths.get(ca);
         Certificate trustedCa;
-        try (InputStream is = Files.newInputStream(caCertificatePath)) {
-            trustedCa = CertificateFactory.getInstance("X.509").generateCertificate(is);
+        if (ca.endsWith("crt")) {
+            log.info("Ca certificate is a file");
+            try (InputStream is = Files.newInputStream(caCertificatePath)) {
+                trustedCa = CertificateFactory.getInstance("X.509").generateCertificate(is);
+            }
+        } else if (ca.startsWith("-----BEGIN CERTIFICATE-----")){
+            log.info("Ca certificate is a string");
+            // 说明是一个字符串 需要新建临时文件
+            Path tempFile = Files.createTempFile("ca", ".crt");
+            Files.writeString(tempFile, ca);
+            try (InputStream is = Files.newInputStream(tempFile)) {
+                trustedCa = CertificateFactory.getInstance("X.509").generateCertificate(is);
+            }
+        } else {
+            log.error("Unsupported ca certificate format");
+            throw new IllegalArgumentException("Unsupported ca certificate format");
         }
-
         KeyStore trustStore = KeyStore.getInstance("pkcs12");
         trustStore.load(null, null);
         trustStore.setCertificateEntry("ca", trustedCa);
-
         return SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
     }
 }
