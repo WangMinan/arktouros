@@ -372,12 +372,9 @@
                 <configuration>
                     <testFailureIgnore>${testFailureIgnore}</testFailureIgnore>
                     <skip>${skipUTs}</skip>
-                    <argLine>${argLine} ${jacocoArgLine}</argLine>
+<!--                    <argLine>${argLine}</argLine>-->
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <reuseForks>true</reuseForks>
-                    <systemPropertyVariables>
-                        <jacoco-agent.destfile>${jacoco.dataFile}</jacoco-agent.destfile>
-                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 
@@ -385,20 +382,12 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco-maven-plugin.version}</version>
-                <configuration>
-                    <destFile>${jacoco.dataFile}</destFile>
-                    <dataFile>${jacoco.dataFile}</dataFile>
-                    <outputDirectory>${jacoco.output.dir}</outputDirectory>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <!--first execution: for preparing JaCoCo runtime agent-->
                             <goal>prepare-agent</goal>
                         </goals>
-                        <configuration>
-                            <propertyName>jacocoArgLine</propertyName>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>report</id>
@@ -407,6 +396,10 @@
                             <!--second execution: for creating code coverage reports-->
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <dataFile>${jacoco.dataFile}</dataFile>
+                            <outputDirectory>${jacoco.output.dir}</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
