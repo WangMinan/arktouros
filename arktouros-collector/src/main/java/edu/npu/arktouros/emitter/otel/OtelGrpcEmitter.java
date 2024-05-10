@@ -1,4 +1,4 @@
-package edu.npu.arktouros.emitter.grpc;
+package edu.npu.arktouros.emitter.otel;
 
 import edu.npu.arktouros.cache.AbstractCache;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
@@ -24,6 +24,7 @@ import io.opentelemetry.proto.trace.v1.TracesData;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @description : [grpc发射器]
  */
 @Slf4j
-public class GrpcEmitter extends AbstractEmitter {
+public class OtelGrpcEmitter extends AbstractEmitter {
 
     @Getter
     private final ManagedChannel channel;
@@ -46,10 +47,13 @@ public class GrpcEmitter extends AbstractEmitter {
 
     // 一个探活线程
     private final ScheduledThreadPoolExecutor keepAliveThreadPool =
-            new ScheduledThreadPoolExecutor(1);
+            // 定时线程池
+            new ScheduledThreadPoolExecutor(1,
+                    new BasicThreadFactory.Builder()
+                            .namingPattern("keepAlive-check-%d").build());
     private final AtomicInteger connectRetryTimes = new AtomicInteger(0);
 
-    public GrpcEmitter(AbstractCache inputCache) {
+    public OtelGrpcEmitter(AbstractCache inputCache) {
         super(inputCache);
         String HOST = PropertiesProvider
                 .getProperty("emitter.grpc.host", "127.0.0.1");
@@ -82,10 +86,14 @@ public class GrpcEmitter extends AbstractEmitter {
     }
 
     private void startKeepAliveCheck(CountDownLatch waitForFirstConnectLatch) {
+        long delay = Long.parseLong(
+                PropertiesProvider.getProperty("emitter.grpc.keepAlive.delay",
+                        "5"));
         Thread checkConnectThread = new Thread(() -> {
             try {
                 if (waitForFirstConnectLatch.getCount() == 1) {
-                    log.info("Waiting for the first connection to apwm. Will take seconds to establish the connection.");
+                    log.info("Waiting for the first connection to apm. Will take delay:{} seconds to establish the connection.",
+                            delay);
                 }
                 ConnectivityState state = channel.getState(true);
                 if (state.equals(ConnectivityState.READY) &&
@@ -118,9 +126,6 @@ public class GrpcEmitter extends AbstractEmitter {
                 System.exit(1);
             }
         });
-        long delay = Long.parseLong(
-                PropertiesProvider.getProperty("emitter.grpc.keepAlive.delay",
-                        "5"));
         log.info("Start grpc keep-alive check. Delay :{}s", delay);
         keepAliveThreadPool.scheduleWithFixedDelay(checkConnectThread, 0,
                 delay, TimeUnit.SECONDS);
@@ -180,6 +185,7 @@ public class GrpcEmitter extends AbstractEmitter {
             log.error("Failed to send logs data to apm, error message: {}.",
                     e.getMessage()
             );
+            e.printStackTrace();
         }
     }
 
@@ -237,7 +243,7 @@ public class GrpcEmitter extends AbstractEmitter {
 
         @Override
         public AbstractEmitter createEmitter(AbstractCache inputCache) {
-            return new GrpcEmitter(inputCache);
+            return new OtelGrpcEmitter(inputCache);
         }
     }
 

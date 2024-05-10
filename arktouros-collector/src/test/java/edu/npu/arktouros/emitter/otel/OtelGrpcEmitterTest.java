@@ -1,4 +1,4 @@
-package edu.npu.arktouros.emitter.grpc;
+package edu.npu.arktouros.emitter.otel;
 
 import edu.npu.arktouros.cache.LogQueueCache;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
@@ -35,16 +35,16 @@ import static org.mockito.Mockito.times;
 
 /**
  * @author : [wangminan]
- * @description : {@link GrpcEmitter}
+ * @description : {@link OtelGrpcEmitter}
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class GrpcEmitterTest {
+public class OtelGrpcEmitterTest {
 
     private TraceServiceGrpc.TraceServiceBlockingStub traceServiceBlockingStub;
     private MetricsServiceGrpc.MetricsServiceBlockingStub metricsServiceBlockingStub;
     private LogsServiceGrpc.LogsServiceBlockingStub logsServiceBlockingStub;
-    private GrpcEmitter grpcEmitter;
+    private OtelGrpcEmitter otelGrpcEmitter;
 
     @BeforeAll
     static void initProperties() {
@@ -56,10 +56,10 @@ public class GrpcEmitterTest {
         traceServiceBlockingStub = Mockito.mock(TraceServiceGrpc.TraceServiceBlockingStub.class);
         metricsServiceBlockingStub = Mockito.mock(MetricsServiceGrpc.MetricsServiceBlockingStub.class);
         logsServiceBlockingStub = Mockito.mock(LogsServiceGrpc.LogsServiceBlockingStub.class);
-        grpcEmitter = new GrpcEmitter(null);
-        grpcEmitter.traceServiceBlockingStub = traceServiceBlockingStub;
-        grpcEmitter.metricsServiceBlockingStub = metricsServiceBlockingStub;
-        grpcEmitter.logsServiceBlockingStub = logsServiceBlockingStub;
+        otelGrpcEmitter = new OtelGrpcEmitter(null);
+        otelGrpcEmitter.traceServiceBlockingStub = traceServiceBlockingStub;
+        otelGrpcEmitter.metricsServiceBlockingStub = metricsServiceBlockingStub;
+        otelGrpcEmitter.logsServiceBlockingStub = logsServiceBlockingStub;
     }
 
     @Test
@@ -68,9 +68,9 @@ public class GrpcEmitterTest {
             NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         log.info("testKeepAlive");
         LogQueueCache cache = (LogQueueCache) new LogQueueCache.Factory().createCache();
-        GrpcEmitter emitter = new GrpcEmitter(cache);
+        OtelGrpcEmitter emitter = new OtelGrpcEmitter(cache);
         Method keepAliveCheck =
-                GrpcEmitter.class
+                OtelGrpcEmitter.class
                         .getDeclaredMethod("startKeepAliveCheck", CountDownLatch.class);
         keepAliveCheck.setAccessible(true);
         keepAliveCheck.invoke(emitter, new CountDownLatch(1));
@@ -90,9 +90,9 @@ public class GrpcEmitterTest {
                         .build();
         Mockito.when(traceServiceBlockingStub.export(any(ExportTraceServiceRequest.class)))
                 .thenReturn(response);
-        Method handleTrace = GrpcEmitter.class.getDeclaredMethod("handleTrace", String.class);
+        Method handleTrace = OtelGrpcEmitter.class.getDeclaredMethod("handleTrace", String.class);
         handleTrace.setAccessible(true);
-        handleTrace.invoke(grpcEmitter, inputJson);
+        handleTrace.invoke(otelGrpcEmitter, inputJson);
         Mockito.verify(traceServiceBlockingStub, times(1))
                 .export(any(ExportTraceServiceRequest.class));
     }
@@ -104,10 +104,10 @@ public class GrpcEmitterTest {
         String inputJson = "{}"; // replace with actual JSON
         Mockito.when(traceServiceBlockingStub.export(any(ExportTraceServiceRequest.class)))
                 .thenThrow(StatusRuntimeException.class);
-        Method handleTrace = GrpcEmitter.class.getDeclaredMethod("handleTrace", String.class);
+        Method handleTrace = OtelGrpcEmitter.class.getDeclaredMethod("handleTrace", String.class);
         handleTrace.setAccessible(true);
         // 会被catch住 不会抛异常
-        Assertions.assertDoesNotThrow(() -> handleTrace.invoke(grpcEmitter, inputJson));
+        Assertions.assertDoesNotThrow(() -> handleTrace.invoke(otelGrpcEmitter, inputJson));
     }
 
     @Test
@@ -124,9 +124,9 @@ public class GrpcEmitterTest {
                         .build();
         Mockito.when(metricsServiceBlockingStub.export(any(ExportMetricsServiceRequest.class)))
                 .thenReturn(response);
-        Method handleMetric = GrpcEmitter.class.getDeclaredMethod("handleMetrics", String.class);
+        Method handleMetric = OtelGrpcEmitter.class.getDeclaredMethod("handleMetrics", String.class);
         handleMetric.setAccessible(true);
-        handleMetric.invoke(grpcEmitter, inputJson);
+        handleMetric.invoke(otelGrpcEmitter, inputJson);
         Mockito.verify(metricsServiceBlockingStub, times(1))
                 .export(any(ExportMetricsServiceRequest.class));
     }
@@ -138,9 +138,9 @@ public class GrpcEmitterTest {
         String inputJson = "{}";
         Mockito.when(metricsServiceBlockingStub.export(any(ExportMetricsServiceRequest.class)))
                 .thenThrow(StatusRuntimeException.class);
-        Method handleMetric = GrpcEmitter.class.getDeclaredMethod("handleMetrics", String.class);
+        Method handleMetric = OtelGrpcEmitter.class.getDeclaredMethod("handleMetrics", String.class);
         handleMetric.setAccessible(true);
-        Assertions.assertDoesNotThrow(() -> handleMetric.invoke(grpcEmitter, inputJson));
+        Assertions.assertDoesNotThrow(() -> handleMetric.invoke(otelGrpcEmitter, inputJson));
     }
 
     @Test
@@ -157,9 +157,9 @@ public class GrpcEmitterTest {
                         .build();
         Mockito.when(logsServiceBlockingStub.export(any(ExportLogsServiceRequest.class)))
                 .thenReturn(response);
-        Method handleLog = GrpcEmitter.class.getDeclaredMethod("handleLogs", String.class);
+        Method handleLog = OtelGrpcEmitter.class.getDeclaredMethod("handleLogs", String.class);
         handleLog.setAccessible(true);
-        handleLog.invoke(grpcEmitter, inputJson);
+        handleLog.invoke(otelGrpcEmitter, inputJson);
         Mockito.verify(logsServiceBlockingStub, times(1))
                 .export(any(ExportLogsServiceRequest.class));
     }
@@ -171,8 +171,8 @@ public class GrpcEmitterTest {
         String inputJson = "{}";
         Mockito.when(logsServiceBlockingStub.export(any(ExportLogsServiceRequest.class)))
                 .thenThrow(StatusRuntimeException.class);
-        Method handleLog = GrpcEmitter.class.getDeclaredMethod("handleLogs", String.class);
+        Method handleLog = OtelGrpcEmitter.class.getDeclaredMethod("handleLogs", String.class);
         handleLog.setAccessible(true);
-        Assertions.assertDoesNotThrow(() -> handleLog.invoke(grpcEmitter, inputJson));
+        Assertions.assertDoesNotThrow(() -> handleLog.invoke(otelGrpcEmitter, inputJson));
     }
 }

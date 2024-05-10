@@ -2,7 +2,7 @@ instance:
   cache: LogQueueCache
   receiver: OtlpLogFileReceiver
   preHandler: OtlpLogPreHandler
-  emitter: GrpcEmitter
+  emitter: OtelGrpcEmitter
 
 receiver:
   otlpLogFile:
