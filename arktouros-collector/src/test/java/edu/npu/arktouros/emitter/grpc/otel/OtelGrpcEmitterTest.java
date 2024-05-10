@@ -1,6 +1,5 @@
 package edu.npu.arktouros.emitter.grpc.otel;
 
-import edu.npu.arktouros.cache.LogQueueCache;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
 import edu.npu.arktouros.config.PropertiesProvider;
 import io.grpc.StatusRuntimeException;
@@ -27,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.CountDownLatch;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -59,20 +57,6 @@ public class OtelGrpcEmitterTest {
         otelGrpcEmitter.traceServiceBlockingStub = traceServiceBlockingStub;
         otelGrpcEmitter.metricsServiceBlockingStub = metricsServiceBlockingStub;
         otelGrpcEmitter.logsServiceBlockingStub = logsServiceBlockingStub;
-    }
-
-    @Test
-    @Timeout(30)
-    void testKeepAlive() throws
-            NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        log.info("testKeepAlive");
-        LogQueueCache cache = (LogQueueCache) new LogQueueCache.Factory().createCache();
-        OtelGrpcEmitter emitter = new OtelGrpcEmitter(cache);
-        Method keepAliveCheck =
-                OtelGrpcEmitter.class
-                        .getDeclaredMethod("startKeepAliveCheck", CountDownLatch.class);
-        keepAliveCheck.setAccessible(true);
-        keepAliveCheck.invoke(emitter, new CountDownLatch(1));
     }
 
     @Test

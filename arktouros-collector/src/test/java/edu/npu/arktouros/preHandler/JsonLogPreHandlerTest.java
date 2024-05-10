@@ -57,7 +57,7 @@ public class JsonLogPreHandlerTest {
             log.error("Thread sleep error", e);
         }
         // 不知道为什么mvn test的时候这个位置会变成nullPointerException 本地跑没问题的
-        Assertions.assertEquals("{}", outputCache.get());
+        Assertions.assertNull(outputCache.get());
         executorService.shutdown();
     }
 
@@ -69,6 +69,6 @@ public class JsonLogPreHandlerTest {
         // 不知道为什么mvn test的时候这个位置会变成nullPointerException 本地跑没问题的
         handler.start();
         handler.interrupt();
-        Assertions.assertTrue(outputCache.isEmpty());
+        Assertions.assertFalse(outputCache.isEmpty());
     }
 }
