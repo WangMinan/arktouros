@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -39,16 +40,9 @@ import java.util.concurrent.TimeUnit;
 public class ElasticsearchSinkService extends SinkService {
 
     private final ExecutorService createIndexThreadPool =
-            new ThreadPoolExecutor(
-                    ElasticsearchIndex.getIndexList().size(),
-                    ElasticsearchIndex.getIndexList().size(),
-                    0L,
-                    TimeUnit.MILLISECONDS,
-                    new ArrayBlockingQueue<>(ElasticsearchIndex.getIndexList().size()),
+            Executors.newFixedThreadPool(ElasticsearchIndex.getIndexList().size(),
                     new BasicThreadFactory.Builder()
-                            .namingPattern("ElasticSearch-init-%d").build(),
-                    new ThreadPoolExecutor.AbortPolicy()
-            );
+                            .namingPattern("ElasticSearch-init-%d").build());
 
     @Override
     public void init() {
