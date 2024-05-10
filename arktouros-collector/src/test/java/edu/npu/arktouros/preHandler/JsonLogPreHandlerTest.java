@@ -17,11 +17,11 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author : [wangminan]
- * @description : {@link OtlpLogPreHandler}
+ * @description : {@link JsonLogPreHandler}
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class OtlpLogPreHandlerTest {
+public class JsonLogPreHandlerTest {
 
     // 线程池
     private static final ExecutorService executorService =
@@ -29,7 +29,7 @@ public class OtlpLogPreHandlerTest {
 
     private LogQueueCache inputCache;
     private LogQueueCache outputCache;
-    private OtlpLogPreHandler handler;
+    private JsonLogPreHandler handler;
 
     @BeforeAll
     static void initProperties() {
@@ -40,7 +40,7 @@ public class OtlpLogPreHandlerTest {
     void init() {
         inputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
         outputCache = (LogQueueCache) new LogQueueCache.Factory().createCache();
-        handler = (OtlpLogPreHandler) new OtlpLogPreHandler.Factory().createPreHandler(inputCache, outputCache);
+        handler = (JsonLogPreHandler) new JsonLogPreHandler.Factory().createPreHandler(inputCache, outputCache);
     }
 
     @Test

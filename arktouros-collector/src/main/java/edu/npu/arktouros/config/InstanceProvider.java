@@ -5,12 +5,13 @@ import edu.npu.arktouros.cache.CacheFactory;
 import edu.npu.arktouros.cache.LogQueueCache;
 import edu.npu.arktouros.emitter.AbstractEmitter;
 import edu.npu.arktouros.emitter.EmitterFactory;
-import edu.npu.arktouros.emitter.otel.OtelGrpcEmitter;
+import edu.npu.arktouros.emitter.grpc.arktouros.ArktourosGrpcEmitter;
+import edu.npu.arktouros.emitter.grpc.otel.OtelGrpcEmitter;
 import edu.npu.arktouros.preHandler.AbstractPreHandler;
-import edu.npu.arktouros.preHandler.OtlpLogPreHandler;
+import edu.npu.arktouros.preHandler.JsonLogPreHandler;
 import edu.npu.arktouros.preHandler.PreHandlerFactory;
 import edu.npu.arktouros.receiver.AbstractReceiver;
-import edu.npu.arktouros.receiver.OtlpLogFileReceiver;
+import edu.npu.arktouros.receiver.JsonLogFileReceiver;
 import edu.npu.arktouros.receiver.ReceiverFactory;
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,8 +47,8 @@ public class InstanceProvider {
         ReceiverFactory factory;
         // 避免反射 手动加载
         if (StringUtils.isNotEmpty(receiverClassName) &&
-                receiverClassName.equals("OtlpLogFileReceiver")) {
-            factory = new OtlpLogFileReceiver.Factory();
+                receiverClassName.equals("JsonLogFileReceiver")) {
+            factory = new JsonLogFileReceiver.Factory();
         } else {
             throw new IllegalArgumentException("Unknown receiver class: " + receiverClassName);
         }
@@ -58,8 +59,8 @@ public class InstanceProvider {
         PreHandlerFactory factory;
         // 避免反射 手动加载
         if (StringUtils.isNotEmpty(preHandlerClassName) &&
-                preHandlerClassName.equals("OtlpLogPreHandler")) {
-            factory = new OtlpLogPreHandler.Factory();
+                preHandlerClassName.equals("JsonLogPreHandler")) {
+            factory = new JsonLogPreHandler.Factory();
         } else {
             throw new IllegalArgumentException("Unknown receiver class: " + receiverClassName);
         }
@@ -71,6 +72,9 @@ public class InstanceProvider {
         if (StringUtils.isNotEmpty(emitterClassName) &&
                 emitterClassName.equals("OtelGrpcEmitter")) {
             factory = new OtelGrpcEmitter.Factory();
+        } else if (StringUtils.isNotEmpty(emitterClassName) &&
+                emitterClassName.equals("ArktourosGrpcEmitter")) {
+            factory = new ArktourosGrpcEmitter.Factory();
         } else {
             throw new IllegalArgumentException("Unknown emitter class: " + emitterClassName);
         }

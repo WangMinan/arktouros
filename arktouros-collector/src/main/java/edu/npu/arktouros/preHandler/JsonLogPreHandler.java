@@ -7,20 +7,20 @@ import java.util.Stack;
 
 /**
  * @author : [wangminan]
- * @description : Otlp日志预处理器
+ * @description : Json日志预处理器
  */
 @Slf4j
-public class OtlpLogPreHandler extends AbstractPreHandler{
+public class JsonLogPreHandler extends AbstractPreHandler{
 
     protected final StringBuilder cacheStringBuilder = new StringBuilder();
 
-    public OtlpLogPreHandler(AbstractCache inputCache, AbstractCache outputCache) {
+    public JsonLogPreHandler(AbstractCache inputCache, AbstractCache outputCache) {
         super(inputCache, outputCache);
     }
 
     @Override
     public void run() {
-        log.info("OtlpLogPreHandler start working");
+        log.info("JsonLogPreHandler start working");
         while (true) {
             handle();
         }
@@ -63,7 +63,7 @@ public class OtlpLogPreHandler extends AbstractPreHandler{
 
         @Override
         public AbstractPreHandler createPreHandler(AbstractCache inputCache, AbstractCache outputCache) {
-            return new OtlpLogPreHandler(inputCache, outputCache);
+            return new JsonLogPreHandler(inputCache, outputCache);
         }
     }
 }

@@ -7,10 +7,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author : [wangminan]
- * @description : {@link OtlpLogFileReceiver}
+ * @description : {@link JsonLogFileReceiver}
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 @Disabled("Not implemented yet")
-public class OtlpLogFileReceiverTest {
+public class JsonLogFileReceiverTest {
 }

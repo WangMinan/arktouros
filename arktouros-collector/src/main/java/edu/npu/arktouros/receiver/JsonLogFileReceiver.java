@@ -25,10 +25,10 @@ import java.util.Map;
 
 /**
  * @author : [wangminan]
- * @description : otlp日志文件接收器
+ * @description : Json格式日志文件接收器
  */
 @Slf4j
-public class OtlpLogFileReceiver extends AbstractReceiver {
+public class JsonLogFileReceiver extends AbstractReceiver {
     private String LOG_DIR;
 
     private static File logsDir;
@@ -44,13 +44,13 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
 
     private static File indexFile;
 
-    public OtlpLogFileReceiver(AbstractCache outputCache) {
+    public JsonLogFileReceiver(AbstractCache outputCache) {
         super(outputCache);
     }
 
     @Override
     public void run() {
-        log.info("this is OtlpLogFileReceiver, start working");
+        log.info("this is JsonLogFileReceiver, start working");
         try {
             prepare();
             while (true) {
@@ -155,7 +155,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
         }
         initCreateTimeFileMap();
         initParamsWithIndex();
-        log.info("OtlpLogFileReceiver prepare complete");
+        log.info("JsonLogFileReceiver prepare complete");
     }
 
     public void initParamsWithIndex() throws IOException {
@@ -247,7 +247,7 @@ public class OtlpLogFileReceiver extends AbstractReceiver {
 
         @Override
         public AbstractReceiver createReceiver(AbstractCache outputCache) {
-            return new OtlpLogFileReceiver(outputCache);
+            return new JsonLogFileReceiver(outputCache);
         }
     }
 }

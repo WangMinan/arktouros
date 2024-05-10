@@ -1,9 +1,9 @@
 instance:
   active:
     cache: LogQueueCache
-    receiver: OtlpLogFileReceiver
-    preHandler: OtlpLogPreHandler
-    emitter: OtelGrpcEmitter
+    receiver: JsonLogFileReceiver
+    preHandler: JsonLogPreHandler
+    emitter: OtelGrpcEmitter # OtelGrpcEmitter, ArktourosGrpcEmitter 二选一
   number:
     preHandler: 3
     emitter: 3

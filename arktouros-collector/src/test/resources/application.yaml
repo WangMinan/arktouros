@@ -1,7 +1,7 @@
 instance:
   cache: LogQueueCache
-  receiver: OtlpLogFileReceiver
-  preHandler: OtlpLogPreHandler
+  receiver: JsonLogFileReceiver
+  preHandler: JsonLogPreHandler
   emitter: OtelGrpcEmitter
 
 receiver:

@@ -1,4 +1,4 @@
-package edu.npu.arktouros.emitter.otel;
+package edu.npu.arktouros.emitter.grpc.otel;
 
 import edu.npu.arktouros.cache.LogQueueCache;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
