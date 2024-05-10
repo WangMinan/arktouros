@@ -87,7 +87,8 @@
         <testFailureIgnore>true</testFailureIgnore>
         <skipUTs>false</skipUTs>
         <argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED</argLine>
-        <jacoco.reportPath>${project.basedir}/jacoco/ut-report.html</jacoco.reportPath>
+        <jacoco.dataFile>${project.build.directory}/jacoco.exec</jacoco.dataFile>
+        <jacoco.output.dir>${project.basedir}/jacoco</jacoco.output.dir>
         <!-- UT -->
 
         <delombok.output.dir>${project.build.directory}/delombok</delombok.output.dir>
@@ -375,7 +376,7 @@
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <reuseForks>true</reuseForks>
                     <systemPropertyVariables>
-                        <jacoco-agent.destfile>${jacoco.reportPath}</jacoco-agent.destfile>
+                        <jacoco-agent.destfile>${jacoco.dataFile}</jacoco-agent.destfile>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -384,6 +385,11 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco-maven-plugin.version}</version>
+                <configuration>
+                    <destFile>${jacoco.dataFile}</destFile>
+                    <dataFile>${jacoco.dataFile}</dataFile>
+                    <outputDirectory>${jacoco.output.dir}</outputDirectory>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -401,9 +407,6 @@
                             <!--second execution: for creating code coverage reports-->
                             <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <dataFile>${jacoco.reportPath}</dataFile>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
