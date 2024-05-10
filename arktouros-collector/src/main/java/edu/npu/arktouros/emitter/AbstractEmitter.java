@@ -1,21 +1,23 @@
 package edu.npu.arktouros.emitter;
 
 import edu.npu.arktouros.cache.AbstractCache;
-import lombok.Getter;
 
 /**
  * @author : [wangminan]
  * @description : 抽象发射器
  */
-@Getter
-public abstract class AbstractEmitter extends Thread{
+public abstract class AbstractEmitter extends Thread {
 
-    protected final AbstractCache inputCache;
+    protected static AbstractCache inputCache;
 
     public AbstractEmitter(AbstractCache inputCache) {
         super();
         this.setName("emitter-thread");
-        this.inputCache = inputCache;
+        AbstractEmitter.inputCache = inputCache;
+    }
+
+    public AbstractCache getInputCache() {
+        return inputCache;
     }
 
     @Override

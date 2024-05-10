@@ -10,6 +10,7 @@ public class LogQueueCache implements AbstractCache {
 
     private static final int DEFAULT_CAPACITY = 1000;
 
+    // 阻塞队列 不需要考虑并发问题 用synchronize或者lock画蛇添足会导致线程阻塞
     protected static ArrayBlockingQueue<String> queue =
             new ArrayBlockingQueue<>(DEFAULT_CAPACITY);
 

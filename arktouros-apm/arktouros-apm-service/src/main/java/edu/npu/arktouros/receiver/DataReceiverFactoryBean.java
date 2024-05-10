@@ -59,10 +59,12 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
     @Override
     public DataReceiver getObject() {
         if (activeDataReceiver.equals("otelGrpc")) {
+            log.info("OtelGrpc receiver is active");
             return new OtelGrpcReceiver(logAnalyzerNumber, traceAnalyzerNumber, metricsAnalyzerNumber,
                     logQueueService, traceQueueService,
                     metricsQueueService, sinkService, grpcPort);
         } else if (activeDataReceiver.equals("arktourosGrpc")) {
+            log.info("ArktourosGrpc receiver is active");
             return new ArktourosReceiver(sinkService, grpcPort);
         } else {
             throw new IllegalArgumentException("can not find data receiver type from profile");

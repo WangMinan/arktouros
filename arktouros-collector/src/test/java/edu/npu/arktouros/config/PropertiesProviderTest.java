@@ -19,7 +19,7 @@ public class PropertiesProviderTest {
     @Timeout(10)
     void testGetProperty() {
         PropertiesProvider.init();
-        Assertions.assertEquals(PropertiesProvider.getProperty("instance.cache"), "LogQueueCache");
+        Assertions.assertEquals(PropertiesProvider.getProperty("instance.active.cache"), "LogQueueCache");
         Assertions.assertEquals(PropertiesProvider.getProperty("server.host", "host"),
                 "host");
     }

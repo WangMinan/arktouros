@@ -171,8 +171,8 @@ public class ElasticsearchClientPoolFactory implements PooledObjectFactory<Elast
         log.debug("Ssl config detected. Loading ca certificate from {}", ca);
         Path caCertificatePath = Paths.get(ca);
         Certificate trustedCa;
-        if (ca.endsWith("crt")) {
-            log.info("Ca certificate is a file");
+        if (ca.contains(".crt")) {
+            log.info("Ca certificate is a file, trying to resolve");
             try (InputStream is = Files.newInputStream(caCertificatePath)) {
                 trustedCa = CertificateFactory.getInstance("X.509").generateCertificate(is);
             }

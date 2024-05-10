@@ -27,7 +27,7 @@ public class OtlpLogPreHandler extends AbstractPreHandler{
     }
 
     public void handle() {
-        log.info("Formatting input from cache.");
+        log.debug("Formatting input from cache.");
         String input =
                 cacheStringBuilder.append(inputCache.get().trim()).toString();
         if (!input.startsWith("{")) {
@@ -48,7 +48,7 @@ public class OtlpLogPreHandler extends AbstractPreHandler{
                 stack.pop();
                 if (stack.isEmpty()) {
                     currentPos = i;
-                    log.info("Outputting formatted json to cache.");
+                    log.debug("Outputting formatted json to cache.");
                     outputCache.put(
                             cacheStringBuilder.substring(0, currentPos - lastPos + 1)
                     );

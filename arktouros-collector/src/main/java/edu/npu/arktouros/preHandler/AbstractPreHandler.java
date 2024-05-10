@@ -7,14 +7,15 @@ import edu.npu.arktouros.cache.AbstractCache;
  * @description : 预处理器
  */
 public abstract class AbstractPreHandler extends Thread{
-    protected final AbstractCache inputCache;
-    protected final AbstractCache outputCache;
+    // 所有preHandler共享一个inputCache和outputCache
+    protected static AbstractCache inputCache;
+    protected static AbstractCache outputCache;
 
     public AbstractPreHandler(AbstractCache inputCache, AbstractCache outputCache) {
         super();
         this.setName("preHandler-thread");
-        this.inputCache = inputCache;
-        this.outputCache = outputCache;
+        AbstractPreHandler.inputCache = inputCache;
+        AbstractPreHandler.outputCache = outputCache;
     }
 
     @Override

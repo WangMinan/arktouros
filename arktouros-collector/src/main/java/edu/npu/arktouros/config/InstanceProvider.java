@@ -5,7 +5,7 @@ import edu.npu.arktouros.cache.CacheFactory;
 import edu.npu.arktouros.cache.LogQueueCache;
 import edu.npu.arktouros.emitter.AbstractEmitter;
 import edu.npu.arktouros.emitter.EmitterFactory;
-import edu.npu.arktouros.emitter.grpc.GrpcEmitter;
+import edu.npu.arktouros.emitter.otel.OtelGrpcEmitter;
 import edu.npu.arktouros.preHandler.AbstractPreHandler;
 import edu.npu.arktouros.preHandler.OtlpLogPreHandler;
 import edu.npu.arktouros.preHandler.PreHandlerFactory;
@@ -29,13 +29,13 @@ public class InstanceProvider {
 
     public static void init() {
         cacheClassName =
-                PropertiesProvider.getProperty("instance.cache");
+                PropertiesProvider.getProperty("instance.active.cache");
         receiverClassName =
-                PropertiesProvider.getProperty("instance.receiver");
+                PropertiesProvider.getProperty("instance.active.receiver");
         preHandlerClassName =
-                PropertiesProvider.getProperty("instance.preHandler");
+                PropertiesProvider.getProperty("instance.active.preHandler");
         emitterClassName =
-                PropertiesProvider.getProperty("instance.emitter");
+                PropertiesProvider.getProperty("instance.active.emitter");
         receiverOutputCache = getNewCache();
         preHandlerOutputCache = getNewCache();
     }
@@ -69,8 +69,8 @@ public class InstanceProvider {
     public static AbstractEmitter getEmitter() {
         EmitterFactory factory;
         if (StringUtils.isNotEmpty(emitterClassName) &&
-                emitterClassName.equals("GrpcEmitter")) {
-            factory = new GrpcEmitter.Factory();
+                emitterClassName.equals("OtelGrpcEmitter")) {
+            factory = new OtelGrpcEmitter.Factory();
         } else {
             throw new IllegalArgumentException("Unknown emitter class: " + emitterClassName);
         }
