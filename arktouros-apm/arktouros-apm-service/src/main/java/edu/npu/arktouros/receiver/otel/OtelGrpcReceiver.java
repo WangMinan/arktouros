@@ -52,9 +52,9 @@ public class OtelGrpcReceiver extends DataReceiver {
         this.metricsAnalyzerNumber = metricsAnalyzerNumber;
         this.sinkService = sinkService;
         this.port = grpcPort;
-        OtelMetricsAnalyzer.queueService = metricsQueueService;
-        OtelLogAnalyzer.queueService = logQueueService;
-        OtelTraceAnalyzer.queueService = traceQueueService;
+        OtelMetricsAnalyzer.setQueueService(metricsQueueService);
+        OtelLogAnalyzer.setQueueService(logQueueService);
+        OtelTraceAnalyzer.setQueueService(traceQueueService);
         initAndStartAnalyzers();
         server = ServerBuilder.forPort(grpcPort)
                 .addService(new OtelMetricsServiceImpl())

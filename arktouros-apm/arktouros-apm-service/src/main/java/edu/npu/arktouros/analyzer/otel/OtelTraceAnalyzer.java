@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class OtelTraceAnalyzer extends DataAnalyzer {
 
-    public static TraceQueueService queueService;
+    protected static TraceQueueService queueService;
 
     private final SinkService sinkService;
 
@@ -49,6 +49,10 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         while (!isInterrupted()) {
             transform();
         }
+    }
+
+    public static void setQueueService(TraceQueueService queueService) {
+        OtelTraceAnalyzer.queueService = queueService;
     }
 
     public static void handle(ResourceSpans resourceSpans) {

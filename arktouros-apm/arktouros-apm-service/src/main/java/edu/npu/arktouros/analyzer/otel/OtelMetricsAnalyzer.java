@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.toMap;
 @Slf4j
 public class OtelMetricsAnalyzer extends DataAnalyzer {
 
-    public static MetricsQueueService queueService;
+    protected static MetricsQueueService queueService;
 
     private final SinkService sinkService;
 
@@ -56,6 +56,10 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
             log.error("Failed to convert resourceMetrics:{} to json", resourceMetrics, e);
             throw new RuntimeException(e);
         }
+    }
+
+    public static void setQueueService(MetricsQueueService queueService) {
+        OtelMetricsAnalyzer.queueService = queueService;
     }
 
     @Override

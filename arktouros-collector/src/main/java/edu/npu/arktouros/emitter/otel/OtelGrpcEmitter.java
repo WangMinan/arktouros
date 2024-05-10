@@ -185,7 +185,6 @@ public class OtelGrpcEmitter extends AbstractEmitter {
             log.error("Failed to send logs data to apm, error message: {}.",
                     e.getMessage()
             );
-            e.printStackTrace();
         }
     }
 

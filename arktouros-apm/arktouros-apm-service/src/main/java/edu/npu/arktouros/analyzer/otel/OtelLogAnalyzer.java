@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -27,7 +26,7 @@ import static java.util.stream.Collectors.toMap;
 @Slf4j
 public class OtelLogAnalyzer extends DataAnalyzer {
 
-    public static LogQueueService queueService;
+    protected static LogQueueService queueService;
 
     private final SinkService sinkService;
 
@@ -46,6 +45,10 @@ public class OtelLogAnalyzer extends DataAnalyzer {
             log.error("Failed to convert resourceLogs:{} to json", resourceLogs, e);
             throw new RuntimeException(e);
         }
+    }
+
+    public static void setQueueService(LogQueueService queueService) {
+        OtelLogAnalyzer.queueService = queueService;
     }
 
     @Override
