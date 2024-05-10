@@ -45,11 +45,11 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          ELASTICSEARCH_SERVERURL: ${{ secrets.ELASTICSEARCH_SERVERURL }}
+          ELASTICSEARCH_PASSWORD: ${{ secrets.ELASTICSEARCH_PASSWORD }}
+          ELASTICSEARCH_CA: ${{ secrets.ELASTICSEARCH_CA }}
         # UT报错不阻塞sonar扫描
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Delasticsearch.serverUrl="${{ secrets.ELASTICSEARCH_SERVERURL }}" \
-          -Delasticsearch.password="${{ secrets.ELASTICSEARCH_PASSWORD }}" \
-          -Delasticsearch.ca="${{ secrets.ELASTICSEARCH_CA }}" \
           -Dsonar.projectKey=WangMinan_Arktouros_aa85d45f-e3d2-4de7-92f8-2068c115b0e2 \
           -Dsonar.projectName='Arktouros'
