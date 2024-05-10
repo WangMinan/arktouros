@@ -49,6 +49,12 @@ public class PropertiesProvider {
     }
 
     public static String getProperty(String propertyPath, String defaultValue) {
+        // 如果系统环境变量中存在这个值 则优先返回 propertyPath中.换_然后全大写
+        String envValue = System.getenv(
+                propertyPath.replace(".", "_").toUpperCase());
+        if (StringUtils.isNotEmpty(envValue)) {
+            return envValue;
+        }
         Map<String, Object> value = map;
         for (String key : propertyPath.split("\\.")) {
             if (!value.containsKey(key)) return defaultValue;
