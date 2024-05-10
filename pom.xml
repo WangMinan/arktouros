@@ -87,6 +87,7 @@
         <testFailureIgnore>true</testFailureIgnore>
         <skipUTs>false</skipUTs>
         <argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED</argLine>
+        <jacoco.reportPath>${project.basedir}/jacoco/ut-report.html</jacoco.reportPath>
         <!-- UT -->
 
         <delombok.output.dir>${project.build.directory}/delombok</delombok.output.dir>
@@ -370,7 +371,12 @@
                 <configuration>
                     <testFailureIgnore>${testFailureIgnore}</testFailureIgnore>
                     <skip>${skipUTs}</skip>
-                    <argLine>${argLine}</argLine>
+                    <argLine>${argLine} ${jacocoArgLine}</argLine>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                    <reuseForks>true</reuseForks>
+                    <systemPropertyVariables>
+                        <jacoco-agent.destfile>${jacoco.reportPath}</jacoco-agent.destfile>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 
@@ -384,6 +390,9 @@
                             <!--first execution: for preparing JaCoCo runtime agent-->
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <propertyName>jacocoArgLine</propertyName>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>report</id>
@@ -392,6 +401,9 @@
                             <!--second execution: for creating code coverage reports-->
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <dataFile>${jacoco.reportPath}</dataFile>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
