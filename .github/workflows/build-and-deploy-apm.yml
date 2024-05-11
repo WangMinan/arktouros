@@ -1,11 +1,12 @@
 name: "build-and-deploy-apm"
 on:
   push:
-    branches: [ "main" ]
+    tags:
+      # 只有有tag的时候才触发部署操作
+      - 'v*'
 
 jobs:
   build-and-push-image:
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -59,7 +60,6 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:latest
 
   deploy_on_remote:
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     needs: build-and-push-image
     steps:
