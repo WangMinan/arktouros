@@ -397,7 +397,9 @@
                 <configuration>
                     <testFailureIgnore>${testFailureIgnore}</testFailureIgnore>
                     <skip>${skipUTs}</skip>
-                    <argLine>@{argLine} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED</argLine>
+                    <argLine>
+                        @{argLine} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+                    </argLine>
                 </configuration>
             </plugin>
 
@@ -406,7 +408,9 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <argLine>${argLine}</argLine>
+                    <argLine>
+                        @{argLine} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+                    </argLine>
                 </configuration>
                 <executions>
                     <execution>
