@@ -86,7 +86,6 @@
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <testFailureIgnore>true</testFailureIgnore>
         <skipUTs>false</skipUTs>
-        <argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED</argLine>
         <jacoco.dataFile>${project.build.directory}/jacoco.exec</jacoco.dataFile>
         <jacoco.output.dir>${project.basedir}/jacoco</jacoco.output.dir>
         <!-- UT -->
@@ -366,19 +365,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <testFailureIgnore>${testFailureIgnore}</testFailureIgnore>
-                    <skip>${skipUTs}</skip>
-<!--                    <argLine>${argLine}</argLine>-->
-                    <useSystemClassLoader>false</useSystemClassLoader>
-                    <reuseForks>true</reuseForks>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco-maven-plugin.version}</version>
@@ -406,15 +392,12 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>${maven-clean-plugin.version}</version>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <filesets>
-                        <fileset>
-                            <!-- 删除根目录下的build文件夹 -->
-                            <directory>${project.basedir}/build/</directory>
-                        </fileset>
-                    </filesets>
+                    <testFailureIgnore>${testFailureIgnore}</testFailureIgnore>
+                    <skip>${skipUTs}</skip>
+                    <argLine>@{argLine} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED</argLine>
                 </configuration>
             </plugin>
 
@@ -432,6 +415,20 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>${maven-clean-plugin.version}</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <!-- 删除根目录下的build文件夹 -->
+                            <directory>${project.basedir}/build/</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
             </plugin>
         </plugins>
     </build>
