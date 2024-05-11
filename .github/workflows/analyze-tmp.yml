@@ -46,7 +46,8 @@ jobs:
           ELASTICSEARCH_PASSWORD: ${{ secrets.ELASTICSEARCH_PASSWORD }}
           ELASTICSEARCH_CA: ${{ secrets.ELASTICSEARCH_CA }}
         # UT报错不阻塞sonar扫描
-        run: |
-          mvn -X -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey=WangMinan_Arktouros_aa85d45f-e3d2-4de7-92f8-2068c115b0e2 \
-          -Dsonar.projectName='Arktouros'
+        run: >
+          mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+          -Dsonar.coverage.jacoco.xmlReportPaths=./arktouros-jacoco-aggregation/target/site/jacoco-aggregate/jacoco.xml
+          -Dsonar.projectKey=WangMinan_Arktouros_5cf7fce8-6c16-4aef-b255-7105807485bf 
+          -Dsonar.projectName='Arktouros' -Pcoverage
