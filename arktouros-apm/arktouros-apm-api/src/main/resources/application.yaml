@@ -43,7 +43,7 @@ elasticsearch:
   # 暂不支持apiKey模式
   username: elastic
   password: elastic
-  caPos: D:/code/arktouros/docs/http_ca.crt # 证书位置 留空或文件不存在则不开启SSL
+  ca: D:/code/arktouros/docs/http_ca.crt # 证书位置 留空或文件不存在则不开启SSL
   pool:
     maxTotal: 10
     minIdle: 1
