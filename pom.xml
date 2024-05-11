@@ -88,9 +88,6 @@
         <skipUTs>false</skipUTs>
 <!--        <jacoco.dataFile>${project.build.directory}/jacoco.exec</jacoco.dataFile>-->
 <!--        <jacoco.output.dir>${project.basedir}/jacoco</jacoco.output.dir>-->
-        <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.basedir}/arktouros-jacoco-aggregation/target/site/jacoco-aggregate/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
         <!-- UT -->
 
         <delombok.output.dir>${project.build.directory}/delombok</delombok.output.dir>
