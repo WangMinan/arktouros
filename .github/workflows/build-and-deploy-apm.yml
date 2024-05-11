@@ -140,6 +140,5 @@ jobs:
         run: |
           mkdir -p ./db &&
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dspring.datasource.url=jdbc:h2:./db/apm;DB_CLOSE_DELAY=-1;MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE \
           -Dsonar.projectKey=WangMinan_Arktouros_aa85d45f-e3d2-4de7-92f8-2068c115b0e2 \
           -Dsonar.projectName='Arktouros'

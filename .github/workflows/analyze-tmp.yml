@@ -1,0 +1,52 @@
+name: "analyze-tmp"
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  analyze_with_sonarqube:
+    name: analyze with sonarqube
+    runs-on: ubuntu-latest
+    # 用新代码跑UT
+    permissions: read-all
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Graal JDK 21
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'      # See 'Options' section below for all supported versions
+          distribution: 'graalvm' # See 'Options' section below for all available distributions
+          version: '21.0.2'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          ELASTICSEARCH_SERVERURL: ${{ secrets.ELASTICSEARCH_SERVERURL }}
+          ELASTICSEARCH_PASSWORD: ${{ secrets.ELASTICSEARCH_PASSWORD }}
+          ELASTICSEARCH_CA: ${{ secrets.ELASTICSEARCH_CA }}
+        # UT报错不阻塞sonar扫描
+        run: |
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey=WangMinan_Arktouros_aa85d45f-e3d2-4de7-92f8-2068c115b0e2 \
+          -Dsonar.projectName='Arktouros'
