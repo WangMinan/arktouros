@@ -34,7 +34,7 @@ public class OtelGrpcEmitter extends AbstractGrpcEmitter {
     protected MetricsServiceGrpc.MetricsServiceBlockingStub metricsServiceBlockingStub;
     protected TraceServiceGrpc.TraceServiceBlockingStub traceServiceBlockingStub;
 
-    public OtelGrpcEmitter(AbstractCache inputCache) {
+    protected OtelGrpcEmitter(AbstractCache inputCache) {
         super(inputCache);
 
         logsServiceBlockingStub = LogsServiceGrpc.newBlockingStub(channel);

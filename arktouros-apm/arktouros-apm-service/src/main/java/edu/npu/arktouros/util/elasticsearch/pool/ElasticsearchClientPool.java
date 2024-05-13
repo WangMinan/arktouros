@@ -15,6 +15,10 @@ public class ElasticsearchClientPool {
     private static final GenericObjectPool<ElasticsearchClient> pool =
             new GenericObjectPool<>(factory, factory.getPoolConfig());
 
+    private ElasticsearchClientPool() {
+        throw new UnsupportedOperationException("ElasticsearchClientPool is a utility class and cannot be instantiated");
+    }
+
     public static GenericObjectPool<ElasticsearchClient> getInstance() {
         return pool;
     }

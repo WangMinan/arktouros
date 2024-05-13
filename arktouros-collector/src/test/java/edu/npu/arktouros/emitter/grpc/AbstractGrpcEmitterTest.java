@@ -2,7 +2,6 @@ package edu.npu.arktouros.emitter.grpc;
 
 import edu.npu.arktouros.cache.LogQueueCache;
 import edu.npu.arktouros.config.PropertiesProvider;
-import edu.npu.arktouros.emitter.grpc.otel.OtelGrpcEmitter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,7 @@ import java.util.concurrent.CountDownLatch;
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class AbstractGrpcEmitterTest {
+class AbstractGrpcEmitterTest {
 
     @BeforeAll
     static void initProperties() {

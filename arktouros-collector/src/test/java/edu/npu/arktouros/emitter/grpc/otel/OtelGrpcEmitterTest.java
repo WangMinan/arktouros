@@ -36,7 +36,7 @@ import static org.mockito.Mockito.times;
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class OtelGrpcEmitterTest {
+class OtelGrpcEmitterTest {
 
     private TraceServiceGrpc.TraceServiceBlockingStub traceServiceBlockingStub;
     private MetricsServiceGrpc.MetricsServiceBlockingStub metricsServiceBlockingStub;

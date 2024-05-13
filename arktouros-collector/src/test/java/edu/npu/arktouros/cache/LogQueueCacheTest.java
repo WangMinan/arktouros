@@ -16,7 +16,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class LogQueueCacheTest {
+class LogQueueCacheTest {
 
     @Test
     @Timeout(30)

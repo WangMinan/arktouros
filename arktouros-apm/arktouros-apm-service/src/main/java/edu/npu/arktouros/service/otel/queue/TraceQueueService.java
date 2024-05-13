@@ -31,12 +31,12 @@ public class TraceQueueService extends QueueService<TraceQueueItem> {
     @Override
     public void put(TraceQueueItem traceQueueItem) {
         queueMapper.add(traceQueueItem);
-        final ReentrantLock lock = this.lock;
-        lock.lock();
+        final ReentrantLock finalLock = this.lock;
+        finalLock.lock();
         try {
             notEmpty.signal();
         } finally {
-            lock.unlock();
+            finalLock.unlock();
         }
     }
 
@@ -53,8 +53,8 @@ public class TraceQueueService extends QueueService<TraceQueueItem> {
     @SneakyThrows
     public TraceQueueItem getItem(boolean removeAtSameTime) {
         TraceQueueItem item = queueMapper.getTop();
-        final ReentrantLock lock = this.lock;
-        lock.lock();
+        final ReentrantLock finalLock = this.lock;
+        finalLock.lock();
         try {
             while (item == null) {
                 notEmpty.await();
@@ -66,7 +66,7 @@ public class TraceQueueService extends QueueService<TraceQueueItem> {
         } catch (InterruptedException e) {
             log.warn("Force traceQueueService shutting down");
         } finally {
-            lock.unlock();
+            finalLock.unlock();
         }
         return item;
     }

@@ -34,7 +34,7 @@ public class AbstractGrpcEmitter extends AbstractEmitter {
                             .namingPattern("keepAlive-check-%d").build());
     protected final AtomicInteger connectRetryTimes = new AtomicInteger(0);
 
-    public AbstractGrpcEmitter(AbstractCache inputCache) {
+    protected AbstractGrpcEmitter(AbstractCache inputCache) {
         super(inputCache);
         String HOST = PropertiesProvider
                 .getProperty("emitter.grpc.host", "127.0.0.1");

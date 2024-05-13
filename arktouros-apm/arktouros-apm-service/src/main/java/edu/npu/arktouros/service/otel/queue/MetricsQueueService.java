@@ -32,20 +32,20 @@ public class MetricsQueueService extends QueueService<MetricsQueueItem> {
     @Override
     public void put(MetricsQueueItem metricsQueueItem) {
         queueMapper.add(metricsQueueItem);
-        final ReentrantLock lock = this.lock;
-        lock.lock();
+        final ReentrantLock finalLock = this.lock;
+        finalLock.lock();
         try {
             notEmpty.signal();
         } finally {
-            lock.unlock();
+            finalLock.unlock();
         }
     }
 
     @SneakyThrows
     public MetricsQueueItem getItem(boolean removeAtSameTime) {
         MetricsQueueItem item = queueMapper.getTop();
-        final ReentrantLock lock = this.lock;
-        lock.lock();
+        final ReentrantLock finalLock = this.lock;
+        finalLock.lock();
         try {
             while (item == null) {
                 notEmpty.await();
@@ -57,7 +57,7 @@ public class MetricsQueueService extends QueueService<MetricsQueueItem> {
         } catch (InterruptedException e) {
             log.warn("Force traceQueueService shutting down");
         }  finally {
-            lock.unlock();
+            finalLock.unlock();
         }
         return item;
     }

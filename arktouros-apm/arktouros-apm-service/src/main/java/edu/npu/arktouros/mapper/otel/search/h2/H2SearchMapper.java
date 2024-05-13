@@ -43,7 +43,7 @@ public class H2SearchMapper extends SearchMapper {
 
     @Override
     public R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto) {
-        return null;
+        return R.ok();
     }
 
     @Override
@@ -63,12 +63,12 @@ public class H2SearchMapper extends SearchMapper {
 
     @Override
     public R getNamespaceList(String query) {
-        return null;
+        return R.ok();
     }
 
     @Override
     public R getAllLogLevels(String query) {
-        return null;
+        return R.ok();
     }
 
 }

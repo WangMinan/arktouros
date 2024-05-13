@@ -17,9 +17,4 @@ public abstract class AbstractPreHandler extends Thread{
         AbstractPreHandler.inputCache = inputCache;
         AbstractPreHandler.outputCache = outputCache;
     }
-
-    @Override
-    public void run() {
-        super.run();
-    }
 }

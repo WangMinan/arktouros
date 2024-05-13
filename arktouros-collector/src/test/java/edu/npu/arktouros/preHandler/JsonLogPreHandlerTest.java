@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class JsonLogPreHandlerTest {
+class JsonLogPreHandlerTest {
 
     // 线程池
     private static final ExecutorService executorService =

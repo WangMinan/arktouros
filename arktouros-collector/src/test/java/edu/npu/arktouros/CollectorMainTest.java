@@ -15,7 +15,7 @@ import java.util.concurrent.CountDownLatch;
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class CollectorMainTest {
+class CollectorMainTest {
 
     @Test
     void testMain() throws Exception {

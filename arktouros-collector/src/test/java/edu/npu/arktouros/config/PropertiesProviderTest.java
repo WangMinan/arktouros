@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class PropertiesProviderTest {
+class PropertiesProviderTest {
 
     @Test
     @Timeout(10)

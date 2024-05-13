@@ -28,6 +28,10 @@ public class InstanceProvider {
     private static AbstractCache receiverOutputCache; // 也是 preHandler的inputCache
     private static AbstractCache preHandlerOutputCache; // 也是 emitter的inputCache
 
+    private InstanceProvider() {
+        throw new UnsupportedOperationException("InstanceProvider is a utility class and should not be instantiated");
+    }
+
     public static void init() {
         cacheClassName =
                 PropertiesProvider.getProperty("instance.active.cache");

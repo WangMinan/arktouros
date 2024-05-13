@@ -10,7 +10,7 @@ public abstract class AbstractEmitter extends Thread {
 
     protected static AbstractCache inputCache;
 
-    public AbstractEmitter(AbstractCache inputCache) {
+    protected AbstractEmitter(AbstractCache inputCache) {
         super();
         this.setName("emitter-thread");
         AbstractEmitter.inputCache = inputCache;
@@ -18,10 +18,5 @@ public abstract class AbstractEmitter extends Thread {
 
     public AbstractCache getInputCache() {
         return inputCache;
-    }
-
-    @Override
-    public void run() {
-        super.run();
     }
 }

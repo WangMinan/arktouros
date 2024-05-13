@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author : [wangminan]
@@ -27,7 +28,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
         String sql = "insert into PUBLIC.APM_TRACE_QUEUE (DATA) values (?);";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
-                    connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+                    connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, traceQueueItem.getData());
             preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
@@ -36,7 +37,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
             resultSet.close();
             preparedStatement.close();
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when add span to dataSource: {}", e.getMessage());
         }
     }
 
@@ -56,7 +57,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
                 return traceQueueItem;
             }
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when get top span from dataSource: {}", e.getMessage());
         }
         return null;
     }
@@ -79,7 +80,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
             preparedStatement.close();
             return size;
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when get span size from dataSource: {}", e.getMessage());
         }
         return 0;
     }
@@ -94,7 +95,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
             preparedStatement.executeUpdate();
             preparedStatement.close();
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when remove top span from dataSource: {}", e.getMessage());
         }
     }
 
@@ -114,7 +115,7 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
             preparedStatement.close();
             return true;
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when prepare span table from dataSource: {}", e.getMessage());
             return false;
         }
     }

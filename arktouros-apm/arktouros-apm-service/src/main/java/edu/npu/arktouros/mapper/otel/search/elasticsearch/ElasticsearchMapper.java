@@ -54,6 +54,9 @@ import java.util.Set;
 @Slf4j
 public class ElasticsearchMapper extends SearchMapper {
     private static final String RESULT = "result";
+    private static final String SERVICE_NAME = "serviceName";
+    private static final String TIMESTAMP = "timestamp";
+    private static final String SEVERITY_TEXT = "severityText";
 
     @Override
     public R getServiceList(ServiceQueryDto queryDto) {
@@ -115,7 +118,7 @@ public class ElasticsearchMapper extends SearchMapper {
             fieldValues.add(FieldValue.of(serviceName));
         }
         termsQueryBuilder
-                .field("serviceName")
+                .field(SERVICE_NAME)
                 .terms(builder -> builder.value(fieldValues));
         searchRequestBuilder
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
@@ -164,14 +167,14 @@ public class ElasticsearchMapper extends SearchMapper {
 
         SortOptions sort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()
-                        .field("timestamp")
+                        .field(TIMESTAMP)
                         .order(SortOrder.Desc)
                         .build())
                 .build();
 
         if (StringUtils.isNotEmpty(logQueryDto.serviceName())) {
             boolQueryBuilder.must(new MatchQuery.Builder()
-                    .field("serviceName")
+                    .field(SERVICE_NAME)
                     .query(logQueryDto.serviceName())
                     .build()._toQuery());
         }
@@ -194,17 +197,17 @@ public class ElasticsearchMapper extends SearchMapper {
         }
         if (logQueryDto.severityText() != null) {
             boolQueryBuilder.filter(new TermQuery.Builder()
-                    .field("severityText")
+                    .field(SEVERITY_TEXT)
                     .value(logQueryDto.severityText())
                     .build()._toQuery());
         }
         RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
         if (logQueryDto.startTimestamp() != null) {
-            rangeQueryBuilder.field("timestamp")
+            rangeQueryBuilder.field(TIMESTAMP)
                     .gte(JsonData.of(logQueryDto.startTimestamp()));
         }
         if (logQueryDto.endTimestamp() != null) {
-            rangeQueryBuilder.field("timestamp")
+            rangeQueryBuilder.field(TIMESTAMP)
                     .lte(JsonData.of(logQueryDto.endTimestamp()));
         }
 
@@ -228,7 +231,7 @@ public class ElasticsearchMapper extends SearchMapper {
     public R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto) {
         TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
         termQueryBuilder
-                .field("serviceName")
+                .field(SERVICE_NAME)
                 .value(endPointQueryDto.serviceName());
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
@@ -239,39 +242,39 @@ public class ElasticsearchMapper extends SearchMapper {
                 ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
         List<Hit<Span>> hits = searchResponse.hits().hits();
         R r = new R();
-        r.put("code", ResponseCodeEnum.SUCCESS.getValue());
         Set<EndPoint> endPointSet = new HashSet<>();
         List<EndPointTraceIdVo> endPointTraceIdVoList = new ArrayList<>();
-        if (hits.isEmpty()) {
-            r.put(RESULT, new ArrayList<>());
-        } else {
-            hits.forEach(hit -> {
-                if (hit.source() != null) {
-                    EndPoint localEndPoint = hit.source().getLocalEndPoint();
-                    if (endPointSet.contains(localEndPoint)) {
-                        // endPointTraceIdDtoList中找到对应记录 并在traceIds中做添加
-                        for (EndPointTraceIdVo endPointTraceIdVo :
-                                endPointTraceIdVoList) {
-                            if (endPointTraceIdVo.endPoint().equals(localEndPoint)) {
-                                endPointTraceIdVo
-                                        .traceIds()
-                                        .add(hit.source().getTraceId());
-                                break;
-                            }
-                        }
-                    } else {
-                        endPointSet.add(localEndPoint);
-                        EndPointTraceIdVo endPointTraceIdVo =
-                                new EndPointTraceIdVo(localEndPoint,
-                                        new HashSet<>());
-                        endPointTraceIdVo.traceIds().add(hit.source().getTraceId());
-                        endPointTraceIdVoList.add(endPointTraceIdVo);
+
+        hits.forEach(hit -> {
+            resolveHit(hit, endPointSet, endPointTraceIdVoList);
+        });
+        r.put(RESULT, endPointTraceIdVoList);
+        return r;
+    }
+
+    private static void resolveHit(Hit<Span> hit, Set<EndPoint> endPointSet, List<EndPointTraceIdVo> endPointTraceIdVoList) {
+        if (hit.source() != null) {
+            EndPoint localEndPoint = hit.source().getLocalEndPoint();
+            if (endPointSet.contains(localEndPoint)) {
+                // endPointTraceIdDtoList中找到对应记录 并在traceIds中做添加
+                for (EndPointTraceIdVo endPointTraceIdVo :
+                        endPointTraceIdVoList) {
+                    if (endPointTraceIdVo.endPoint().equals(localEndPoint)) {
+                        endPointTraceIdVo
+                                .traceIds()
+                                .add(hit.source().getTraceId());
+                        break;
                     }
                 }
-            });
-            r.put(RESULT, endPointTraceIdVoList);
+            } else {
+                endPointSet.add(localEndPoint);
+                EndPointTraceIdVo endPointTraceIdVo =
+                        new EndPointTraceIdVo(localEndPoint,
+                                new HashSet<>());
+                endPointTraceIdVo.traceIds().add(hit.source().getTraceId());
+                endPointTraceIdVoList.add(endPointTraceIdVo);
+            }
         }
-        return r;
     }
 
     @Override
@@ -306,7 +309,7 @@ public class ElasticsearchMapper extends SearchMapper {
     private <T extends Metric> List<String> getMetricNamesFromIndex(
             String serviceName, String indexName, Class<T> clazz) throws IOException {
         MatchQuery.Builder matchQueryBuilder = new MatchQuery.Builder();
-        matchQueryBuilder.field("serviceName").query(serviceName);
+        matchQueryBuilder.field(SERVICE_NAME).query(serviceName);
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         searchRequestBuilder
                 .index(indexName)
@@ -329,14 +332,14 @@ public class ElasticsearchMapper extends SearchMapper {
         termQueryBuilder.field("name").terms(builder -> builder.value(fieldValues));
         boolQueryBuilder.must(termQueryBuilder.build()._toQuery());
         boolQueryBuilder.must(new TermQuery.Builder()
-                .field("serviceName").value(serviceName).build()._toQuery());
+                .field(SERVICE_NAME).value(serviceName).build()._toQuery());
         RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
         if (startTimestamp != null) {
-            rangeQueryBuilder.field("timestamp")
+            rangeQueryBuilder.field(TIMESTAMP)
                     .gte(JsonData.of(startTimestamp));
         }
         if (endTimestamp != null) {
-            rangeQueryBuilder.field("timestamp")
+            rangeQueryBuilder.field(TIMESTAMP)
                     .lte(JsonData.of(endTimestamp));
         }
         if (startTimestamp != null || endTimestamp != null) {
@@ -415,14 +418,14 @@ public class ElasticsearchMapper extends SearchMapper {
         if (StringUtils.isNotEmpty(query)) {
             searchRequestBuilder.query(new Query.Builder()
                     .prefix(prefixBuilder ->
-                            prefixBuilder.field("severityText")
+                            prefixBuilder.field(SEVERITY_TEXT)
                                     .value(query))
                     .build()
             );
         } else {
             // group by
             searchRequestBuilder.aggregations("severityAgg",
-                    agg -> agg.terms(term -> term.field("severityText")));
+                    agg -> agg.terms(term -> term.field(SEVERITY_TEXT)));
         }
         List<String> severityList = new ArrayList<>();
         searchRequestBuilder.index(ElasticsearchIndex.LOG_INDEX.getIndexName());
@@ -458,7 +461,7 @@ public class ElasticsearchMapper extends SearchMapper {
             String indexName, Query query, Class<T> clazz) throws IOException {
         SortOptions sort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()
-                        .field("timestamp")
+                        .field(TIMESTAMP)
                         .order(SortOrder.Asc)
                         .build())
                 .build();

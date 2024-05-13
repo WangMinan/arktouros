@@ -12,5 +12,5 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 @Disabled("Not implemented yet")
-public class JsonLogFileReceiverTest {
+class JsonLogFileReceiverTest {
 }

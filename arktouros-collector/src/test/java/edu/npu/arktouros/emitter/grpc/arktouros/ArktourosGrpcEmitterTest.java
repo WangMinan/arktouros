@@ -37,7 +37,7 @@ import static org.mockito.Mockito.times;
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class ArktourosGrpcEmitterTest {
+class ArktourosGrpcEmitterTest {
     private SpanServiceGrpc.SpanServiceBlockingStub spanServiceBlockingStub;
     private MetricServiceGrpc.MetricServiceBlockingStub metricServiceBlockingStub;
     private LogServiceGrpc.LogServiceBlockingStub logServiceBlockingStub;

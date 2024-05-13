@@ -139,18 +139,16 @@ public class SearchServiceImpl implements SearchService {
     private void buildTraceTree(List<SpanTreeNode> formerLayerSpans, List<Span> otherSpans) {
         List<Span> currentLayerSpans = new ArrayList<>();
         List<SpanTreeNode> currentLayerNodes = new ArrayList<>();
-        formerLayerSpans.forEach(formerSpan -> {
-            otherSpans.forEach(otherSpan -> {
-                if (otherSpan.getParentSpanId().equals(formerSpan.getSpan().getId())) {
-                    SpanTreeNode.SpanTreeNodeBuilder otherBuilder =
-                            SpanTreeNode.builder().span(otherSpan);
-                    SpanTreeNode spanTreeNode = otherBuilder.build();
-                    currentLayerSpans.add(otherSpan);
-                    currentLayerNodes.add(spanTreeNode);
-                    formerSpan.getChildren().add(spanTreeNode);
-                }
-            });
-        });
+        formerLayerSpans.forEach(formerSpan -> otherSpans.forEach(otherSpan -> {
+            if (otherSpan.getParentSpanId().equals(formerSpan.getSpan().getId())) {
+                SpanTreeNode.SpanTreeNodeBuilder otherBuilder =
+                        SpanTreeNode.builder().span(otherSpan);
+                SpanTreeNode spanTreeNode = otherBuilder.build();
+                currentLayerSpans.add(otherSpan);
+                currentLayerNodes.add(spanTreeNode);
+                formerSpan.getChildren().add(spanTreeNode);
+            }
+        }));
         if (!currentLayerSpans.isEmpty()) {
             buildTraceTree(currentLayerNodes, otherSpans.stream()
                     .filter(span -> !currentLayerSpans.contains(span)).toList());

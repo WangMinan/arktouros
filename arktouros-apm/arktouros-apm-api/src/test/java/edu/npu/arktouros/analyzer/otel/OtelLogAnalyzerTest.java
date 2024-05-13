@@ -33,7 +33,7 @@ import static org.mockito.Mockito.times;
 @Slf4j
 @MockitoSettings(strictness = Strictness.LENIENT)
 @Timeout(30)
-public class OtelLogAnalyzerTest {
+class OtelLogAnalyzerTest {
     @Mock
     private SinkService sinkService;
 

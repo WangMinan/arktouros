@@ -23,6 +23,9 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
     @Resource
     private DataSource dataSource;
 
+    private static final String LOG_UNABLE_TO_CONNECT_TO_DATASOURCE =
+            "Encounter error when get connection from dataSource: {}";
+
     @Override
     public void add(LogQueueItem logQueueItem) {
         String sql = "insert into PUBLIC.APM_LOG_QUEUE (DATA) values (?);";
@@ -37,7 +40,7 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
             resultSet.close();
             preparedStatement.close();
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when add log to dataSource: {}", e.getMessage());
         }
     }
 
@@ -57,7 +60,7 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
                 return logQueueItem;
             }
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when get top log from dataSource: {}", e.getMessage());
         }
         return null;
     }
@@ -80,7 +83,7 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
             preparedStatement.close();
             return count;
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when get log size from dataSource: {}", e.getMessage());
         }
         return -1;
     }
@@ -95,7 +98,7 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
             preparedStatement.executeUpdate();
             preparedStatement.close();
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when remove top from dataSource: {}", e.getMessage());
         }
     }
 
@@ -115,7 +118,7 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
             preparedStatement.close();
             return true;
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when prepare log table in dataSource: {}", e.getMessage());
             return false;
         }
     }

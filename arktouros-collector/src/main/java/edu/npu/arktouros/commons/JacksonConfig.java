@@ -13,7 +13,7 @@ public class JacksonConfig {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static JacksonConfig instance = new JacksonConfig();
+    public static final JacksonConfig instance = new JacksonConfig();
 
     private JacksonConfig() {
         objectMapper.getFactory()

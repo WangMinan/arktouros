@@ -33,7 +33,7 @@ public class ArktourosGrpcEmitter extends AbstractGrpcEmitter {
     protected SpanServiceGrpc.SpanServiceBlockingStub spanServiceBlockingStub;
     protected MetricServiceGrpc.MetricServiceBlockingStub metricServiceBlockingStub;
 
-    public ArktourosGrpcEmitter(AbstractCache inputCache) {
+    protected ArktourosGrpcEmitter(AbstractCache inputCache) {
         super(inputCache);
         logServiceBlockingStub = LogServiceGrpc.newBlockingStub(channel);
         spanServiceBlockingStub = SpanServiceGrpc.newBlockingStub(channel);

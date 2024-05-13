@@ -31,12 +31,12 @@ public class LogQueueService extends QueueService<LogQueueItem> {
     @Override
     public void put(LogQueueItem logQueueItem) {
         queueMapper.add(logQueueItem);
-        final ReentrantLock lock = this.lock;
-        lock.lock();
+        final ReentrantLock finalLock = this.lock;
+        finalLock.lock();
         try {
             notEmpty.signal();
         } finally {
-            lock.unlock();
+            finalLock.unlock();
         }
     }
 

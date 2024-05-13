@@ -62,9 +62,7 @@ public class CollectorMain {
         AbstractReceiver receiver = startReceiver();
 
         Runtime.getRuntime().addShutdownHook(
-                new Thread(() -> {
-                    getShutdownThread(receiver, emitters);
-                })
+                new Thread(() -> getShutdownThread(receiver, emitters))
         );
 
         // 阻塞主线程

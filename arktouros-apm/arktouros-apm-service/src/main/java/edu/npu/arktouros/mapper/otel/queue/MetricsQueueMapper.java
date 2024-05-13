@@ -37,7 +37,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
             resultSet.close();
             preparedStatement.close();
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when add metric to dataSource: {}", e.getMessage());
         }
     }
 
@@ -57,7 +57,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
                 return metricsQueueItem;
             }
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when get top metric from dataSource: {}", e.getMessage());
         }
         return null;
     }
@@ -80,7 +80,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
             preparedStatement.close();
             return size;
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when get metric size from dataSource: {}", e.getMessage());
         }
         return 0;
     }
@@ -95,7 +95,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
             preparedStatement.executeUpdate();
             preparedStatement.close();
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when remove top metric from dataSource: {}", e.getMessage());
         }
     }
 
@@ -115,7 +115,7 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
             preparedStatement.close();
             return true;
         } catch (SQLException e) {
-            log.error("Encounter error when get connection from dataSource: {}", e.getMessage());
+            log.error("Encounter error when prepare metric table in dataSource: {}", e.getMessage());
             return false;
         }
     }
