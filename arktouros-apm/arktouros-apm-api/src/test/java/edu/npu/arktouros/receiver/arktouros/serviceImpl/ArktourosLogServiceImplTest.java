@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 // 要加这个配置 不然对any的类型推断有很严格的限制
 @MockitoSettings(strictness = Strictness.LENIENT)
 @Timeout(30)
-public class ArktourosLogServiceImplTest {
+class ArktourosLogServiceImplTest {
 
     @Test
     void testExport() throws IOException {
