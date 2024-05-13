@@ -97,7 +97,8 @@ jobs:
   analyze_with_sonarqube:
     name: analyze with sonarqube
     runs-on: ubuntu-latest
-    # 用新代码跑UT
+    needs: build-and-push-image
+    # 需要用新代码和新环境来跑UT
     permissions: read-all
     steps:
       - name: Checkout repository
@@ -140,4 +141,4 @@ jobs:
           mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
           -Dsonar.coverage.jacoco.xmlReportPaths=./arktouros-jacoco-aggregation/target/site/jacoco-aggregate/jacoco.xml
           -Dsonar.projectKey=WangMinan_Arktouros_5cf7fce8-6c16-4aef-b255-7105807485bf 
-          -Dsonar.projectName='Arktouros' -Pcoverage
+          -Dsonar.projectName='Arktouros'
