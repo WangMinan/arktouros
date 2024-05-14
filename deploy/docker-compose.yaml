@@ -13,6 +13,7 @@ services:
       # 日志目录映射出来
       - /root/arktouros/apm/logs:/arktouros/logs
     privileged: true
+    restart: on-failure
   arktouros-ui:
     image: wangminan/arktouros-ui:latest
     container_name: arktouros-ui
@@ -22,3 +23,4 @@ services:
       - /root/arktouros/ui/config:/arktouros-ui/config
       - /root/arktouros/ui/logs:/arktouros-ui/logs
     privileged: true
+    restart: on-failure
