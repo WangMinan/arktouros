@@ -48,7 +48,7 @@ class OtelLogAnalyzerTest {
     }
 
     @Test
-    public void testHandle() {
+    void testHandle() {
         ResourceLogs resourceLogs = ResourceLogs.newBuilder().build();
         Mockito.doNothing().when(logQueueService).put(any(LogQueueItem.class));
         OtelLogAnalyzer.handle(resourceLogs);
@@ -57,7 +57,7 @@ class OtelLogAnalyzerTest {
     }
 
     @Test
-    public void testTransform() throws IOException {
+    void testTransform() throws IOException {
         LogQueueItem logQueueItem = LogQueueItem.builder().data("{}").build();
         Mockito.when(logQueueService.get()).thenReturn(logQueueItem);
         Mockito.doNothing().when(sinkService).sink(any(Log.class));

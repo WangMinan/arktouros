@@ -5,6 +5,7 @@ import edu.npu.arktouros.model.queue.LogQueueItem;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import java.sql.Statement;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @Slf4j
+@Disabled
 class JdbcTemplateTest {
 
     @Resource

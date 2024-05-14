@@ -5,6 +5,7 @@ import edu.npu.arktouros.proto.collector.v1.SpanRequest;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,8 +37,8 @@ class ArktourosSpanServiceImplTest {
         SinkService sinkService = Mockito.mock(SinkService.class);
         Mockito.doNothing().when(sinkService).sink(any(Source.class));
         ArktourosSpanServiceImpl arktourosSpanService = new ArktourosSpanServiceImpl(sinkService);
-        arktourosSpanService.export(SpanRequest.newBuilder().build(),
-                Mockito.mock(StreamObserver.class));
+        Assertions.assertDoesNotThrow(() ->arktourosSpanService.export(SpanRequest.newBuilder().build(),
+                Mockito.mock(StreamObserver.class)));
     }
 
     @Test
@@ -45,7 +46,7 @@ class ArktourosSpanServiceImplTest {
         SinkService sinkService = Mockito.mock(SinkService.class);
         Mockito.doThrow(new IOException()).when(sinkService).sink(any(Source.class));
         ArktourosSpanServiceImpl arktourosSpanService = new ArktourosSpanServiceImpl(sinkService);
-        arktourosSpanService.export(SpanRequest.newBuilder().build(),
-                Mockito.mock(StreamObserver.class));
+        Assertions.assertDoesNotThrow(() ->arktourosSpanService.export(SpanRequest.newBuilder().build(),
+                Mockito.mock(StreamObserver.class)));
     }
 }

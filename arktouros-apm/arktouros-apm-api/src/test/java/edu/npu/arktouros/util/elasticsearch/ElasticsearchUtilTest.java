@@ -43,7 +43,7 @@ class ElasticsearchUtilTest {
     }
 
     @Test
-    public void testSink() throws IOException {
+    void testSink() throws IOException {
         try (
                 MockedStatic<ElasticsearchClientPool> poolMockedStatic =
                         Mockito.mockStatic(ElasticsearchClientPool.class)

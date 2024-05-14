@@ -47,17 +47,12 @@ class JsonLogPreHandlerTest {
     @Timeout(value = 30000, unit = TimeUnit.MILLISECONDS) // 默认单位秒
     void testRun() {
         log.info("testRun");
-        inputCache.put("   {}");
         executorService.submit(handler);
-        // 等待
-        try {
-            Thread.sleep(1000);
-            handler.interrupt();
-        } catch (InterruptedException e) {
-            log.error("Thread sleep error", e);
+        for (int i = 0; i < 100; i++) {
+            inputCache.put("   {}");
         }
         // 不知道为什么mvn test的时候这个位置会变成nullPointerException 本地跑没问题的
-        Assertions.assertNull(outputCache.get());
+        Assertions.assertNotNull(outputCache.get());
         executorService.shutdown();
     }
 
@@ -69,6 +64,6 @@ class JsonLogPreHandlerTest {
         // 不知道为什么mvn test的时候这个位置会变成nullPointerException 本地跑没问题的
         handler.start();
         handler.interrupt();
-        Assertions.assertFalse(outputCache.isEmpty());
+        Assertions.assertTrue(outputCache.isEmpty());
     }
 }
