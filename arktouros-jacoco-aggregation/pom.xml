@@ -21,7 +21,7 @@
     <dependencies>
         <dependency>
             <groupId>edu.npu</groupId>
-            <artifactId>arktouros-apm-api</artifactId>
+            <artifactId>arktouros-apm-service</artifactId>
             <version>0.0.1</version>
         </dependency>
 

@@ -420,9 +420,13 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <!-- protobuf自动生成文件不测 -->
                     <excludes>edu.npu.arktouros.proto.*</excludes>
                     <excludes>io.opentelemetry.proto.*</excludes>
+                    <!-- 实体类按照惯例不测 -->
                     <excludes>edu.npu.arktouros.model.*</excludes>
+                    <!-- 接口走集成测试 -->
+                    <excludes>edu.npu.arktouros.controller.*</excludes>
                 </configuration>
             </plugin>
 
