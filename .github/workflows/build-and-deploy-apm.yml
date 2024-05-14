@@ -154,7 +154,7 @@ jobs:
         with:
           server_address: smtp-mail.outlook.com
           server_port: 587
-          secure: true
+          secure: false # 看源码 置true时默认走465 其实这个逻辑是有问题的
           # Optional (recommended) mail server username:
           username: ${{secrets.MAIL_USERNAME}}
           # Optional (recommended) mail server password:
