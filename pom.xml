@@ -295,6 +295,10 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco-maven-plugin.version}</version>
+                    <configuration>
+                        <excludes>edu.npu.arktouros.proto.*</excludes>
+                        <excludes>io.opentelemetry.proto.*</excludes>
+                    </configuration>
                 </plugin>
 
                 <plugin>
