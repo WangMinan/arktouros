@@ -141,7 +141,7 @@ jobs:
         run: >
           sshpass -p ${{secrets.REMOTE_PWD}} 
           scp -r -o StrictHostKeyChecking=no 
-          arktouros-jacoco-aggregation/target/site/jacoco-aggregate 
+          arktouros-jacoco-aggregation/target/site/jacoco-aggregate/* 
           root@${{secrets.NGINX_IP}}:/usr/local/nginx/html/jacoco
 
       - name: 压缩UT报告为一个包
