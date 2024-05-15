@@ -427,6 +427,8 @@
                     <excludes>edu.npu.arktouros.model.*</excludes>
                     <!-- 接口走集成测试 -->
                     <excludes>edu.npu.arktouros.controller.*</excludes>
+                    <!-- *h2*链路暂时不实现 -->
+                    <excludes>edu.npu.arktouros.*.h2.*</excludes>
                 </configuration>
             </plugin>
 
