@@ -26,6 +26,10 @@ import java.io.IOException;
 
 public class ProtoBufJsonUtils {
 
+    private ProtoBufJsonUtils() {
+        throw new UnsupportedOperationException("Utility class, cannot be instantiated.");
+    }
+
     public static String toJSON(Message sourceMessage) throws IOException {
         return JsonFormat.printer()
                 .usingTypeRegistry(

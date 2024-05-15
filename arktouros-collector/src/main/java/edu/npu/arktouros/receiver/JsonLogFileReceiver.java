@@ -29,9 +29,9 @@ import java.util.Map;
  */
 @Slf4j
 public class JsonLogFileReceiver extends AbstractReceiver {
-    private String LOG_DIR;
+    private String logDirName;
 
-    private static File logsDir;
+    private static File logDirFile;
 
     // 我们默认所有文件的创建时间不同
     private static Map<Long, File> createTimeFileMap;
@@ -142,15 +142,15 @@ public class JsonLogFileReceiver extends AbstractReceiver {
 
     public void prepare() throws IOException {
         log.info("prepare to read logs");
-        LOG_DIR =
+        logDirName =
                 PropertiesProvider.getProperty("receiver.otlpLogFile.logDir");
-        if (LOG_DIR == null || LOG_DIR.isEmpty()) {
+        if (logDirName == null || logDirName.isEmpty()) {
             log.warn("Log dir: {} is not been set in config file, using default 'otel_logs'",
-                    LOG_DIR);
-            LOG_DIR = "otel_logs";
+                    logDirName);
+            logDirName = "otel_logs";
         }
-        logsDir = new File(LOG_DIR);
-        if (!logsDir.exists()) {
+        logDirFile = new File(logDirName);
+        if (!logDirFile.exists()) {
             throw new FileNotFoundException("log dir not found");
         }
         initCreateTimeFileMap();
@@ -160,9 +160,9 @@ public class JsonLogFileReceiver extends AbstractReceiver {
 
     public void initParamsWithIndex() throws IOException {
         // 去logs目录下检索是否有index文件
-        indexFile = new File(LOG_DIR + File.separator + "logs.index");
+        indexFile = new File(logDirName + File.separator + "logs.index");
         // 在执行rename的时候中断程序会出现问题
-        File tmpIndexFile = new File(LOG_DIR + File.separator + "logs.index.tmp");
+        File tmpIndexFile = new File(logDirName + File.separator + "logs.index.tmp");
         if (tmpIndexFile.exists()) {
             // 优先级更高 用tmpIndexFile的内容覆盖indexFile
             indexFile.createNewFile();
@@ -204,13 +204,13 @@ public class JsonLogFileReceiver extends AbstractReceiver {
                         currentPos = 0L;
                         currentFileCreateTime = entry.getKey();
                         List<String> line = List.of(currentFileCreateTime + ":" + currentPos);
-                        File tmpIndex = new File(LOG_DIR + File.separator + "logs.index.tmp");
+                        File tmpIndex = new File(logDirName + File.separator + "logs.index.tmp");
                         try {
                             tmpIndex.createNewFile();
                             Files.write(tmpIndex.toPath(), line,
                                     StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
                             tmpIndex.renameTo(indexFile);
-                            tmpIndex.delete();
+                            Files.delete(tmpIndex.toPath());
                         } catch (IOException e) {
                             throw new RuntimeException("failed while writing index file", e);
                         }
@@ -225,7 +225,7 @@ public class JsonLogFileReceiver extends AbstractReceiver {
 
     public void initCreateTimeFileMap() {
         createTimeFileMap = new HashMap<>();
-        File[] files = logsDir.listFiles();
+        File[] files = logDirFile.listFiles();
         if (files != null) {
             for (File file : files) {
                 // 需要排除索引文件

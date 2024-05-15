@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: arktouros-apm
+  datasource:
+    driver-class-name: org.h2.Driver
+    # 一定要持久化，这玩意是用来做apm缓存的 如果用内存型的话要丢数据 仅限测试环境用
+    url: jdbc:h2:./db/apm;DB_CLOSE_DELAY=-1;MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: sa
+  # 不要寄希望于自启动执行SQL，已经靠编码实现了 这个H2已经给我整吐了
+  h2:
+    console:
+      enabled: true
+
+server:
+  servlet:
+    context-path: /api/${var.api.version}
+  port: 50050
+
+var:
+  api:
+    version: v0
+
+# 对象选择，目前只完善了otelGrpc->elasticsearch全链路,h2暂不可选
+instance:
+  active:
+    dataReceiver: arktourosGrpc # otelGrpc/arktourosGrpc
+    sinker: elasticsearch # elasticsearch/h2
+    searchMapper: elasticsearch # elasticsearch/h2
+  number:
+    analyzer:
+      otel:
+        log: 1
+        metric: 5
+        trace: 1
+
+receiver:
+  grpc:
+    port: 50051
+
+elasticsearch:
+  serverUrl: https://localhost:9200
+  # 暂不支持apiKey模式
+  username: elastic
+  password: elastic
+  ca: D:/code/arktouros/docs/http_ca.crt # 证书位置 留空或文件不存在则不开启SSL
+  pool:
+    maxTotal: 10
+    minIdle: 1
+    maxWait: 3000
+  scroll:
+    maxWait: 5000

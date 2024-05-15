@@ -1,0 +1,23 @@
+{
+  "resource": {
+  },
+  "scopeLogs": [{
+    "scope": {
+    },
+    "logRecords": [{
+      "timeUnixNano": "1712152093574019397",
+      "severityNumber": "SEVERITY_NUMBER_INFO",
+      "severityText": "Info",
+      "body": {
+        "stringValue": "the message"
+      },
+      "attributes": [{
+        "key": "app",
+        "value": {
+          "stringValue": "server"
+        }
+      }],
+      "droppedAttributesCount": 1
+    }]
+  }]
+}
