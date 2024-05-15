@@ -38,6 +38,10 @@ public class ApplicationStartUp {
                 .join();
         log.info("Application started successfully.");
         // shutdown hook
+        addShutdownHook();
+    }
+
+    protected static void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Shutting down the application...");
             log.info("Application shutdown successfully.");

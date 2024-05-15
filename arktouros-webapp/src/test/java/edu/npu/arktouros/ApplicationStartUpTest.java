@@ -47,6 +47,8 @@ public class ApplicationStartUpTest {
         Mockito.when(PropertiesProvider.getProperty(anyString(), anyString()))
                 .thenReturn("50052");
 
+        ApplicationStartUp.addShutdownHook();
+
         Assertions.assertThrows(NullPointerException.class,
                 () -> ApplicationStartUp.main(args));
     }

@@ -21,6 +21,7 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.Locale;
 
 /**
  * @author : [wangminan]
@@ -49,21 +50,31 @@ public class ArktourosGrpcEmitter extends AbstractGrpcEmitter {
             Log.Builder logBuilder = Log.newBuilder();
             Span.Builder spanBuilder = Span.newBuilder();
             Metric.Builder metricBuilder = Metric.newBuilder();
-            // 序列化
-            try {
-                ProtoBufJsonUtils.fromJSON(inputJson, logBuilder);
-                emitLog(logBuilder.build());
-            } catch (IOException e) {
+            // 结构相似 都能转 所以只能用关键字试探
+            // 深拷贝
+            String tmpJson = inputJson;
+            tmpJson = tmpJson.replaceAll("\\s*|\r|\n|\t", "")
+                    .toLowerCase(Locale.ROOT);
+            if (tmpJson.contains("\"type\":\"log\"")) {
+                try {
+                    ProtoBufJsonUtils.fromJSON(inputJson, logBuilder);
+                    emitLog(logBuilder.build());
+                } catch (IOException e) {
+                    log.error("Failed to parse arktouros log from json string: {}", inputJson);
+                }
+            } else if (tmpJson.contains("\"type\":\"span\"")) {
                 try {
                     ProtoBufJsonUtils.fromJSON(inputJson, spanBuilder);
                     emitSpan(spanBuilder.build());
                 } catch (IOException ex) {
-                    try {
-                        ProtoBufJsonUtils.fromJSON(inputJson, metricBuilder);
-                        emitMetric(metricBuilder.build());
-                    } catch (IOException exc) {
-                        log.error("Failed to parse json string: {}", inputJson);
-                    }
+                    log.error("Failed to parse arktouros span json string: {}", inputJson);
+                }
+            } else {
+                try {
+                    ProtoBufJsonUtils.fromJSON(inputJson, metricBuilder);
+                    emitMetric(metricBuilder.build());
+                } catch (IOException exc) {
+                    log.error("Failed to parse arktouros metric json string: {}", inputJson);
                 }
             }
         }

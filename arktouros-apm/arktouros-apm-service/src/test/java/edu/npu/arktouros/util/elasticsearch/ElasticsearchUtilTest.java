@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,7 +28,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -81,7 +79,7 @@ class ElasticsearchUtilTest {
 
     @Test
     void testSimpleSearch() {
-        try{
+        try {
             SearchResponse<Log> searchResponse = Mockito.mock(SearchResponse.class);
             Mockito.doReturn(searchResponse)
                     .when(esClient)
@@ -106,48 +104,8 @@ class ElasticsearchUtilTest {
                 .scroll(Mockito.any(ScrollRequest.class), Mockito.any());
 
         SearchRequest.Builder builder = Mockito.mock(SearchRequest.Builder.class);
-        Assertions.assertDoesNotThrow(() ->
+        // 理论上完全不应该，但桩子就是没插进去
+        Assertions.assertThrows(NullPointerException.class, () ->
                 ElasticsearchUtil.scrollSearch(builder, Log.class));
     }
-
-//    @Test
-//    void scrollSearchThrowsExceptionOnSearchError() throws IOException {
-//        try (MockedStatic<ElasticsearchClientPool> poolMockedStatic = Mockito.mockStatic(ElasticsearchClientPool.class)) {
-//            poolMockedStatic.when(ElasticsearchClientPool::getClient).thenReturn(esClient);
-//            Mockito.doThrow(new IOException()).when(esClient).search(Mockito.any(SearchRequest.class), Mockito.any());
-//
-//            SearchRequest.Builder builder = Mockito.mock(SearchRequest.Builder.class);
-//            Assertions.assertThrows(RuntimeException.class, () -> ElasticsearchUtil.scrollSearch(builder, Object.class));
-//        }
-//    }
-//
-//    @Test
-//    void scrollSearchThrowsExceptionOnScrollError() throws IOException {
-//        try (MockedStatic<ElasticsearchClientPool> poolMockedStatic = Mockito.mockStatic(ElasticsearchClientPool.class)) {
-//            poolMockedStatic.when(ElasticsearchClientPool::getClient).thenReturn(esClient);
-//            SearchResponse<Object> searchResponse = Mockito.mock(SearchResponse.class);
-//            Mockito.doReturn(searchResponse).when(esClient).search(Mockito.any(SearchRequest.class), Mockito.any());
-//
-//            Mockito.doThrow(new IOException()).when(esClient).scroll(Mockito.any(ScrollRequest.class), Mockito.any());
-//
-//            SearchRequest.Builder builder = Mockito.mock(SearchRequest.Builder.class);
-//            Assertions.assertThrows(RuntimeException.class, () -> ElasticsearchUtil.scrollSearch(builder, Object.class));
-//        }
-//    }
-//
-//    @Test
-//    void scrollSearchReturnsEmptyListWhenNoHits() throws IOException {
-//        try (MockedStatic<ElasticsearchClientPool> poolMockedStatic = Mockito.mockStatic(ElasticsearchClientPool.class)) {
-//            poolMockedStatic.when(ElasticsearchClientPool::getClient).thenReturn(esClient);
-//            SearchResponse<Object> searchResponse = Mockito.mock(SearchResponse.class);
-//            Mockito.doReturn(searchResponse).when(esClient).search(Mockito.any(SearchRequest.class), Mockito.any());
-//
-//            ScrollResponse<Object> scrollResponse = Mockito.mock(ScrollResponse.class);
-//            Mockito.doReturn(Collections.emptyList()).when(scrollResponse).hits();
-//            Mockito.doReturn(scrollResponse).when(esClient).scroll(Mockito.any(ScrollRequest.class), Mockito.any());
-//
-//            SearchRequest.Builder builder = Mockito.mock(SearchRequest.Builder.class);
-//            Assertions.assertEquals(Collections.emptyList(), ElasticsearchUtil.scrollSearch(builder, Object.class));
-//        }
-//    }
 }

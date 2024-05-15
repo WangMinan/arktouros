@@ -39,7 +39,7 @@ public class CollectorMain {
                 PropertiesProvider.getProperty("instance.number.preHandler", "3"));
         emitterNum = Integer.parseInt(
                 PropertiesProvider.getProperty("instance.number.emitter", "3"));
-        receiverThreadPool = Executors.newFixedThreadPool(1,
+        receiverThreadPool = Executors.newSingleThreadExecutor(
                 new BasicThreadFactory.Builder()
                         .namingPattern("receiver-%d").build());
         preHandlerThreadPool = Executors.newFixedThreadPool(preHandlerNum,

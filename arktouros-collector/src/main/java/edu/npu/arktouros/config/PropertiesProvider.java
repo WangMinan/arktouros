@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -17,7 +18,7 @@ import java.util.Map;
 @Slf4j
 public class PropertiesProvider {
 
-    private static Map<String, Object> map;
+    private static Map<String, Object> map = new HashMap<>();
 
     private PropertiesProvider() {
     }
@@ -58,7 +59,7 @@ public class PropertiesProvider {
                 value = (Map<String, Object>) obj;
             } else {
                 String result = String.valueOf(obj);
-                if (StringUtils.isEmpty(result)) {
+                if (StringUtils.isEmpty(result) || obj == null) {
                     return defaultValue;
                 } else {
                     return result;

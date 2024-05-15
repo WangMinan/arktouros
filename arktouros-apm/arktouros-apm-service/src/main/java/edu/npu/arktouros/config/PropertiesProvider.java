@@ -19,7 +19,8 @@ public class PropertiesProvider {
 
     private static Map<String, Object> map;
 
-    private PropertiesProvider(){}
+    private PropertiesProvider() {
+    }
 
     public static void init() {
         Yaml yaml = new Yaml();
@@ -49,12 +50,6 @@ public class PropertiesProvider {
     }
 
     public static String getProperty(String propertyPath, String defaultValue) {
-        // 如果系统环境变量中存在这个值 则优先返回 propertyPath中.换_然后全大写
-        String envValue = System.getenv(
-                propertyPath.replace(".", "_").toUpperCase());
-        if (StringUtils.isNotEmpty(envValue)) {
-            return envValue;
-        }
         Map<String, Object> value = map;
         for (String key : propertyPath.split("\\.")) {
             if (!value.containsKey(key)) return defaultValue;
@@ -63,7 +58,7 @@ public class PropertiesProvider {
                 value = (Map<String, Object>) obj;
             } else {
                 String result = String.valueOf(obj);
-                if (StringUtils.isEmpty(result)) {
+                if (StringUtils.isEmpty(result) || obj == null) {
                     return defaultValue;
                 } else {
                     return result;

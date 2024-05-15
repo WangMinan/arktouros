@@ -29,7 +29,7 @@ import java.util.Map;
  */
 @Slf4j
 public class JsonLogFileReceiver extends AbstractReceiver {
-    private String logDirName;
+    private static String logDirName;
 
     private static File logDirFile;
 
@@ -57,6 +57,7 @@ public class JsonLogFileReceiver extends AbstractReceiver {
                 readFile();
             }
         } catch (InterruptedException | IOException e) {
+            log.error("JsonLogFileReceiver run failed", e);
             throw new RuntimeException(e);
         }
     }
@@ -65,7 +66,6 @@ public class JsonLogFileReceiver extends AbstractReceiver {
         log.info("continuing reading log: {}, current position: {}", currentFile.getName(), currentPos);
         // 存在逐步写入情况 使用buffer读
         readCurrentFileWithChannel();
-        // readCurrentFileWithStream();
         // 如果当前文件读完 尝试切换
         if (currentPos == currentFile.length()) {
             log.info("read complete, start switching, current file: {}, current position: {}",
@@ -95,26 +95,6 @@ public class JsonLogFileReceiver extends AbstractReceiver {
             } else {
                 log.info("switch to file: {}, current position: {}", currentFile.getName(), currentPos);
             }
-        }
-    }
-
-    // 定义一个方法，用于读取当前的输入流
-    private void readCurrentFileWithStream() {
-        try (BufferedInputStream currentStream = new BufferedInputStream(new FileInputStream(currentFile))) {
-            // 如果当前的输入流为空，返回
-            byte[] buffer = new byte[8 * 1024 * 1024];
-            int len;
-            currentStream.skip(currentPos);
-            while ((len = currentStream.read(buffer)) != -1) {
-                String line = new String(buffer, 0, len);
-                this.outputCache.put(line);
-                currentPos += len;
-                String indexLine = currentFileCreateTime + ":" + currentPos;
-                Files.write(indexFile.toPath(), List.of(indexLine),
-                        StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

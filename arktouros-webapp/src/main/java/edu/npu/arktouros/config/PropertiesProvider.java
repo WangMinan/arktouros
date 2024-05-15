@@ -58,7 +58,7 @@ public class PropertiesProvider {
                 value = (Map<String, Object>) obj;
             } else {
                 String result = String.valueOf(obj);
-                if (StringUtils.isEmpty(result)) {
+                if (StringUtils.isEmpty(result) || obj == null) {
                     return defaultValue;
                 } else {
                     return result;

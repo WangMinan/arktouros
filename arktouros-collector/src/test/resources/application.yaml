@@ -21,3 +21,5 @@ emitter:
       enabled: true # 是否进行连接检查 置空默认true
       delay: 5 # timeunit seconds
       maxRetryTimes: 3
+
+testAttr:

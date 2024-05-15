@@ -21,12 +21,12 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class InstanceProvider {
 
-    private static String cacheClassName;
-    private static String receiverClassName;
-    private static String preHandlerClassName;
-    private static String emitterClassName;
-    private static AbstractCache receiverOutputCache; // 也是 preHandler的inputCache
-    private static AbstractCache preHandlerOutputCache; // 也是 emitter的inputCache
+    protected static String cacheClassName;
+    protected static String receiverClassName;
+    protected static String preHandlerClassName;
+    protected static String emitterClassName;
+    protected static AbstractCache receiverOutputCache; // 也是 preHandler的inputCache
+    protected static AbstractCache preHandlerOutputCache; // 也是 emitter的inputCache
 
     private InstanceProvider() {
         throw new UnsupportedOperationException("InstanceProvider is a utility class and should not be instantiated");
