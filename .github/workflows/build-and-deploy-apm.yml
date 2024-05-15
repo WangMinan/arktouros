@@ -136,6 +136,13 @@ jobs:
           -Dsonar.projectKey=WangMinan_Arktouros_5cf7fce8-6c16-4aef-b255-7105807485bf 
           -Dsonar.projectName='Arktouros'
 
+      # 删除nginx原有目录下内容
+      - name: 清空nginx目录
+        run: >
+          sshpass -p ${{secrets.REMOTE_PWD}} 
+          ssh -o StrictHostKeyChecking=no root@${{secrets.NGINX_IP}} 
+          "rm -rf /usr/local/nginx/html/jacoco/*"
+
       # 理论上直接覆盖就可以了 我们先试试
       - name: 转发jacoco到nginx
         run: >
