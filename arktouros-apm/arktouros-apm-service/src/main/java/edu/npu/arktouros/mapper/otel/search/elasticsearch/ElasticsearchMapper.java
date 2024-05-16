@@ -92,21 +92,13 @@ public class ElasticsearchMapper extends SearchMapper {
         MatchQuery.Builder queryBuilder = new MatchQuery.Builder();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         queryBuilder.field("namespace").query(namespace);
-        SearchRequest searchRequest = searchRequestBuilder
+        searchRequestBuilder
                 .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
                 .query(queryBuilder.build()._toQuery())
-                .size(ElasticsearchConstants.MAX_PAGE_SIZE)
-                .build();
-        try {
-            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-            SearchResponse<Service> searchResponse =
-                    esClient.search(searchRequest, Service.class);
-            ElasticsearchClientPool.returnClient(esClient);
-            return searchResponse.hits().hits().stream().map(Hit::source).toList();
-        } catch (IOException e) {
-            log.error("Search for service with namespace error:{}", e.getMessage());
-            throw new RuntimeException(e);
-        }
+                .size(ElasticsearchConstants.MAX_PAGE_SIZE);
+        SearchResponse<Service> searchResponse =
+                ElasticsearchUtil.simpleSearch(searchRequestBuilder, Service.class);
+        return searchResponse.hits().hits().stream().map(Hit::source).toList();
     }
 
     @Override
@@ -122,18 +114,8 @@ public class ElasticsearchMapper extends SearchMapper {
                 .terms(builder -> builder.value(fieldValues));
         searchRequestBuilder
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
-                .query(termsQueryBuilder.build()._toQuery())
-                .size(ElasticsearchConstants.MAX_PAGE_SIZE);
-        try {
-            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-            SearchResponse<Span> searchResponse =
-                    esClient.search(searchRequestBuilder.build(), Span.class);
-            ElasticsearchClientPool.returnClient(esClient);
-            return searchResponse.hits().hits().stream().map(Hit::source).toList();
-        } catch (IOException e) {
-            log.error("Search for span list error:{}", e.getMessage());
-            throw new RuntimeException(e);
-        }
+                .query(termsQueryBuilder.build()._toQuery());
+        return ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
     }
 
     @Override
@@ -141,23 +123,16 @@ public class ElasticsearchMapper extends SearchMapper {
         TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         termQueryBuilder.field("name").value(serviceName);
-        SearchRequest searchRequest = searchRequestBuilder
+        searchRequestBuilder
                 .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
                 .query(termQueryBuilder.build()._toQuery()).build();
-        try {
-            ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-            SearchResponse<Service> searchResponse =
-                    esClient.search(searchRequest, Service.class);
-            ElasticsearchClientPool.returnClient(esClient);
-            List<Hit<Service>> hits = searchResponse.hits().hits();
-            if (hits.isEmpty()) {
-                return null;
-            }
-            return hits.getFirst().source();
-        } catch (IOException e) {
-            log.error("Search for service by name error:{}", e.getMessage());
-            throw new RuntimeException(e);
+        SearchResponse<Service> searchResponse =
+                ElasticsearchUtil.simpleSearch(searchRequestBuilder, Service.class);
+        List<Hit<Service>> hits = searchResponse.hits().hits();
+        if (hits.isEmpty()) {
+            return null;
         }
+        return hits.getFirst().source();
     }
 
     @Override

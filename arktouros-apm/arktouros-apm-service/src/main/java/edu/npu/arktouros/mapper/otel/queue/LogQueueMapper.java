@@ -82,7 +82,7 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
         } catch (SQLException e) {
             log.error("Encounter error when get log size from dataSource: {}", e.getMessage());
         }
-        return -1;
+        return 0;
     }
 
     @Override

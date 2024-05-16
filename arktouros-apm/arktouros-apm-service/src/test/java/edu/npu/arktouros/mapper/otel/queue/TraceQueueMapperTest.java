@@ -1,6 +1,6 @@
 package edu.npu.arktouros.mapper.otel.queue;
 
-import edu.npu.arktouros.model.queue.LogQueueItem;
+import edu.npu.arktouros.model.queue.TraceQueueItem;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -28,14 +28,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * @author : [wangminan]
- * @description : {@link LogQueueMapper}
+ * @description : {@link TraceQueueMapper}
  */
 @SpringBootTest
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @Slf4j
 @MockitoSettings(strictness = Strictness.LENIENT)
 @Timeout(30)
-class LogQueueMapperTest {
+class TraceQueueMapperTest {
 
     @MockBean
     private DataSource dataSource;
@@ -44,7 +44,7 @@ class LogQueueMapperTest {
     private Connection connection;
 
     @Resource
-    private LogQueueMapper logQueueMapper;
+    private TraceQueueMapper traceQueueMapper;
 
     @BeforeEach
     void beforeEach() throws SQLException {
@@ -59,8 +59,8 @@ class LogQueueMapperTest {
         try (ResultSet rs = Mockito.mock(ResultSet.class)) {
             Mockito.when(preparedStatement.getGeneratedKeys()).thenReturn(rs);
             Mockito.when(rs.getLong("ID")).thenReturn(1L);
-            LogQueueItem item = LogQueueItem.builder().build();
-            logQueueMapper.add(item);
+            TraceQueueItem item = TraceQueueItem.builder().build();
+            traceQueueMapper.add(item);
             Assertions.assertEquals(1L, item.getId());
         }
     }
@@ -69,7 +69,7 @@ class LogQueueMapperTest {
     void testAddError() throws SQLException {
         Mockito.when(connection.prepareStatement(anyString(), anyInt()))
                 .thenThrow(new SQLException());
-        Assertions.assertDoesNotThrow(() -> logQueueMapper.add(LogQueueItem.builder().build()));
+        Assertions.assertDoesNotThrow(() -> traceQueueMapper.add(TraceQueueItem.builder().build()));
     }
 
     @Test
@@ -82,7 +82,7 @@ class LogQueueMapperTest {
             Mockito.when(rs.next()).thenReturn(true, false);
             Mockito.when(rs.getLong("ID")).thenReturn(1L);
             Mockito.when(rs.getString("DATA")).thenReturn("data");
-            LogQueueItem top = logQueueMapper.getTop();
+            TraceQueueItem top = traceQueueMapper.getTop();
             Assertions.assertEquals(top.getId(), 1L);
         }
     }
@@ -95,7 +95,7 @@ class LogQueueMapperTest {
         try (ResultSet rs = Mockito.mock(ResultSet.class)) {
             Mockito.when(preparedStatement.executeQuery()).thenReturn(rs);
             Mockito.when(rs.next()).thenReturn(false);
-            Assertions.assertNull(logQueueMapper.getTop());
+            Assertions.assertNull(traceQueueMapper.getTop());
         }
     }
 
@@ -103,7 +103,7 @@ class LogQueueMapperTest {
     void getTopError() throws SQLException {
         Mockito.when(connection.prepareStatement(anyString()))
                 .thenThrow(new SQLException());
-        Assertions.assertDoesNotThrow(() -> logQueueMapper.getTop());
+        Assertions.assertDoesNotThrow(() -> traceQueueMapper.getTop());
     }
 
     @Test
@@ -115,7 +115,7 @@ class LogQueueMapperTest {
             Mockito.when(preparedStatement.executeQuery()).thenReturn(rs);
             Mockito.when(rs.next()).thenReturn(true);
             Mockito.when(rs.getLong(1)).thenReturn(1L);
-            Assertions.assertFalse(logQueueMapper.isEmpty());
+            Assertions.assertFalse(traceQueueMapper.isEmpty());
         }
     }
 
@@ -123,7 +123,7 @@ class LogQueueMapperTest {
     void getSizeError() throws SQLException {
         Mockito.when(connection.prepareStatement(anyString()))
                 .thenThrow(new SQLException());
-        Assertions.assertEquals(0, logQueueMapper.getSize());
+        Assertions.assertEquals(0, traceQueueMapper.getSize());
     }
 
     @Test
@@ -131,20 +131,20 @@ class LogQueueMapperTest {
         PreparedStatement preparedStatement = Mockito.mock(PreparedStatement.class);
         Mockito.when(connection.prepareStatement(anyString()))
                 .thenReturn(preparedStatement);
-        Assertions.assertDoesNotThrow(() -> logQueueMapper.removeTop());
+        Assertions.assertDoesNotThrow(() -> traceQueueMapper.removeTop());
     }
 
     @Test
     void testRemoveTopError() throws SQLException {
         Mockito.when(connection.prepareStatement(anyString()))
                 .thenThrow(new SQLException());
-        Assertions.assertDoesNotThrow(() -> logQueueMapper.removeTop());
+        Assertions.assertDoesNotThrow(() -> traceQueueMapper.removeTop());
     }
 
     @Test
     void TestPrepareTableError() throws SQLException {
         Mockito.when(connection.prepareStatement(anyString()))
                 .thenThrow(new SQLException());
-        Assertions.assertFalse(logQueueMapper.prepareTable());
+        Assertions.assertFalse(traceQueueMapper.prepareTable());
     }
 }

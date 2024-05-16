@@ -3,7 +3,6 @@ package edu.npu.arktouros.analyzer.otel;
 import com.google.protobuf.ByteString;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
 import edu.npu.arktouros.model.otel.log.Log;
-import edu.npu.arktouros.model.queue.MetricsQueueItem;
 import edu.npu.arktouros.model.queue.TraceQueueItem;
 import edu.npu.arktouros.service.otel.queue.TraceQueueService;
 import edu.npu.arktouros.service.otel.sinker.SinkService;

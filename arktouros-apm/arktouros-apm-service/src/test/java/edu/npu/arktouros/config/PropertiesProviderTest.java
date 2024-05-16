@@ -42,7 +42,7 @@ class PropertiesProviderTest {
     void testGetProperty() {
         PropertiesProvider.init();
         Assertions.assertEquals(
-                PropertiesProvider.getProperty("instance.active.cache"), "LogQueueCache");
+                PropertiesProvider.getProperty("instance.active.sinker"), "elasticsearch");
         Assertions.assertEquals(
                 PropertiesProvider.getProperty("server.host", "host"),
                 "host");
