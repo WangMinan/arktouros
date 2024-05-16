@@ -427,8 +427,9 @@
                     <excludes>edu.npu.arktouros.model.*</excludes>
                     <!-- 接口走集成测试 -->
                     <excludes>edu.npu.arktouros.controller.*</excludes>
-                    <!-- *h2*链路暂时不实现 -->
-                    <excludes>edu.npu.arktouros.*.h2.*</excludes>
+                    <!-- h2链路暂时不实现 -->
+                    <excludes>edu.npu.arktouros.mapper.otel.search.h2.*</excludes>
+                    <excludes>edu.npu.arktouros.service.otel.sinker.h2.*</excludes>
                 </configuration>
             </plugin>
 
