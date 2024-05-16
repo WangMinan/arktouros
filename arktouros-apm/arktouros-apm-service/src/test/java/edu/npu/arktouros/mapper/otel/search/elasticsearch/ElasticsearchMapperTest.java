@@ -179,4 +179,9 @@ public class ElasticsearchMapperTest {
         Assertions.assertNotNull(
                 elasticsearchMapper.getEndPointListByServiceName(endPointQueryDto));
     }
+
+    @Test
+    void testGetSpanListByTraceId() {
+
+    }
 }
