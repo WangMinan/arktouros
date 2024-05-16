@@ -23,9 +23,6 @@ public class LogQueueMapper extends QueueMapper<LogQueueItem> {
     @Resource
     private DataSource dataSource;
 
-    private static final String LOG_UNABLE_TO_CONNECT_TO_DATASOURCE =
-            "Encounter error when get connection from dataSource: {}";
-
     @Override
     public void add(LogQueueItem logQueueItem) {
         String sql = "insert into PUBLIC.APM_LOG_QUEUE (DATA) values (?);";

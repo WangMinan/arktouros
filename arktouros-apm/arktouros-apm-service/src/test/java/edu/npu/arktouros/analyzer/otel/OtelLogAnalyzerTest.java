@@ -44,7 +44,7 @@ class OtelLogAnalyzerTest {
     private OtelLogAnalyzer otelLogAnalyzer;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         otelLogAnalyzer = new OtelLogAnalyzer(sinkService);
         OtelLogAnalyzer.setQueueService(logQueueService);
     }
@@ -52,7 +52,8 @@ class OtelLogAnalyzerTest {
     @Test
     void testHandle() {
         ResourceLogs resourceLogs = ResourceLogs.newBuilder().build();
-        Mockito.doNothing().when(logQueueService).put(ArgumentMatchers.any(LogQueueItem.class));
+        Mockito.doNothing().when(logQueueService)
+                .put(ArgumentMatchers.any(LogQueueItem.class));
         OtelLogAnalyzer.handle(resourceLogs);
         Mockito.verify(logQueueService, Mockito.times(1))
                 .put(ArgumentMatchers.any(LogQueueItem.class));

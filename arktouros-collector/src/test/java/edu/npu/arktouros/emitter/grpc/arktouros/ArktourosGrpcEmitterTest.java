@@ -65,6 +65,7 @@ class ArktourosGrpcEmitterTest {
     }
 
     @Test
+    @Timeout(30)
     void testRun() throws InterruptedException {
         initCache();
         // 几个span被调用的时候啥都不要做

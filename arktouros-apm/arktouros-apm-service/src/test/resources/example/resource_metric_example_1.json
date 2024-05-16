@@ -1,0 +1,1396 @@
+{
+  "resource": {
+    "attributes": [
+      {
+        "key": "service.name",
+        "value": {
+          "stringValue": "opentelemetry-collector"
+        }
+      },
+      {
+        "key": "net.host.name",
+        "value": {
+          "stringValue": "10.244.0.75"
+        }
+      },
+      {
+        "key": "service.instance.id",
+        "value": {
+          "stringValue": "10.244.0.75:8888"
+        }
+      },
+      {
+        "key": "net.host.port",
+        "value": {
+          "stringValue": "8888"
+        }
+      },
+      {
+        "key": "http.scheme",
+        "value": {
+          "stringValue": "http"
+        }
+      },
+      {
+        "key": "service_instance_id",
+        "value": {
+          "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+        }
+      },
+      {
+        "key": "service_name",
+        "value": {
+          "stringValue": "otelcol-contrib"
+        }
+      },
+      {
+        "key": "service_version",
+        "value": {
+          "stringValue": "0.97.0"
+        }
+      }
+    ]
+  },
+  "scopeMetrics": [
+    {
+      "scope": {
+        "name": "otelcol/prometheusreceiver",
+        "version": "0.97.0"
+      },
+      "metrics": [
+        {
+          "name": "otelcol_process_cpu_seconds",
+          "description": "Total CPU user and system time in seconds",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904212231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 0.65
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "otelcol_process_memory_rss",
+          "description": "Total physical memory (resident set size)",
+          "gauge": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 167944192
+              }
+            ]
+          }
+        },
+        {
+          "name": "otelcol_processor_refused_metric_points",
+          "description": "Number of metric points that were rejected by the next component in the pipeline.",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "processor",
+                    "value": {
+                      "stringValue": "memory_limiter"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 0
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "scrape_duration_seconds",
+          "description": "Duration of the scrape",
+          "unit": "s",
+          "gauge": {
+            "dataPoints": [
+              {
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 0.00204665
+              }
+            ]
+          }
+        },
+        {
+          "name": "up",
+          "description": "The scraping was successful",
+          "gauge": {
+            "dataPoints": [
+              {
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "otelcol_exporter_queue_size",
+          "description": "Current size of the retry queue (in batches)",
+          "gauge": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "exporter",
+                    "value": {
+                      "stringValue": "otlp"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "otelcol_processor_batch_timeout_trigger_send",
+          "description": "Number of times the batch was sent due to a timeout trigger",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "processor",
+                    "value": {
+                      "stringValue": "batch"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 14
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "otelcol_receiver_refused_metric_points",
+          "description": "Number of metric points that could not be pushed into the pipeline.",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "receiver",
+                    "value": {
+                      "stringValue": "k8s_cluster"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  },
+                  {
+                    "key": "transport",
+                    "value": {
+                      "stringValue": "http"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 0
+              },
+              {
+                "attributes": [
+                  {
+                    "key": "receiver",
+                    "value": {
+                      "stringValue": "prometheus"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  },
+                  {
+                    "key": "transport",
+                    "value": {
+                      "stringValue": "http"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 0
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "otelcol_exporter_sent_metric_points",
+          "description": "Number of metric points successfully sent to destination.",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "exporter",
+                    "value": {
+                      "stringValue": "otlp"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 782
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "otelcol_processor_accepted_metric_points",
+          "description": "Number of metric points successfully pushed into the next component in the pipeline.",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "processor",
+                    "value": {
+                      "stringValue": "memory_limiter"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 782
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "otelcol_processor_dropped_metric_points",
+          "description": "Number of metric points that were dropped.",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "processor",
+                    "value": {
+                      "stringValue": "memory_limiter"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 0
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "otelcol_receiver_accepted_metric_points",
+          "description": "Number of metric points successfully pushed into the pipeline.",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "receiver",
+                    "value": {
+                      "stringValue": "k8s_cluster"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  },
+                  {
+                    "key": "transport",
+                    "value": {
+                      "stringValue": "http"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 588
+              },
+              {
+                "attributes": [
+                  {
+                    "key": "receiver",
+                    "value": {
+                      "stringValue": "prometheus"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  },
+                  {
+                    "key": "transport",
+                    "value": {
+                      "stringValue": "http"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 194
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "otelcol_rpc_client_responses_per_rpc",
+          "description": "Measures the number of messages received per RPC. Should be 1 for all non-streaming RPCs.",
+          "histogram": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "rpc_grpc_status_code",
+                    "value": {
+                      "stringValue": "0"
+                    }
+                  },
+                  {
+                    "key": "rpc_method",
+                    "value": {
+                      "stringValue": "Export"
+                    }
+                  },
+                  {
+                    "key": "rpc_service",
+                    "value": {
+                      "stringValue": "opentelemetry.proto.collector.metrics.v1.MetricsService"
+                    }
+                  },
+                  {
+                    "key": "rpc_system",
+                    "value": {
+                      "stringValue": "grpc"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "count": "14",
+                "sum": 14,
+                "bucketCounts": [
+                  "0",
+                  "14",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0"
+                ],
+                "explicitBounds": [
+                  0,
+                  5,
+                  10,
+                  25,
+                  50,
+                  75,
+                  100,
+                  250,
+                  500,
+                  750,
+                  1000,
+                  2500,
+                  5000,
+                  7500,
+                  10000
+                ]
+              }
+            ],
+            "aggregationTemporality": 2
+          }
+        },
+        {
+          "name": "otelcol_process_uptime",
+          "description": "Uptime of the process",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904212231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 75.176147281
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "otelcol_rpc_client_requests_per_rpc",
+          "description": "Measures the number of messages received per RPC. Should be 1 for all non-streaming RPCs.",
+          "histogram": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "rpc_grpc_status_code",
+                    "value": {
+                      "stringValue": "0"
+                    }
+                  },
+                  {
+                    "key": "rpc_method",
+                    "value": {
+                      "stringValue": "Export"
+                    }
+                  },
+                  {
+                    "key": "rpc_service",
+                    "value": {
+                      "stringValue": "opentelemetry.proto.collector.metrics.v1.MetricsService"
+                    }
+                  },
+                  {
+                    "key": "rpc_system",
+                    "value": {
+                      "stringValue": "grpc"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "count": "14",
+                "sum": 14,
+                "bucketCounts": [
+                  "0",
+                  "14",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0"
+                ],
+                "explicitBounds": [
+                  0,
+                  5,
+                  10,
+                  25,
+                  50,
+                  75,
+                  100,
+                  250,
+                  500,
+                  750,
+                  1000,
+                  2500,
+                  5000,
+                  7500,
+                  10000
+                ]
+              }
+            ],
+            "aggregationTemporality": 2
+          }
+        },
+        {
+          "name": "scrape_series_added",
+          "description": "The approximate number of new series in this scrape",
+          "gauge": {
+            "dataPoints": [
+              {
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 135
+              }
+            ]
+          }
+        },
+        {
+          "name": "otelcol_processor_batch_batch_send_size",
+          "description": "Number of units in the batch",
+          "histogram": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "processor",
+                    "value": {
+                      "stringValue": "batch"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "count": "14",
+                "sum": 782,
+                "bucketCounts": [
+                  "0",
+                  "1",
+                  "6",
+                  "0",
+                  "7",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0"
+                ],
+                "explicitBounds": [
+                  10,
+                  25,
+                  50,
+                  75,
+                  100,
+                  250,
+                  500,
+                  750,
+                  1000,
+                  2000,
+                  3000,
+                  4000,
+                  5000,
+                  6000,
+                  7000,
+                  8000,
+                  9000,
+                  10000,
+                  20000,
+                  30000,
+                  50000,
+                  100000
+                ]
+              }
+            ],
+            "aggregationTemporality": 2
+          }
+        },
+        {
+          "name": "otelcol_processor_batch_metadata_cardinality",
+          "description": "Number of distinct metadata value combinations being processed",
+          "gauge": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "otelcol_rpc_client_duration",
+          "description": "Measures the duration of inbound RPC.",
+          "histogram": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "rpc_grpc_status_code",
+                    "value": {
+                      "stringValue": "0"
+                    }
+                  },
+                  {
+                    "key": "rpc_method",
+                    "value": {
+                      "stringValue": "Export"
+                    }
+                  },
+                  {
+                    "key": "rpc_service",
+                    "value": {
+                      "stringValue": "opentelemetry.proto.collector.metrics.v1.MetricsService"
+                    }
+                  },
+                  {
+                    "key": "rpc_system",
+                    "value": {
+                      "stringValue": "grpc"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "count": "14",
+                "sum": 782.5030179999999,
+                "bucketCounts": [
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "6",
+                  "7",
+                  "0",
+                  "1",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0"
+                ],
+                "explicitBounds": [
+                  0,
+                  5,
+                  10,
+                  25,
+                  50,
+                  75,
+                  100,
+                  250,
+                  500,
+                  750,
+                  1000,
+                  2500,
+                  5000,
+                  7500,
+                  10000
+                ]
+              }
+            ],
+            "aggregationTemporality": 2
+          }
+        },
+        {
+          "name": "otelcol_exporter_queue_capacity",
+          "description": "Fixed capacity of the retry queue (in batches)",
+          "gauge": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "exporter",
+                    "value": {
+                      "stringValue": "otlp"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 1000
+              }
+            ]
+          }
+        },
+        {
+          "name": "otelcol_exporter_send_failed_metric_points",
+          "description": "Number of metric points in failed attempts to send to destination.",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "exporter",
+                    "value": {
+                      "stringValue": "otlp"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 0
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "otelcol_process_runtime_heap_alloc_bytes",
+          "description": "Bytes of allocated heap objects (see 'go doc runtime.MemStats.HeapAlloc')",
+          "gauge": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 50014088
+              }
+            ]
+          }
+        },
+        {
+          "name": "otelcol_process_runtime_total_alloc_bytes",
+          "description": "Cumulative bytes allocated for heap objects (see 'go doc runtime.MemStats.TotalAlloc')",
+          "sum": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904212231000000",
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 64673744
+              }
+            ],
+            "aggregationTemporality": 2,
+            "isMonotonic": true
+          }
+        },
+        {
+          "name": "otelcol_process_runtime_total_sys_memory_bytes",
+          "description": "Total bytes of memory obtained from the OS (see 'go doc runtime.MemStats.Sys')",
+          "gauge": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 74863880
+              }
+            ]
+          }
+        },
+        {
+          "name": "scrape_samples_scraped",
+          "description": "The number of samples the target exposed",
+          "gauge": {
+            "dataPoints": [
+              {
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 135
+              }
+            ]
+          }
+        },
+        {
+          "name": "scrape_samples_post_metric_relabeling",
+          "description": "The number of samples remaining after metric relabeling was applied",
+          "gauge": {
+            "dataPoints": [
+              {
+                "timeUnixNano": "1712904282230000000",
+                "asDouble": 135
+              }
+            ]
+          }
+        },
+        {
+          "name": "otelcol_rpc_client_request_size",
+          "description": "Measures size of RPC request messages (uncompressed).",
+          "histogram": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "rpc_method",
+                    "value": {
+                      "stringValue": "Export"
+                    }
+                  },
+                  {
+                    "key": "rpc_service",
+                    "value": {
+                      "stringValue": "opentelemetry.proto.collector.metrics.v1.MetricsService"
+                    }
+                  },
+                  {
+                    "key": "rpc_system",
+                    "value": {
+                      "stringValue": "grpc"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "count": "14",
+                "sum": 28,
+                "bucketCounts": [
+                  "0",
+                  "14",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0"
+                ],
+                "explicitBounds": [
+                  0,
+                  5,
+                  10,
+                  25,
+                  50,
+                  75,
+                  100,
+                  250,
+                  500,
+                  750,
+                  1000,
+                  2500,
+                  5000,
+                  7500,
+                  10000
+                ]
+              }
+            ],
+            "aggregationTemporality": 2
+          }
+        },
+        {
+          "name": "otelcol_rpc_client_response_size",
+          "description": "Measures size of RPC response messages (uncompressed).",
+          "histogram": {
+            "dataPoints": [
+              {
+                "attributes": [
+                  {
+                    "key": "rpc_method",
+                    "value": {
+                      "stringValue": "Export"
+                    }
+                  },
+                  {
+                    "key": "rpc_service",
+                    "value": {
+                      "stringValue": "opentelemetry.proto.collector.metrics.v1.MetricsService"
+                    }
+                  },
+                  {
+                    "key": "rpc_system",
+                    "value": {
+                      "stringValue": "grpc"
+                    }
+                  },
+                  {
+                    "key": "service_instance_id",
+                    "value": {
+                      "stringValue": "b4498fcc-950e-49aa-bde6-6f36fc98b8d9"
+                    }
+                  },
+                  {
+                    "key": "service_name",
+                    "value": {
+                      "stringValue": "otelcol-contrib"
+                    }
+                  },
+                  {
+                    "key": "service_version",
+                    "value": {
+                      "stringValue": "0.97.0"
+                    }
+                  }
+                ],
+                "startTimeUnixNano": "1712904222231000000",
+                "timeUnixNano": "1712904282230000000",
+                "count": "14",
+                "sum": 291710,
+                "bucketCounts": [
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "1",
+                  "0",
+                  "6",
+                  "7"
+                ],
+                "explicitBounds": [
+                  0,
+                  5,
+                  10,
+                  25,
+                  50,
+                  75,
+                  100,
+                  250,
+                  500,
+                  750,
+                  1000,
+                  2500,
+                  5000,
+                  7500,
+                  10000
+                ]
+              }
+            ],
+            "aggregationTemporality": 2
+          }
+        }
+      ]
+    }
+  ]
+}

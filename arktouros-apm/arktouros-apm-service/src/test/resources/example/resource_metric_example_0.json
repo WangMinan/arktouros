@@ -1,0 +1,54 @@
+{
+  "resource": {
+    "attributes": [
+      {
+        "key": "k8s.namespace.name",
+        "value": {
+          "stringValue": "kube-system"
+        }
+      },
+      {
+        "key": "k8s.node.name",
+        "value": {
+          "stringValue": "minikube"
+        }
+      },
+      {
+        "key": "k8s.pod.name",
+        "value": {
+          "stringValue": "kube-apiserver-minikube"
+        }
+      },
+      {
+        "key": "k8s.pod.uid",
+        "value": {
+          "stringValue": "b19f2b1f-e725-4122-9f95-97c983715957"
+        }
+      }
+    ]
+  },
+  "scopeMetrics": [
+    {
+      "scope": {
+        "name": "otelcol/k8sclusterreceiver",
+        "version": "0.97.0"
+      },
+      "metrics": [
+        {
+          "name": "k8s.pod.phase",
+          "description": "Current phase of the pod (1 - Pending, 2 - Running, 3 - Succeeded, 4 - Failed, 5 - Unknown)",
+          "gauge": {
+            "dataPoints": [
+              {
+                "startTimeUnixNano": "1712904207049196864",
+                "timeUnixNano": "1712904327217063565",
+                "asInt": "2"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "schemaUrl": "https://opentelemetry.io/schemas/1.18.0"
+}

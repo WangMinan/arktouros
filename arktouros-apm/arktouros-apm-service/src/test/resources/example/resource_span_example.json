@@ -1,0 +1,214 @@
+{
+  "resource": {
+    "attributes": [
+      {
+        "key": "service.name",
+        "value": {
+          "stringValue": "telemetrygen"
+        }
+      }
+    ]
+  },
+  "scopeSpans": [
+    {
+      "scope": {
+        "name": "telemetrygen"
+      },
+      "spans": [
+        {
+          "traceId": "fac05582239d11e9230d5d4cb35de283",
+          "spanId": "1d541c1b94fd3731",
+          "parentSpanId": "b886bc67d191080c",
+          "name": "okey-dokey-0",
+          "kind": 2,
+          "startTimeUnixNano": "1712152069036541114",
+          "endTimeUnixNano": "1712152069036664114",
+          "attributes": [
+            {
+              "key": "net.peer.ip",
+              "value": {
+                "stringValue": "1.2.3.4"
+              }
+            },
+            {
+              "key": "peer.service",
+              "value": {
+                "stringValue": "telemetrygen-client"
+              }
+            }
+          ],
+          "status": {}
+        },
+        {
+          "traceId": "fac05582239d11e9230d5d4cb35de283",
+          "spanId": "b886bc67d191080c",
+          "parentSpanId": "",
+          "name": "lets-go",
+          "kind": 3,
+          "startTimeUnixNano": "1712152069036541114",
+          "endTimeUnixNano": "1712152069036664114",
+          "attributes": [
+            {
+              "key": "net.peer.ip",
+              "value": {
+                "stringValue": "1.2.3.4"
+              }
+            },
+            {
+              "key": "peer.service",
+              "value": {
+                "stringValue": "telemetrygen-server"
+              }
+            }
+          ],
+          "status": {}
+        },
+        {
+          "traceId": "fac05582239d11e9230d5d4cb35de283",
+          "spanId": "6084dc9e56ed7470",
+          "parentSpanId": "b886bc67d191080c",
+          "name": "okey-dokey-1",
+          "kind": 2,
+          "startTimeUnixNano": "1713621214805990816",
+          "endTimeUnixNano": "1713621214806113816",
+          "attributes": [
+            {
+              "key": "net.peer.ip",
+              "value": {
+                "stringValue": "1.2.3.4"
+              }
+            },
+            {
+              "key": "peer.service",
+              "value": {
+                "stringValue": "telemetrygen-client"
+              }
+            }
+          ],
+          "status": {}
+        },
+        {
+          "traceId": "fac05582239d11e9230d5d4cb35de283",
+          "spanId": "7c81ffdf93421341",
+          "parentSpanId": "1d541c1b94fd3731",
+          "name": "lets-go-1",
+          "kind": 3,
+          "startTimeUnixNano": "1713621214805990816",
+          "endTimeUnixNano": "1713621214806113816",
+          "attributes": [
+            {
+              "key": "net.peer.ip",
+              "value": {
+                "stringValue": "1.2.3.4"
+              }
+            },
+            {
+              "key": "peer.service",
+              "value": {
+                "stringValue": "telemetrygen-server"
+              }
+            }
+          ],
+          "status": {}
+        },
+        {
+          "traceId": "7d1961b5c2985d369e7703ffaf7d5224",
+          "spanId": "cfc5189172f0a39c",
+          "parentSpanId": "652fde0faa777a85",
+          "name": "okey-dokey-0",
+          "kind": 2,
+          "startTimeUnixNano": "1712152069036591454",
+          "endTimeUnixNano": "1712152069036714454",
+          "attributes": [
+            {
+              "key": "net.peer.ip",
+              "value": {
+                "stringValue": "1.2.3.4"
+              }
+            },
+            {
+              "key": "peer.service",
+              "value": {
+                "stringValue": "telemetrygen-client"
+              }
+            }
+          ],
+          "status": {}
+        },
+        {
+          "traceId": "7d1961b5c2985d369e7703ffaf7d5224",
+          "spanId": "652fde0faa777a85",
+          "parentSpanId": "",
+          "name": "lets-go",
+          "kind": 3,
+          "startTimeUnixNano": "1712152069036591454",
+          "endTimeUnixNano": "1712152069036714454",
+          "attributes": [
+            {
+              "key": "net.peer.ip",
+              "value": {
+                "stringValue": "1.2.3.4"
+              }
+            },
+            {
+              "key": "peer.service",
+              "value": {
+                "stringValue": "telemetrygen-server"
+              }
+            }
+          ],
+          "status": {}
+        },
+        {
+          "traceId": "b5233b70a0f91db26a92444edc2d34e4",
+          "spanId": "27eeeb1a81bcc651",
+          "parentSpanId": "690da148cab000ab",
+          "name": "okey-dokey-0",
+          "kind": 2,
+          "startTimeUnixNano": "1712152069036595633",
+          "endTimeUnixNano": "1712152069036718633",
+          "attributes": [
+            {
+              "key": "net.peer.ip",
+              "value": {
+                "stringValue": "1.2.3.4"
+              }
+            },
+            {
+              "key": "peer.service",
+              "value": {
+                "stringValue": "telemetrygen-client"
+              }
+            }
+          ],
+          "status": {}
+        },
+        {
+          "traceId": "b5233b70a0f91db26a92444edc2d34e4",
+          "spanId": "690da148cab000ab",
+          "parentSpanId": "",
+          "name": "lets-go",
+          "kind": 3,
+          "startTimeUnixNano": "1712152069036595633",
+          "endTimeUnixNano": "1712152069036718633",
+          "attributes": [
+            {
+              "key": "net.peer.ip",
+              "value": {
+                "stringValue": "1.2.3.4"
+              }
+            },
+            {
+              "key": "peer.service",
+              "value": {
+                "stringValue": "telemetrygen-server"
+              }
+            }
+          ],
+          "status": {}
+        }
+      ]
+    }
+  ],
+  "schemaUrl": "https://opentelemetry.io/schemas/1.4.0"
+}
