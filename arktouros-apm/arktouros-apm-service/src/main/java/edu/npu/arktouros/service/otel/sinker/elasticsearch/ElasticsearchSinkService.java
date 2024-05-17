@@ -44,7 +44,8 @@ public class ElasticsearchSinkService extends SinkService {
     @Override
     public void init() {
         log.info("Check and init mappings in elasticsearch.");
-        CountDownLatch createIndexLatch = new CountDownLatch(ElasticsearchIndex.getIndexList().size());
+        CountDownLatch createIndexLatch = new CountDownLatch(
+                ElasticsearchIndex.getIndexList().size());
         // 先判断各索引是否存在 不存在则创建 并行操作
         List<Thread> initThreads = new ArrayList<>();
         ElasticsearchIndex.getIndexList().forEach(indexName -> {
@@ -131,6 +132,8 @@ public class ElasticsearchSinkService extends SinkService {
         } else if (ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName().equals(indexName)) {
             createIndexRequestBuilder.mappings(typeMappingBuilder ->
                     typeMappingBuilder.properties(Histogram.documentMap));
+        } else {
+            throw new IllegalArgumentException("Unexpected index name: " + indexName);
         }
         return createIndexRequestBuilder;
     }

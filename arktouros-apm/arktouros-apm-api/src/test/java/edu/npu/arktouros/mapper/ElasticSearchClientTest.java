@@ -18,6 +18,7 @@ import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -76,6 +77,7 @@ class ElasticSearchClientTest {
                         .document(service)
         );
         ElasticsearchClientPool.returnClient(esClient);
+        Assertions.assertNotNull(service);
     }
 
     @Test

@@ -111,12 +111,12 @@ public class ElasticsearchClientPoolFactory implements PooledObjectFactory<Elast
     }
 
     @Override
-    public void activateObject(PooledObject<ElasticsearchClient> pooledObject) throws Exception {
+    public void activateObject(PooledObject<ElasticsearchClient> pooledObject) {
         log.debug("Activate object:{}", pooledObject.getCreateInstant());
     }
 
     @Override
-    public void destroyObject(PooledObject<ElasticsearchClient> pooledObject) throws Exception {
+    public void destroyObject(PooledObject<ElasticsearchClient> pooledObject) {
         log.debug("Destroy object:{}", pooledObject.getCreateInstant());
         ElasticsearchClient elasticsearchClient = pooledObject.getObject();
         elasticsearchClient.shutdown();
@@ -168,16 +168,16 @@ public class ElasticsearchClientPoolFactory implements PooledObjectFactory<Elast
         }
     }
 
-    private SSLContext createSSLContext() throws Exception {
+    protected SSLContext createSSLContext() throws Exception {
         log.debug("Ssl config detected. Loading ca certificate from {}", ca);
-        Path caCertificatePath = Paths.get(ca);
         Certificate trustedCa;
         if (ca.contains(".crt")) {
+            Path caCertificatePath = Paths.get(ca);
             log.info("Ca certificate is a file, trying to resolve");
             try (InputStream is = Files.newInputStream(caCertificatePath)) {
                 trustedCa = CertificateFactory.getInstance("X.509").generateCertificate(is);
             }
-        } else if (ca.startsWith("-----BEGIN CERTIFICATE-----")){
+        } else if (ca.trim().startsWith("-----BEGIN CERTIFICATE-----")){
             log.info("Ca certificate is a string");
             // 说明是一个字符串 需要新建临时文件
             Path tempFile = Files.createTempFile("ca", ".crt");

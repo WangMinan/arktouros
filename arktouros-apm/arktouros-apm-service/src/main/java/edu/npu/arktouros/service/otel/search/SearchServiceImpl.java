@@ -163,7 +163,8 @@ public class SearchServiceImpl implements SearchService {
         if (metricNames.isEmpty()) {
             return R.ok();
         }
-        List<Metric> metricValues = searchMapper.getMetricsValues(metricNames, metricQueryDto.serviceName(),
+        List<Metric> metricValues = searchMapper.getMetricsValues(metricNames,
+                metricQueryDto.serviceName(),
                 metricQueryDto.startTimeStamp(), metricQueryDto.endTimeStamp());
         // 整形 最后要送出去一个MetricVo类型的List 需要做三层聚合 只有name serviceName和metricType字段一样的才能放到一个桶里
         List<MetricVo> metricVoList = new ArrayList<>();
