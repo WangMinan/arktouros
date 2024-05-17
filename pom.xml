@@ -417,20 +417,20 @@
                             <!--second execution: for creating code coverage reports-->
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <!-- protobuf自动生成文件不测 -->
+                            <excludes>edu.npu.arktouros.proto.*</excludes>
+                            <excludes>io.opentelemetry.proto.*</excludes>
+                            <!-- 实体类按照惯例不测 -->
+                            <excludes>edu.npu.arktouros.model.*</excludes>
+                            <!-- 接口走集成测试 -->
+                            <excludes>edu.npu.arktouros.controller.*</excludes>
+                            <!-- h2链路暂时不实现 -->
+                            <excludes>edu.npu.arktouros.mapper.otel.search.h2.*</excludes>
+                            <excludes>edu.npu.arktouros.service.otel.sinker.h2.*</excludes>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <!-- protobuf自动生成文件不测 -->
-                    <excludes>edu.npu.arktouros.proto.*</excludes>
-                    <excludes>io.opentelemetry.proto.*</excludes>
-                    <!-- 实体类按照惯例不测 -->
-                    <excludes>edu.npu.arktouros.model.*</excludes>
-                    <!-- 接口走集成测试 -->
-                    <excludes>edu.npu.arktouros.controller.*</excludes>
-                    <!-- h2链路暂时不实现 -->
-                    <excludes>edu.npu.arktouros.mapper.otel.search.h2.*</excludes>
-                    <excludes>edu.npu.arktouros.service.otel.sinker.h2.*</excludes>
-                </configuration>
             </plugin>
 
             <plugin>
