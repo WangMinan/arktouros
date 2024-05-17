@@ -1,5 +1,9 @@
 package edu.npu.arktouros.mapper.otel.search.elasticsearch;
 
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.Buckets;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
@@ -7,6 +11,7 @@ import co.elastic.clients.elasticsearch.core.search.TotalHits;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
+import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
@@ -29,6 +34,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author : [wangminan]
@@ -182,6 +188,98 @@ public class ElasticsearchMapperTest {
 
     @Test
     void testGetSpanListByTraceId() {
+        elasticsearchUtil.when(() -> ElasticsearchUtil
+                        .scrollSearch(Mockito.any(), Mockito.any()))
+                .thenReturn(new ArrayList<>());
+        Assertions.assertDoesNotThrow(() -> elasticsearchMapper.getSpanListByTraceId("123"));
+    }
 
+    @Test
+    void testGetMetricsNames() {
+        elasticsearchUtil.when(() -> ElasticsearchUtil
+                        .scrollSearch(Mockito.any(), Mockito.any()))
+                .thenReturn(new ArrayList<>());
+        Assertions.assertNotNull(
+                elasticsearchMapper.getMetricsNames("testName", null));
+        Assertions.assertNotNull(
+                elasticsearchMapper.getMetricsNames("testName", 1));
+    }
+
+    @Test
+    void testGetMetricsValues() {
+        elasticsearchUtil.when(() -> ElasticsearchUtil
+                        .scrollSearch(Mockito.any(), Mockito.any()))
+                .thenReturn(new ArrayList<>());
+        Assertions.assertNotNull(
+                elasticsearchMapper.getMetricsValues(
+                        List.of("testName"), "testValue",
+                        null, null));
+        Assertions.assertNotNull(
+                elasticsearchMapper.getMetricsValues(
+                        List.of("testName"), "testValue",
+                        System.currentTimeMillis() - 1000,
+                        null));
+        Assertions.assertNotNull(
+                elasticsearchMapper.getMetricsValues(
+                        List.of("testName"), "testValue",
+                        System.currentTimeMillis() - 1000,
+                        System.currentTimeMillis()));
+        Assertions.assertNotNull(
+                elasticsearchMapper.getMetricsValues(
+                        List.of("testName"), "testValue",
+                        null,
+                        System.currentTimeMillis()));
+    }
+
+    @Test
+    void testGetNamespaceList() {
+        SearchResponse<Service> searchResponse = Mockito.mock(SearchResponse.class);
+        Service service1 = Service.builder().build();
+        Service service2 = Service.builder().build();
+        service2.setNamespace("default");
+        elasticsearchUtil.when(() -> ElasticsearchUtil
+                        .simpleSearch(Mockito.any(), Mockito.any()))
+                .thenReturn(searchResponse);
+        elasticsearchUtil.when(() -> ElasticsearchUtil
+                        .scrollSearch(Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(service1, service2));
+        Assertions.assertDoesNotThrow(() -> elasticsearchMapper.getNamespaceList("test"));
+        Map<String, Aggregate> aggregations = Mockito.mock(Map.class);
+        Mockito.when(searchResponse.aggregations()).thenReturn(aggregations);
+        Aggregate namespaceAgg = Mockito.mock(Aggregate.class);
+        Mockito.when(aggregations.get(Mockito.anyString())).thenReturn(namespaceAgg);
+        StringTermsAggregate sterms = Mockito.mock(StringTermsAggregate.class);
+        Mockito.when(namespaceAgg.sterms()).thenReturn(sterms);
+        Buckets<StringTermsBucket> buckets = Mockito.mock(Buckets.class);
+        Mockito.when(sterms.buckets()).thenReturn(buckets);
+        Mockito.when(buckets.array()).thenReturn(List.of(new StringTermsBucket.Builder()
+                .key("default").docCount(1L).build()));
+        Assertions.assertDoesNotThrow(() -> elasticsearchMapper.getNamespaceList(null));
+    }
+
+    @Test
+    void testGetAllLogLevels() {
+        SearchResponse<Service> searchResponse = Mockito.mock(SearchResponse.class);
+        elasticsearchUtil.when(() -> ElasticsearchUtil
+                        .simpleSearch(Mockito.any(), Mockito.any()))
+                .thenReturn(searchResponse);
+        Log log1 = Log.builder().severityText(null).build();
+        Log log2 = Log.builder().severityText("INFO").build();
+        elasticsearchUtil.when(() -> ElasticsearchUtil
+                        .scrollSearch(Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(log1, log2));
+        Assertions.assertDoesNotThrow(() ->
+                elasticsearchMapper.getAllLogLevels("test"));
+        Map<String, Aggregate> aggregations = Mockito.mock(Map.class);
+        Mockito.when(searchResponse.aggregations()).thenReturn(aggregations);
+        Aggregate namespaceAgg = Mockito.mock(Aggregate.class);
+        Mockito.when(aggregations.get(Mockito.anyString())).thenReturn(namespaceAgg);
+        StringTermsAggregate sterms = Mockito.mock(StringTermsAggregate.class);
+        Mockito.when(namespaceAgg.sterms()).thenReturn(sterms);
+        Buckets<StringTermsBucket> buckets = Mockito.mock(Buckets.class);
+        Mockito.when(sterms.buckets()).thenReturn(buckets);
+        Mockito.when(buckets.array()).thenReturn(List.of(new StringTermsBucket.Builder()
+                .key("default").docCount(1L).build()));
+        Assertions.assertDoesNotThrow(() -> elasticsearchMapper.getAllLogLevels(null));
     }
 }

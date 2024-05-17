@@ -1,6 +1,5 @@
 package edu.npu.arktouros.mapper.otel.search.elasticsearch;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldSort;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOptions;
@@ -37,7 +36,6 @@ import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.PageResultVo;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
-import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 

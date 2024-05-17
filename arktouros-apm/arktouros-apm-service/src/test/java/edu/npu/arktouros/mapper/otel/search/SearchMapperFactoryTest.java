@@ -2,7 +2,6 @@ package edu.npu.arktouros.mapper.otel.search;
 
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -25,7 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 @Slf4j
 @MockitoSettings(strictness = Strictness.LENIENT)
 @Timeout(30)
-// 这玩意只能单独拿出来测
+// 这玩意只能单独拿出来测 不然会影响后面的MapperTest 这个环境变量改不回来
 @Disabled
 class SearchMapperFactoryTest {
 
