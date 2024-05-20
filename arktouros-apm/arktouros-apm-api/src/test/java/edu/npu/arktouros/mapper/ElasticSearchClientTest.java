@@ -7,7 +7,7 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import edu.npu.arktouros.mapper.otel.search.SearchMapper;
+import edu.npu.arktouros.mapper.search.SearchMapper;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Gauge;

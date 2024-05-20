@@ -1,4 +1,4 @@
-package edu.npu.arktouros.mapper.otel.search;
+package edu.npu.arktouros.mapper.search;
 
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;

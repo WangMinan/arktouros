@@ -1,5 +1,7 @@
 package edu.npu.arktouros.mapper.otel.search;
 
+import edu.npu.arktouros.mapper.search.SearchMapper;
+import edu.npu.arktouros.mapper.search.SearchMapperFactory;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;

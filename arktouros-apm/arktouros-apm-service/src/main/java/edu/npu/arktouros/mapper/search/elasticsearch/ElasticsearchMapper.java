@@ -1,4 +1,4 @@
-package edu.npu.arktouros.mapper.otel.search.elasticsearch;
+package edu.npu.arktouros.mapper.search.elasticsearch;
 
 import co.elastic.clients.elasticsearch._types.FieldSort;
 import co.elastic.clients.elasticsearch._types.FieldValue;
@@ -16,7 +16,7 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
-import edu.npu.arktouros.mapper.otel.search.SearchMapper;
+import edu.npu.arktouros.mapper.search.SearchMapper;
 import edu.npu.arktouros.model.common.ElasticsearchConstants;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.common.ResponseCodeEnum;

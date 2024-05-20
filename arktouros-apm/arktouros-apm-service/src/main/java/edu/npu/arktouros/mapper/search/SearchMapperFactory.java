@@ -1,7 +1,7 @@
-package edu.npu.arktouros.mapper.otel.search;
+package edu.npu.arktouros.mapper.search;
 
-import edu.npu.arktouros.mapper.otel.search.elasticsearch.ElasticsearchMapper;
-import edu.npu.arktouros.mapper.otel.search.h2.H2SearchMapper;
+import edu.npu.arktouros.mapper.search.elasticsearch.ElasticsearchMapper;
+import edu.npu.arktouros.mapper.search.h2.H2SearchMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
