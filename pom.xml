@@ -444,6 +444,10 @@
                         @{argLine} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens
                         java.base/java.lang.reflect=ALL-UNNAMED
                     </argLine>
+                    <forkCount>1C</forkCount> <!-- 根据CPU核心数创建相应数量的线程 -->
+                    <reuseForks>false</reuseForks> <!-- 设置为false以确保每个测试类都在新的JVM进程中运行 -->
+                    <parallel>all</parallel> <!-- 并行模式 -->
+                    <perCoreThreadCount>true</perCoreThreadCount> <!-- 启用每核心线程数的计算 -->
                 </configuration>
             </plugin>
 
