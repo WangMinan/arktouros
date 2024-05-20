@@ -19,6 +19,7 @@ public class LogQueueCache implements AbstractCache {
         try {
             queue.put(object);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -27,6 +28,7 @@ public class LogQueueCache implements AbstractCache {
         try {
             return queue.take();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }

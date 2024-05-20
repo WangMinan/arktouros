@@ -5,6 +5,8 @@ import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
+import edu.npu.arktouros.model.common.ResponseCodeEnum;
+import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;
@@ -66,7 +68,8 @@ public class ElasticsearchSinkService extends SinkService {
             createIndexLatch.await();
         } catch (InterruptedException e) {
             log.error("Create index interrupted.");
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            throw new ArktourosException(e, "Create index interrupted.");
         }
         this.setReady(true);
         // 关闭init线程池

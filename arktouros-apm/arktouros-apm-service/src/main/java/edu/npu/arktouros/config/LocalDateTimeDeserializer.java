@@ -3,6 +3,7 @@ package edu.npu.arktouros.config;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import edu.npu.arktouros.model.exception.ArktourosException;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
                     "yyyy-MM-dd HH:mm:ss.SSS"
             );
         } catch (ParseException ex) {
-            throw new RuntimeException(ex);
+            throw new ArktourosException(ex, "Wrong date format");
         }
 
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();

@@ -1,6 +1,7 @@
 package edu.npu.arktouros.util.elasticsearch.pool;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import edu.npu.arktouros.model.exception.ArktourosException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
@@ -10,9 +11,9 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
  */
 @Slf4j
 public class ElasticsearchClientPool {
-    private static final ElasticsearchClientPoolFactory factory =
+    protected static ElasticsearchClientPoolFactory factory =
             new ElasticsearchClientPoolFactory();
-    private static final GenericObjectPool<ElasticsearchClient> pool =
+    protected static GenericObjectPool<ElasticsearchClient> pool =
             new GenericObjectPool<>(factory, factory.getPoolConfig());
 
     private ElasticsearchClientPool() {
@@ -28,7 +29,7 @@ public class ElasticsearchClientPool {
             return pool.borrowObject();
         } catch (Exception e) {
             log.error("Failed to get ElasticsearchClient from pool: {}", e.getMessage());
-            throw new RuntimeException("Failed to get ElasticsearchClient from pool", e);
+            throw new ArktourosException(e, "Failed to get ElasticsearchClient from pool");
         }
     }
 

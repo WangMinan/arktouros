@@ -1,5 +1,7 @@
 package edu.npu.arktouros.receiver.arktouros;
 
+import edu.npu.arktouros.model.common.ResponseCodeEnum;
+import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.receiver.arktouros.serviceImpl.ArktourosLogServiceImpl;
 import edu.npu.arktouros.receiver.arktouros.serviceImpl.ArktourosMetricServiceImpl;
@@ -39,7 +41,7 @@ public class ArktourosReceiver extends DataReceiver {
             log.info("ArktourosReceiver start to receive data, listening on port:{}", port);
         } catch (IOException e) {
             log.error("Grpc receiver start error", e);
-            throw new RuntimeException(e);
+            throw new ArktourosException(e);
         }
     }
 
@@ -52,7 +54,9 @@ public class ArktourosReceiver extends DataReceiver {
                 log.info("Grpc receiver stopped");
             } catch (InterruptedException e) {
                 log.error("Grpc receiver failed to shutdown.");
-                throw new RuntimeException(e);
+                // 遇到InterruptedException异常，重新设置中断标志位
+                Thread.currentThread().interrupt();
+                throw new ArktourosException(e, "Grpc receiver failed to shutdown.");
             }
         }
     }

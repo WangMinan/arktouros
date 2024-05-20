@@ -3,6 +3,7 @@ package edu.npu.arktouros.receiver.otel;
 import edu.npu.arktouros.analyzer.otel.OtelLogAnalyzer;
 import edu.npu.arktouros.analyzer.otel.OtelMetricsAnalyzer;
 import edu.npu.arktouros.analyzer.otel.OtelTraceAnalyzer;
+import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.receiver.otel.serviceImpl.OtelLogServiceImpl;
 import edu.npu.arktouros.receiver.otel.serviceImpl.OtelMetricsServiceImpl;
@@ -70,7 +71,7 @@ public class OtelGrpcReceiver extends DataReceiver {
             log.info("OtelGrpcReceiver start to receive data, listening on port:{}", port);
         } catch (IOException e) {
             log.error("Grpc receiver start error", e);
-            throw new RuntimeException(e);
+            throw new ArktourosException(e, "Grpc receiver start error");
         }
     }
 
@@ -86,7 +87,8 @@ public class OtelGrpcReceiver extends DataReceiver {
                 log.info("Grpc receiver stopped");
             } catch (InterruptedException e) {
                 log.error("Grpc receiver failed to shutdown.");
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
+                throw new ArktourosException(e, "Grpc receiver failed to shutdown.");
             }
         }
     }

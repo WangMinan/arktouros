@@ -20,6 +20,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class OtelAnalyzerUtil {
+    private OtelAnalyzerUtil() {
+        throw new UnsupportedOperationException("OtelAnalyzerUtil is a utility class and cannot be instantiated");
+    }
+
     private static final Map<String, String> LABEL_MAPPINGS =
             ImmutableMap
                     .<String, String>builder()

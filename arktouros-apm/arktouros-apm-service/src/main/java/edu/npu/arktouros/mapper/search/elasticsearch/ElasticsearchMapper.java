@@ -53,6 +53,7 @@ import java.util.Set;
 public class ElasticsearchMapper extends SearchMapper {
     private static final String RESULT = "result";
     private static final String SERVICE_NAME = "serviceName";
+    private static final String NAMESPACE = "namespace";
     private static final String TIMESTAMP = "timestamp";
     private static final String SEVERITY_TEXT = "severityText";
 
@@ -67,9 +68,9 @@ public class ElasticsearchMapper extends SearchMapper {
                             .value(queryDto.query())).build());
         }
         if (StringUtils.isNotEmpty(queryDto.namespace())) {
-            matchQueryBuilder.field("namespace").query(queryDto.namespace());
+            matchQueryBuilder.field(NAMESPACE).query(queryDto.namespace());
         } else {
-            matchQueryBuilder.field("namespace").query("default");
+            matchQueryBuilder.field(NAMESPACE).query("default");
         }
         boolQueryBuilder.must(matchQueryBuilder.build()._toQuery());
         searchRequestBuilder.query(boolQueryBuilder.build()._toQuery());
@@ -89,7 +90,7 @@ public class ElasticsearchMapper extends SearchMapper {
     public List<Service> getServiceListFromNamespace(String namespace) {
         MatchQuery.Builder queryBuilder = new MatchQuery.Builder();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
-        queryBuilder.field("namespace").query(namespace);
+        queryBuilder.field(NAMESPACE).query(namespace);
         searchRequestBuilder
                 .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
                 .query(queryBuilder.build()._toQuery())
@@ -218,9 +219,7 @@ public class ElasticsearchMapper extends SearchMapper {
         Set<EndPoint> endPointSet = new HashSet<>();
         List<EndPointTraceIdVo> endPointTraceIdVoList = new ArrayList<>();
 
-        hits.forEach(hit -> {
-            resolveHit(hit, endPointSet, endPointTraceIdVoList);
-        });
+        hits.forEach(hit -> resolveHit(hit, endPointSet, endPointTraceIdVoList));
         r.put(RESULT, endPointTraceIdVoList);
         return r;
     }
@@ -262,25 +261,20 @@ public class ElasticsearchMapper extends SearchMapper {
 
     @Override
     public List<String> getMetricsNames(String serviceName, Integer metricNameLimit) {
-        try {
-            List<String> allNames = new ArrayList<>();
-            allNames.addAll(getMetricNamesFromIndex(serviceName,
-                    ElasticsearchIndex.GAUGE_INDEX.getIndexName(), Gauge.class));
-            allNames.addAll(getMetricNamesFromIndex(serviceName,
-                    ElasticsearchIndex.COUNTER_INDEX.getIndexName(), Counter.class));
-            allNames.addAll(getMetricNamesFromIndex(serviceName,
-                    ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName(), Histogram.class));
-            allNames.addAll(getMetricNamesFromIndex(serviceName,
-                    ElasticsearchIndex.SUMMARY_INDEX.getIndexName(), Summary.class));
-            return metricNameLimit == null ? allNames : allNames.stream().limit(metricNameLimit).toList();
-        } catch (IOException e) {
-            log.error("Search for metric names error:{}", e.getMessage());
-            throw new RuntimeException(e);
-        }
+        List<String> allNames = new ArrayList<>();
+        allNames.addAll(getMetricNamesFromIndex(serviceName,
+                ElasticsearchIndex.GAUGE_INDEX.getIndexName(), Gauge.class));
+        allNames.addAll(getMetricNamesFromIndex(serviceName,
+                ElasticsearchIndex.COUNTER_INDEX.getIndexName(), Counter.class));
+        allNames.addAll(getMetricNamesFromIndex(serviceName,
+                ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName(), Histogram.class));
+        allNames.addAll(getMetricNamesFromIndex(serviceName,
+                ElasticsearchIndex.SUMMARY_INDEX.getIndexName(), Summary.class));
+        return metricNameLimit == null ? allNames : allNames.stream().limit(metricNameLimit).toList();
     }
 
     private <T extends Metric> List<String> getMetricNamesFromIndex(
-            String serviceName, String indexName, Class<T> clazz) throws IOException {
+            String serviceName, String indexName, Class<T> clazz) {
         MatchQuery.Builder matchQueryBuilder = new MatchQuery.Builder();
         matchQueryBuilder.field(SERVICE_NAME).query(serviceName);
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
@@ -320,23 +314,18 @@ public class ElasticsearchMapper extends SearchMapper {
         }
         Query query = boolQueryBuilder.build()._toQuery();
         List<Metric> metrics = new ArrayList<>();
-        try {
-            metrics.addAll(getMetricsFromBoolQuery(
-                    ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
-                    query, Gauge.class));
-            metrics.addAll(getMetricsFromBoolQuery(
-                    ElasticsearchIndex.COUNTER_INDEX.getIndexName(),
-                    query, Counter.class));
-            metrics.addAll(getMetricsFromBoolQuery(
-                    ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName(),
-                    query, Histogram.class));
-            metrics.addAll(getMetricsFromBoolQuery(
-                    ElasticsearchIndex.SUMMARY_INDEX.getIndexName(),
-                    query, Summary.class));
-        } catch (IOException e) {
-            log.error("Search for metric values error:{}", e.getMessage());
-            throw new RuntimeException(e);
-        }
+        metrics.addAll(getMetricsFromBoolQuery(
+                ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
+                query, Gauge.class));
+        metrics.addAll(getMetricsFromBoolQuery(
+                ElasticsearchIndex.COUNTER_INDEX.getIndexName(),
+                query, Counter.class));
+        metrics.addAll(getMetricsFromBoolQuery(
+                ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName(),
+                query, Histogram.class));
+        metrics.addAll(getMetricsFromBoolQuery(
+                ElasticsearchIndex.SUMMARY_INDEX.getIndexName(),
+                query, Summary.class));
         return metrics;
     }
 
@@ -346,14 +335,14 @@ public class ElasticsearchMapper extends SearchMapper {
         if (StringUtils.isNotEmpty(query)) {
             searchRequestBuilder.query(new Query.Builder()
                     .prefix(prefixBuilder ->
-                            prefixBuilder.field("namespace")
+                            prefixBuilder.field(NAMESPACE)
                                     .value(query))
                     .build()
             );
         } else {
             // group by
             searchRequestBuilder.aggregations("namespaceAgg",
-                    agg -> agg.terms(term -> term.field("namespace")));
+                    agg -> agg.terms(term -> term.field(NAMESPACE)));
         }
         searchRequestBuilder.index(ElasticsearchIndex.SERVICE_INDEX.getIndexName());
         List<String> namespaceList = new ArrayList<>();
@@ -431,7 +420,7 @@ public class ElasticsearchMapper extends SearchMapper {
     }
 
     private <T extends Metric> List<T> getMetricsFromBoolQuery(
-            String indexName, Query query, Class<T> clazz) throws IOException {
+            String indexName, Query query, Class<T> clazz) {
         SortOptions sort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()
                         .field(TIMESTAMP)

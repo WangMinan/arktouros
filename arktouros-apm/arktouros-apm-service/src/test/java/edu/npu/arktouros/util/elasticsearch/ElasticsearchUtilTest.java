@@ -28,6 +28,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -56,6 +57,15 @@ class ElasticsearchUtilTest {
     void beforeEach() {
         esClient = Mockito.mock(ElasticsearchClient.class);
         poolMockedStatic.when(ElasticsearchClientPool::getClient).thenReturn(esClient);
+    }
+
+    @Test
+    void testConstructor() throws NoSuchMethodException {
+        Constructor<ElasticsearchUtil> elasticsearchUtilConstructor =
+                ElasticsearchUtil.class.getDeclaredConstructor();
+        elasticsearchUtilConstructor.setAccessible(true);
+        Assertions.assertThrows(Exception.class,
+                elasticsearchUtilConstructor::newInstance);
     }
 
     @Test

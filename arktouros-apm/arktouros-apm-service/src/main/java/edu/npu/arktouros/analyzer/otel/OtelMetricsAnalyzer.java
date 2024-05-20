@@ -3,6 +3,7 @@ package edu.npu.arktouros.analyzer.otel;
 import edu.npu.arktouros.analyzer.DataAnalyzer;
 import edu.npu.arktouros.analyzer.otel.util.OtelAnalyzerUtil;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
+import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.metric.Counter;
 import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.metric.Histogram;
@@ -54,7 +55,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
             queueService.put(metricsQueueItem);
         } catch (IOException e) {
             log.error("Failed to convert resourceMetrics:{} to json", resourceMetrics, e);
-            throw new RuntimeException(e);
+            throw new ArktourosException(e, "failed to convert resourceMetrics to json");
         }
     }
 
@@ -64,6 +65,7 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
 
     @Override
     public void run() {
+        super.run();
         while (!isInterrupted()) {
             transform();
         }
@@ -95,13 +97,13 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
                                 sinkService.sink(metric);
                             } catch (IOException e) {
                                 log.error("Failed to sink metric after retry:{}", metric, e);
-                                throw new RuntimeException(e);
+                                throw new ArktourosException(e, "failed to sink metric");
                             }
                         });
             }
         } catch (IOException e) {
             log.error("OtelMetricsAnalyzer failed to serialize data:{}", item.getData(), e);
-            throw new RuntimeException(e);
+            throw new ArktourosException(e, "failed to serialize data");
         }
     }
 

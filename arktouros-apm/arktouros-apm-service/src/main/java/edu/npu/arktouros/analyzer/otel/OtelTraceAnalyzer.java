@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import edu.npu.arktouros.analyzer.DataAnalyzer;
 import edu.npu.arktouros.analyzer.otel.util.OtelAnalyzerUtil;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
+import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
 import edu.npu.arktouros.model.otel.trace.Span;
@@ -46,6 +47,7 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
 
     @Override
     public void run() {
+        super.run();
         while (!isInterrupted()) {
             transform();
         }
@@ -63,7 +65,8 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
             queueService.put(logQueueItem);
         } catch (IOException e) {
             log.error("Failed to convert resourceSpans:{} to json", resourceSpans, e);
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            throw new ArktourosException(e, "Failed to convert resourceSpans to json");
         }
     }
 
@@ -88,7 +91,7 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
                         convertAndSinkSpan(otelSpan, attributes));
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ArktourosException(e, "Failed to convert resourceSpans to json");
         }
     }
 
@@ -160,7 +163,7 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
             sinkService.sink(span);
         } catch (IOException e) {
             log.error("Failed to sink span after retry.", e);
-            throw new RuntimeException(e);
+            throw new ArktourosException(e, "Failed to sink span after retry.");
         }
     }
 
@@ -218,7 +221,8 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
             serviceName = tmpVal;
         }
 
-        String ipKey, portKey;
+        String ipKey;
+        String portKey;
         if (isRemote) {
             ipKey = "net_peer_ip";
             portKey = "net_peer_port";
@@ -230,15 +234,15 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
         boolean ipParseSuccess = false;
         if (StringUtils.isNotEmpty(tmpVal = getAndPutRedundantKey(
                 resourceTags, ipKey, redundantKeys))) {
-            if (!(ipParseSuccess = parseIp(tmpVal))) {
+            if (ipParseSuccess != parseIp(tmpVal)) {
                 // if ip parse failed, use the value as service name
                 serviceName = StringUtils.isEmpty(serviceName) ? tmpVal : serviceName;
             } else {
                 builder.ip(tmpVal);
             }
         }
-        if (StringUtils.isNotEmpty(tmpVal = getAndPutRedundantKey(
-                resourceTags, portKey, redundantKeys))) {
+        tmpVal = getAndPutRedundantKey(resourceTags, portKey, redundantKeys);
+        if (StringUtils.isNotEmpty(tmpVal)) {
             builder.port(Integer.parseInt(tmpVal));
         }
         if (StringUtils.isEmpty(serviceName) && !ipParseSuccess) {

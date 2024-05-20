@@ -1,5 +1,7 @@
 package edu.npu.arktouros.config;
 
+import edu.npu.arktouros.model.common.ResponseCodeEnum;
+import edu.npu.arktouros.model.exception.ArktourosException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -40,7 +42,8 @@ public class PropertiesProvider {
                 log.error("""
                         Failed to load properties file from resource, please check the location of your config file.
                         """, ex);
-                throw new RuntimeException(ex);
+                throw new ArktourosException(e,
+                        "Failed to load properties file from resource, please check the location of your config file.");
             }
         }
     }

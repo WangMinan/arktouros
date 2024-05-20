@@ -27,7 +27,7 @@ public abstract class Metric implements Source {
     protected final SourceType sourceType = SourceType.METRIC;
     protected MetricType metricType = MetricType.METRIC;
 
-    public Metric(edu.npu.arktouros.proto.metric.v1.Metric metric) {
+    protected Metric(edu.npu.arktouros.proto.metric.v1.Metric metric) {
         this.name = metric.getName();
         this.description = metric.getDescription();
         this.labels = metric.getLabelsMap();

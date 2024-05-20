@@ -57,6 +57,7 @@ public class AbstractGrpcEmitter extends AbstractEmitter {
                 waitForFirstConnectLatch.await();
             } catch (InterruptedException e) {
                 log.info("Interrupted when waiting for the first connection to apm.");
+                Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
             }
         }

@@ -3,6 +3,8 @@ package edu.npu.arktouros.analyzer.otel;
 import edu.npu.arktouros.analyzer.DataAnalyzer;
 import edu.npu.arktouros.analyzer.otel.util.OtelAnalyzerUtil;
 import edu.npu.arktouros.commons.ProtoBufJsonUtils;
+import edu.npu.arktouros.model.common.ResponseCodeEnum;
+import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.queue.LogQueueItem;
@@ -44,7 +46,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
             queueService.put(logQueueItem);
         } catch (IOException e) {
             log.error("Failed to convert resourceLogs:{} to json", resourceLogs, e);
-            throw new RuntimeException(e);
+            throw new ArktourosException(e, "failed to convert resourceLogs to json");
         }
     }
 
@@ -54,6 +56,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
 
     @Override
     public void run() {
+        super.run();
         while (!isInterrupted()) {
             transform();
         }
@@ -111,7 +114,7 @@ public class OtelLogAnalyzer extends DataAnalyzer {
                                 sinkService.sink(sourceLog);
                             } catch (IOException e) {
                                 log.error("Failed to sink log after retry.", e);
-                                throw new RuntimeException(e);
+                                throw new ArktourosException(e, "Failed to sink log");
                             }
                         }
                 );

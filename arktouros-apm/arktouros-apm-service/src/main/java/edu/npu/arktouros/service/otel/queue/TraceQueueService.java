@@ -65,6 +65,7 @@ public class TraceQueueService extends QueueService<TraceQueueItem> {
             }
         } catch (InterruptedException e) {
             log.warn("Force traceQueueService shutting down");
+            Thread.currentThread().interrupt();
         } finally {
             finalLock.unlock();
         }

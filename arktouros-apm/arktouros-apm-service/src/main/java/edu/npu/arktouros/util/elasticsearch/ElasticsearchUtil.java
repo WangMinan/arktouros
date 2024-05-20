@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import edu.npu.arktouros.config.PropertiesProvider;
+import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,10 @@ import java.util.List;
  */
 @Slf4j
 public class ElasticsearchUtil {
+
+    private ElasticsearchUtil() {
+        throw new UnsupportedOperationException("ElasticsearchUtil is a utility class and cannot be instantiated");
+    }
 
     public static void sink(String id, String index, Source source) throws IOException {
         ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
@@ -45,7 +50,7 @@ public class ElasticsearchUtil {
                     esClient.search(searchRequestBuilder.build(), clazz);
         } catch (IOException e) {
             log.error("Failed to search: {}", e.getMessage());
-            throw new RuntimeException(e);
+            throw new ArktourosException(e, "Failed to search");
         } finally {
             ElasticsearchClientPool.returnClient(esClient);
         }
@@ -84,7 +89,7 @@ public class ElasticsearchUtil {
             } while (!scrollResponse.hits().hits().isEmpty());
         } catch (IOException e) {
             log.error("Failed to scroll search: {}", e.getMessage());
-            throw new RuntimeException(e);
+            throw new ArktourosException(e, "Failed to scroll search");
         } finally {
             ElasticsearchClientPool.returnClient(esClient);
         }
