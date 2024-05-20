@@ -10,12 +10,8 @@ import lombok.Getter;
 @Getter
 public class ArktourosException extends RuntimeException{
 
-    private ResponseCodeEnum code;
-    private String message;
-
-    public ArktourosException() {
-        super();
-    }
+    private final ResponseCodeEnum code;
+    private final String message;
 
     public ArktourosException(Throwable cause) {
         super(cause);

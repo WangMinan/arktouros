@@ -41,5 +41,8 @@ class LogQueueCacheTest {
         LogQueueCache.queue = queue2;
         Mockito.doThrow(new InterruptedException()).when(queue2).put("123");
         Assertions.assertThrows(RuntimeException.class, () -> cacheException2.put("123"));
+
+        // 还原现场
+        LogQueueCache.queue = new ArrayBlockingQueue<>(1000);
     }
 }

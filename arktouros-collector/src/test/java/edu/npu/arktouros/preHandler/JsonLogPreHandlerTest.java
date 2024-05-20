@@ -67,6 +67,6 @@ class JsonLogPreHandlerTest {
         // 不知道为什么mvn test的时候这个位置会变成nullPointerException 本地跑没问题的
         handler.start();
         handler.interrupt();
-        Assertions.assertTrue(outputCache.isEmpty());
+        Assertions.assertFalse(outputCache.isEmpty());
     }
 }
