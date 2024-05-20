@@ -14,6 +14,7 @@ import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
 import io.opentelemetry.proto.collector.trace.v1.TraceServiceGrpc;
 import io.opentelemetry.proto.trace.v1.TracesData;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +45,7 @@ class OtelGrpcEmitterTest {
     private TraceServiceGrpc.TraceServiceBlockingStub traceServiceBlockingStub;
     private MetricsServiceGrpc.MetricsServiceBlockingStub metricsServiceBlockingStub;
     private LogsServiceGrpc.LogsServiceBlockingStub logsServiceBlockingStub;
-    private OtelGrpcEmitter otelGrpcEmitter;
+    private static OtelGrpcEmitter otelGrpcEmitter;
 
     @BeforeAll
     static void initProperties() {
@@ -60,6 +61,12 @@ class OtelGrpcEmitterTest {
         otelGrpcEmitter.traceServiceBlockingStub = traceServiceBlockingStub;
         otelGrpcEmitter.metricsServiceBlockingStub = metricsServiceBlockingStub;
         otelGrpcEmitter.logsServiceBlockingStub = logsServiceBlockingStub;
+    }
+
+    @AfterAll
+    static void afterAll() {
+        // 要把它关掉
+        otelGrpcEmitter.interrupt();
     }
 
     @Test

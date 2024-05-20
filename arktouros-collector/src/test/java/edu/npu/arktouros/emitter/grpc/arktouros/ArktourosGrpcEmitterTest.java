@@ -89,7 +89,7 @@ class ArktourosGrpcEmitterTest {
                 break;
             }
         }
-        Assertions.assertTrue(grpcEmitter.isInterrupted());
+        Assertions.assertTrue(cache.isEmpty());
     }
 
     private void initCache() {
