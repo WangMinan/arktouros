@@ -132,7 +132,6 @@ jobs:
         # UT报错不阻塞sonar扫描 使用内存型数据库避免并行执行问题
         run: >
           mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
-          -Dspring.datasource.url=jdbc:h2:mem:apm;MODE=MySQL
           -Dsonar.coverage.jacoco.xmlReportPaths=./arktouros-jacoco-aggregation/target/site/jacoco-aggregate/jacoco.xml
           -Dsonar.projectKey=WangMinan_Arktouros_5cf7fce8-6c16-4aef-b255-7105807485bf 
           -Dsonar.projectName='Arktouros'
