@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ApplicationStartUp {
+
     public static void main(String[] args) {
         PropertiesProvider.init();
         int port = Integer.parseInt(

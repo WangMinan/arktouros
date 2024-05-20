@@ -28,7 +28,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -Dmaven.test.skip=true -T 1C clean package
+        run: mvn -Dmaven.test.skip=true -T 2C clean package
 
       - name: Unzip package
         run: tar -zxvf build/arktouros-apm-api-leaves.tar.gz -C build/
@@ -94,7 +94,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP}} 
           "chmod +x /root/arktouros/run-backend.sh && /root/arktouros/run-backend.sh"
 
-  analyze_with_sonarqube:
+  analyze-with-sonarqube:
     name: analyze with sonarqube
     runs-on: ubuntu-latest
     needs: deploy_on_remote
@@ -129,9 +129,10 @@ jobs:
           ELASTICSEARCH_SERVERURL: ${{ secrets.ELASTICSEARCH_SERVERURL }}
           ELASTICSEARCH_PASSWORD: ${{ secrets.ELASTICSEARCH_PASSWORD }}
           ELASTICSEARCH_CA: ${{ secrets.ELASTICSEARCH_CA }}
-        # UT报错不阻塞sonar扫描
+        # UT报错不阻塞sonar扫描 使用内存型数据库避免并行执行问题
         run: >
-          mvn -B -T 1C clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+          mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+          -Dspring.datasource.url=jdbc:h2:mem:apm;MODE=MySQL
           -Dsonar.coverage.jacoco.xmlReportPaths=./arktouros-jacoco-aggregation/target/site/jacoco-aggregate/jacoco.xml
           -Dsonar.projectKey=WangMinan_Arktouros_5cf7fce8-6c16-4aef-b255-7105807485bf 
           -Dsonar.projectName='Arktouros'
