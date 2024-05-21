@@ -1,6 +1,5 @@
 package edu.npu.arktouros.config;
 
-import edu.npu.arktouros.model.common.ResponseCodeEnum;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,9 +18,10 @@ import java.util.Map;
 @Slf4j
 public class PropertiesProvider {
 
-    private static Map<String, Object> map;
+    protected static Map<String, Object> map;
 
     private PropertiesProvider() {
+        throw new UnsupportedOperationException("PropertiesProvider is a utility class and cannot be instantiated");
     }
 
     public static void init() {

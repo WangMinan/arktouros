@@ -17,9 +17,10 @@ import java.util.Map;
 @Slf4j
 public class PropertiesProvider {
 
-    private static Map<String, Object> map;
+    protected static Map<String, Object> map;
 
     private PropertiesProvider() {
+        throw new UnsupportedOperationException("PropertiesProvider is a utility class and cannot be instantiated");
     }
 
     public static void init() {
@@ -52,7 +53,9 @@ public class PropertiesProvider {
     public static String getProperty(String propertyPath, String defaultValue) {
         Map<String, Object> value = map;
         for (String key : propertyPath.split("\\.")) {
-            if (!value.containsKey(key)) return defaultValue;
+            if (!value.containsKey(key)) {
+                return defaultValue;
+            }
             Object obj = value.get(key);
             if (obj instanceof Map) {
                 value = (Map<String, Object>) obj;

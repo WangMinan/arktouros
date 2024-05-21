@@ -1,6 +1,5 @@
 package edu.npu.arktouros.service.otel.queue;
 
-import edu.npu.arktouros.mapper.otel.queue.MetricsQueueMapper;
 import edu.npu.arktouros.mapper.otel.queue.TraceQueueMapper;
 import edu.npu.arktouros.model.queue.TraceQueueItem;
 import jakarta.annotation.Resource;

@@ -6,10 +6,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author : [wangminan]
@@ -17,6 +22,8 @@ import java.nio.file.Paths;
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@Timeout(30)
 class PropertiesProviderTest {
 
     @Test
@@ -49,5 +56,36 @@ class PropertiesProviderTest {
         Assertions.assertNotNull(
                 PropertiesProvider.getProperty("testAttr", "test"),
                 "test");
+        // 清空
+        PropertiesProvider.map.clear();
+    }
+
+    @Test
+    @Timeout(10)
+    void testGetPropertyWithEmptyOrNullValue() {
+        // Mock the property map with empty and null values
+        Map<String, Object> mockMap = new HashMap<>();
+        mockMap.put("emptyKey", "");
+        mockMap.put("nullKey", null);
+        PropertiesProvider.map = new HashMap<>();
+        PropertiesProvider.map.putAll(mockMap);
+
+        // Test empty value with default value
+        Assertions.assertEquals("default",
+                PropertiesProvider.getProperty("emptyKey", "default"));
+
+        // Test null value with default value
+        Assertions.assertEquals("default",
+                PropertiesProvider.getProperty("nullKey", "default"));
+        // 清空
+        PropertiesProvider.map.clear();
+    }
+
+    @Test
+    void testConstructor() throws NoSuchMethodException {
+        Constructor<PropertiesProvider> constructor =
+                PropertiesProvider.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        Assertions.assertThrows(Exception.class, constructor::newInstance);
     }
 }

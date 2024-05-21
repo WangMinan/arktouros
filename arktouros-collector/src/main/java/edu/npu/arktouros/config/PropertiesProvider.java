@@ -18,9 +18,10 @@ import java.util.Map;
 @Slf4j
 public class PropertiesProvider {
 
-    private static Map<String, Object> map = new HashMap<>();
+    protected static Map<String, Object> map = new HashMap<>();
 
     private PropertiesProvider() {
+        throw new UnsupportedOperationException("PropertiesProvider is a utility class and cannot be instantiated");
     }
 
     public static void init() {

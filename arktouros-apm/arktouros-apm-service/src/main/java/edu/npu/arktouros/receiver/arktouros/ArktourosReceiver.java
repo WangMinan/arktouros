@@ -1,6 +1,5 @@
 package edu.npu.arktouros.receiver.arktouros;
 
-import edu.npu.arktouros.model.common.ResponseCodeEnum;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.receiver.arktouros.serviceImpl.ArktourosLogServiceImpl;
