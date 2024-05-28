@@ -18,7 +18,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  analyze_with_codeQL:
+  analyze-with-codeQL:
     name: Analyze
     # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql
