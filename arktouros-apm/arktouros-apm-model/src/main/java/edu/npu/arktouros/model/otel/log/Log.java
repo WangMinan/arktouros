@@ -40,7 +40,8 @@ public class Log implements Source {
     @Builder.Default
     private boolean error = false;
     private Long timestamp;
-    private String severityText; // logLevel
+    @Builder.Default
+    private String severityText = "Info"; // logLevel
 
     public static final Map<String, Property> documentMap = new HashMap<>();
 

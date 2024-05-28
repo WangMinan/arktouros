@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * @author : [wangminan]
  * @description : 全局异常处理器
  */
+@SuppressWarnings("CallToPrintStackTrace")
 @RestControllerAdvice
 @Slf4j
 public class ArktourosExceptionHandler {
@@ -19,6 +20,7 @@ public class ArktourosExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R handleArktourosException(ArktourosException e){
         log.error("捕获自定义异常ArktourosException:{}", e.getMessage());
+        e.printStackTrace();
         return R.error(e.getCode(), e.getMessage());
     }
 
@@ -26,6 +28,7 @@ public class ArktourosExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R doException(Exception e){
         log.error("捕获全局异常:{}",e.getMessage());
+        e.printStackTrace();
         return R.error(e.getMessage());
     }
 }

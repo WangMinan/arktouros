@@ -119,11 +119,12 @@ public class ElasticsearchMapper extends SearchMapper {
     @Override
     public Service getServiceByName(String serviceName) {
         TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
-        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+
         termQueryBuilder.field("name").value(serviceName);
-        searchRequestBuilder
-                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
-                .query(termQueryBuilder.build()._toQuery()).build();
+        SearchRequest.Builder searchRequestBuilder =
+                new SearchRequest.Builder()
+                        .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
+                        .query(termQueryBuilder.build()._toQuery());
         SearchResponse<Service> searchResponse =
                 ElasticsearchUtil.simpleSearch(searchRequestBuilder, Service.class);
         List<Hit<Service>> hits = searchResponse.hits().hits();
@@ -168,11 +169,18 @@ public class ElasticsearchMapper extends SearchMapper {
                     .field("content")
                     .query(logQueryDto.keywordNotIncluded()).build()._toQuery());
         }
-        if (logQueryDto.severityText() != null) {
-            boolQueryBuilder.filter(new TermQuery.Builder()
-                    .field(SEVERITY_TEXT)
-                    .value(logQueryDto.severityText())
-                    .build()._toQuery());
+        if (StringUtils.isNotEmpty(logQueryDto.severityText())) {
+            if (!logQueryDto.severityText().equals("null")) {
+                boolQueryBuilder.filter(new TermQuery.Builder()
+                        .field(SEVERITY_TEXT)
+                        .value(logQueryDto.severityText())
+                        .build()._toQuery());
+            } else {
+                boolQueryBuilder.filter(new TermQuery.Builder()
+                        .field(SEVERITY_TEXT)
+                        .value("")
+                        .build()._toQuery());
+            }
         }
         RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
         if (logQueryDto.startTimestamp() != null) {
