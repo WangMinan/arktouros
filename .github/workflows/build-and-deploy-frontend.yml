@@ -59,7 +59,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-ui:${{ steps.vars.outputs.tag }}
             ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-ui:latest
 
-  deploy:
+  deploy-on-remote:
     runs-on: ubuntu-latest
     needs: build-and-push-image
     steps:

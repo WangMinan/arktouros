@@ -156,7 +156,7 @@
                             <goal>npm</goal>
                         </goals>
                         <configuration>
-                            <arguments>install --registry=https://registry.npmjs.org/</arguments>
+                            <arguments>install</arguments>
                         </configuration>
                     </execution>
                     <execution>
