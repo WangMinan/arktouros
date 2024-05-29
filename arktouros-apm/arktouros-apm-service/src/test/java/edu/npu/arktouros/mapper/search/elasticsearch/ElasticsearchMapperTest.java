@@ -1,4 +1,4 @@
-package edu.npu.arktouros.mapper.otel.search.elasticsearch;
+package edu.npu.arktouros.mapper.search.elasticsearch;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.Buckets;
@@ -12,6 +12,7 @@ import edu.npu.arktouros.mapper.search.elasticsearch.ElasticsearchMapper;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
+import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
 import edu.npu.arktouros.model.otel.structure.Service;
@@ -192,7 +193,8 @@ public class ElasticsearchMapperTest {
         elasticsearchUtil.when(() -> ElasticsearchUtil
                         .scrollSearch(Mockito.any(), Mockito.any()))
                 .thenReturn(new ArrayList<>());
-        Assertions.assertDoesNotThrow(() -> elasticsearchMapper.getSpanListByTraceId("123"));
+        Assertions.assertDoesNotThrow(() -> elasticsearchMapper
+                .getSpanListByTraceId(new SpanTopologyQueryDto("123","test")));
     }
 
     @Test
