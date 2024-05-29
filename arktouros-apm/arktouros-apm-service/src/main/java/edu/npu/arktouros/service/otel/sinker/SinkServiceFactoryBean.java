@@ -33,7 +33,7 @@ public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
                 throw new IllegalArgumentException("Invalid sinker type: " + activeSinker);
             }
         }
-        log.info("SinkServiceFactory init, current sinker:{}", activeSinker);
+        log.debug("SinkServiceFactory init, current sinker:{}", activeSinker);
         return sinkService;
     }
 

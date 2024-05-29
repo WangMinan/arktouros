@@ -5,6 +5,7 @@ import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.MetricQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
+import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.topology.service.Topology;
@@ -51,7 +52,7 @@ public class SearchServiceImpl implements SearchService {
         // 根据服务搜索span
         List<String> serviceNames = serviceList.stream()
                 .map(Service::getName)
-                // 过滤到空串
+                // 过滤空串
                 .filter(name -> name != null && !name.isEmpty())
                 .toList();
         List<Span> originalSpanList =
@@ -88,7 +89,8 @@ public class SearchServiceImpl implements SearchService {
             List<Span> otherSpans,
             Set<TopologyNode<Service>> topologyNodes,
             Set<TopologyCall<Service>> topologyCalls) {
-        otherSpans.forEach(otherSpan -> {
+        // 这个位置不应该用深度优先搜索 要用广度优先搜索
+        for (Span otherSpan : otherSpans) {
             if (otherSpan.getParentSpanId().equals(formerSpan.getId())) {
                 Service otherService = searchMapper.getServiceByName(otherSpan.getServiceName());
                 TopologyNode<Service> otherNode = new TopologyNode<>(otherService);
@@ -102,7 +104,7 @@ public class SearchServiceImpl implements SearchService {
                         otherSpans.stream().filter(span -> !span.equals(otherSpan)).toList(),
                         topologyNodes, topologyCalls);
             }
-        });
+        }
     }
 
     @Override
@@ -116,13 +118,13 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public R getSpanTopologyByTraceId(String traceId) {
-        List<Span> originalSpanList = searchMapper.getSpanListByTraceId(traceId);
+    public R getSpanTopologyByTraceId(SpanTopologyQueryDto spanTopologyQueryDto) {
+        List<Span> originalSpanList =
+                searchMapper.getSpanListByTraceId(spanTopologyQueryDto);
         // 找到唯一的rootSpan
-        Span rootSpan = originalSpanList.stream()
-                .filter(Span::isRoot).findFirst().orElse(null);
+        Span rootSpan = getRootSpan(originalSpanList);
         if (rootSpan == null) {
-            log.warn("Can't find root span for traceId: {}", traceId);
+            log.warn("Can't find root span for spanTopologyQueryDto: {}", spanTopologyQueryDto);
             return R.ok();
         }
         SpanTreeNode.SpanTreeNodeBuilder rootBuilder = SpanTreeNode.builder();
@@ -134,6 +136,20 @@ public class SearchServiceImpl implements SearchService {
         R r = new R();
         r.put(RESULT, new SpanTreeNodeVo(rootTreeNode));
         return r;
+    }
+
+    private Span getRootSpan(List<Span> originalSpanList) {
+        Span span = originalSpanList.stream()
+                .filter(Span::isRoot).findFirst().orElse(null);
+        if (span != null) {
+            return span;
+        }
+        log.info("Root span is not in this service, try to find the first span without considering parent span id.");
+        // 取startTimeUnixNano最小的
+        return originalSpanList.stream()
+                .min((span1, span2) -> (int)
+                        (span1.getStartTime() - span2.getStartTime()))
+                .orElse(null);
     }
 
     private void buildTraceTree(List<SpanTreeNode> formerLayerSpans, List<Span> otherSpans) {

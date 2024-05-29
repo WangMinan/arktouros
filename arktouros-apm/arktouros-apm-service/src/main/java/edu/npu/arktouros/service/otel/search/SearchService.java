@@ -4,6 +4,7 @@ import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.MetricQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
+import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.vo.R;
 
 public interface SearchService {
@@ -15,7 +16,7 @@ public interface SearchService {
 
     R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto);
 
-    R getSpanTopologyByTraceId(String traceId);
+    R getSpanTopologyByTraceId(SpanTopologyQueryDto traceId);
 
     R getMetrics(MetricQueryDto metricQueryDto);
 

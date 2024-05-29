@@ -5,6 +5,7 @@ import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.MetricQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
+import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.structure.Service;
@@ -110,7 +111,8 @@ public class SearchServiceImplTest {
     @Test
     void testGetSpanTopologyByTraceId() {
         Mockito.when(searchMapper.getSpanListByTraceId(any())).thenReturn(List.of());
-        Assertions.assertDoesNotThrow(() -> service.getSpanTopologyByTraceId("123"));
+        Assertions.assertDoesNotThrow(() -> service
+                .getSpanTopologyByTraceId(new SpanTopologyQueryDto("123", "test")));
         // 然后用一个有数据的情况
         Span father = Span.builder()
                 .root(true)
@@ -135,7 +137,8 @@ public class SearchServiceImplTest {
                 .build();
         Mockito.when(searchMapper.getSpanListByTraceId(any()))
                 .thenReturn(List.of(father, child1, child2));
-        Assertions.assertDoesNotThrow(() -> service.getSpanTopologyByTraceId("123"));
+        Assertions.assertDoesNotThrow(() -> service
+                .getSpanTopologyByTraceId(new SpanTopologyQueryDto("123", "test")));
     }
 
     @Test

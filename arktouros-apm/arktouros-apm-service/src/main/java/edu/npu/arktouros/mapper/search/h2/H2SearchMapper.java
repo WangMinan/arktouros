@@ -4,6 +4,7 @@ import edu.npu.arktouros.mapper.search.SearchMapper;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
+import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
@@ -47,7 +48,7 @@ public class H2SearchMapper extends SearchMapper {
     }
 
     @Override
-    public List<Span> getSpanListByTraceId(String traceId) {
+    public List<Span> getSpanListByTraceId(SpanTopologyQueryDto spanTopologyQueryDto) {
         return List.of();
     }
 

@@ -23,6 +23,7 @@ import edu.npu.arktouros.model.common.ResponseCodeEnum;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
+import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;
 import edu.npu.arktouros.model.otel.metric.Gauge;
@@ -257,12 +258,21 @@ public class ElasticsearchMapper extends SearchMapper {
     }
 
     @Override
-    public List<Span> getSpanListByTraceId(String traceId) {
-        TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
-        termQueryBuilder.field("traceId").value(traceId);
+    public List<Span> getSpanListByTraceId(SpanTopologyQueryDto spanTopologyQueryDto) {
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        boolQueryBuilder.must(
+                new TermQuery.Builder()
+                        .field("serviceName")
+                        .value(spanTopologyQueryDto.serviceName())
+                        .build()._toQuery(),
+                new TermQuery.Builder()
+                        .field("traceId")
+                        .value(spanTopologyQueryDto.traceId())
+                        .build()._toQuery()
+        );
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
-                .query(termQueryBuilder.build()._toQuery());
+                .query(boolQueryBuilder.build()._toQuery());
         return ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
     }
 

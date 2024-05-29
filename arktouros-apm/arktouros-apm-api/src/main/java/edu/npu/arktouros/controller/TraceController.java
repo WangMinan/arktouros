@@ -1,6 +1,7 @@
 package edu.npu.arktouros.controller;
 
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
+import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.service.otel.search.SearchService;
 import jakarta.annotation.Resource;
@@ -27,7 +28,7 @@ public class TraceController {
     }
 
     @GetMapping("/topology")
-    public R getSpanTopologyByTraceQuery(@NotEmpty @RequestParam("traceId") String traceId) {
-        return searchService.getSpanTopologyByTraceId(traceId);
+    public R getSpanTopologyByTraceQuery(@Validated SpanTopologyQueryDto spanTopologyQueryDto) {
+        return searchService.getSpanTopologyByTraceId(spanTopologyQueryDto);
     }
 }
