@@ -48,5 +48,12 @@ elasticsearch:
     maxTotal: 10
     minIdle: 1
     maxWait: 3000
+  # scrollApi配置
   scroll:
+    # 对于每一次scroll 等待回调结果的最长时间
     maxWait: 5000
+  # rolloverApi configuration部分配置
+  rollover:
+    maxDocs: 100000
+    maxAge: 1d
+    maxSize: 5gb
