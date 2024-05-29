@@ -4,6 +4,8 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.elasticsearch.indices.ElasticsearchIndicesClient;
+import co.elastic.clients.elasticsearch.indices.RolloverRequest;
+import co.elastic.clients.elasticsearch.indices.RolloverResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
@@ -134,5 +136,18 @@ class ElasticsearchSinkServiceTest {
         Assertions.assertDoesNotThrow(() -> elasticsearchSinkService.sink(histogram));
         Assertions.assertDoesNotThrow(() -> elasticsearchSinkService.sink(log1));
         Assertions.assertDoesNotThrow(() -> elasticsearchSinkService.sink(span));
+    }
+
+    @Test
+    void testTryRollover() throws IOException {
+        ElasticsearchIndicesClient indices = Mockito.mock(ElasticsearchIndicesClient.class);
+        Mockito.when(esClient.indices()).thenReturn(indices);
+        RolloverResponse response = Mockito.mock(RolloverResponse.class);
+        Mockito.when(esClient.indices().rollover(any(RolloverRequest.class)))
+                .thenReturn(response);
+        Mockito.when(response.acknowledged()).thenReturn(true);
+        Assertions.assertDoesNotThrow(() -> elasticsearchSinkService.tryRollover());
+        Mockito.when(response.acknowledged()).thenReturn(false);
+        Assertions.assertDoesNotThrow(() -> elasticsearchSinkService.tryRollover());
     }
 }
