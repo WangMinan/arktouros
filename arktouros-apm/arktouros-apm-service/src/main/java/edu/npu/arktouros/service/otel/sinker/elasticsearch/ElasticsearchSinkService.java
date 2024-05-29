@@ -2,6 +2,7 @@ package edu.npu.arktouros.service.otel.sinker.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.Time;
+import co.elastic.clients.elasticsearch._types.mapping.TypeMapping;
 import co.elastic.clients.elasticsearch.indices.Alias;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
@@ -9,6 +10,7 @@ import co.elastic.clients.elasticsearch.indices.RolloverRequest;
 import co.elastic.clients.elasticsearch.indices.RolloverResponse;
 import co.elastic.clients.elasticsearch.indices.rollover.RolloverConditions;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
+import co.elastic.clients.util.ObjectBuilder;
 import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.exception.ArktourosException;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 /**
  * @author : [wangminan]
@@ -127,31 +130,30 @@ public class ElasticsearchSinkService extends SinkService {
         createIndexRequestBuilder.index("<" + indexName+ "-{now/d}-000001>")
                 // 不区分 读写都从indexName这个虚拟索引做
                 .aliases(indexName, new Alias.Builder().isWriteIndex(true).build());
+        createIndexRequestBuilder.mappings(getMappings(indexName));
+        return createIndexRequestBuilder;
+    }
+
+    private static TypeMapping getMappings(String indexName) {
+        TypeMapping.Builder typeMappingBuilder = new TypeMapping.Builder();
         if (ElasticsearchIndex.SERVICE_INDEX.getIndexName().equals(indexName)) {
-            createIndexRequestBuilder.mappings(typeMappingBuilder ->
-                    typeMappingBuilder.properties(Service.documentMap));
+            typeMappingBuilder.properties(Service.documentMap);
         } else if (ElasticsearchIndex.LOG_INDEX.getIndexName().equals(indexName)) {
-            createIndexRequestBuilder.mappings(typeMappingBuilder ->
-                    typeMappingBuilder.properties(Log.documentMap));
+            typeMappingBuilder.properties(Log.documentMap);
         } else if (ElasticsearchIndex.SPAN_INDEX.getIndexName().equals(indexName)) {
-            createIndexRequestBuilder.mappings(typeMappingBuilder ->
-                    typeMappingBuilder.properties(Span.documentMap));
+            typeMappingBuilder.properties(Span.documentMap);
         } else if (ElasticsearchIndex.GAUGE_INDEX.getIndexName().equals(indexName)) {
-            createIndexRequestBuilder.mappings(typeMappingBuilder ->
-                    typeMappingBuilder.properties(Gauge.documentMap));
+            typeMappingBuilder.properties(Gauge.documentMap);
         } else if (ElasticsearchIndex.COUNTER_INDEX.getIndexName().equals(indexName)) {
-            createIndexRequestBuilder.mappings(typeMappingBuilder ->
-                    typeMappingBuilder.properties(Counter.documentMap));
+            typeMappingBuilder.properties(Counter.documentMap);
         } else if (ElasticsearchIndex.SUMMARY_INDEX.getIndexName().equals(indexName)) {
-            createIndexRequestBuilder.mappings(typeMappingBuilder ->
-                    typeMappingBuilder.properties(Summary.documentMap));
+            typeMappingBuilder.properties(Summary.documentMap);
         } else if (ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName().equals(indexName)) {
-            createIndexRequestBuilder.mappings(typeMappingBuilder ->
-                    typeMappingBuilder.properties(Histogram.documentMap));
+            typeMappingBuilder.properties(Histogram.documentMap);
         } else {
             throw new IllegalArgumentException("Unexpected index name: " + indexName);
         }
-        return createIndexRequestBuilder;
+        return typeMappingBuilder.build();
     }
 
     @Override
@@ -268,6 +270,8 @@ public class ElasticsearchSinkService extends SinkService {
                         .maxDocs(Long.parseLong(PropertiesProvider.getProperty(
                                 "elasticsearch.rollover.maxDocs", "100000")))
                         .build())
+                // 要重新制定mappings 不然会出问题
+                .mappings(getMappings(indexName))
                 .build();
         ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         RolloverResponse rolloverResponse = esClient.indices()
