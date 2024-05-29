@@ -4,6 +4,9 @@ on:
     tags:
       # 只有有tag的时候才触发部署操作
       - 'v*'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   analyze-with-sonarqube:
