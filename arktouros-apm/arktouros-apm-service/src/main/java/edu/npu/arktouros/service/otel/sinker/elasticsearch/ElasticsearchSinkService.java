@@ -159,6 +159,7 @@ public class ElasticsearchSinkService extends SinkService {
     @Override
     @Retryable(retryFor = IOException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
     public void sink(Source source) throws IOException {
+        log.info("Sink source:{}", source.toString());
         if (source instanceof Metric sourceMetric) {
             Service service =
                     Service.builder().name(sourceMetric.getServiceName()).build();

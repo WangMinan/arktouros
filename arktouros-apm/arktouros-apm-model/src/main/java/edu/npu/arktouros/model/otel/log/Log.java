@@ -13,7 +13,9 @@ import edu.npu.arktouros.model.otel.basic.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Singular;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +29,8 @@ import java.util.Map;
 @Builder
 @Data
 @AllArgsConstructor
+@EqualsAndHashCode
+@ToString(callSuper = true)
 public class Log implements Source {
     private String serviceName;
     private String traceId;

@@ -9,6 +9,8 @@ import edu.npu.arktouros.model.otel.basic.ElasticsearchProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
 import io.micrometer.common.util.StringUtils;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +20,8 @@ import java.util.Map;
  * @description : prometheus指标基类
  */
 @Data
+@EqualsAndHashCode
+@ToString(callSuper = true)
 public abstract class Metric implements Source {
     protected String name;
     protected String serviceName;

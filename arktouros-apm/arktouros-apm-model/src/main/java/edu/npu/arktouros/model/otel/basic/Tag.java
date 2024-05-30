@@ -20,16 +20,17 @@ package edu.npu.arktouros.model.otel.basic;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Getter
-@Setter
+@Data
 @Builder
 @EqualsAndHashCode
 @NoArgsConstructor

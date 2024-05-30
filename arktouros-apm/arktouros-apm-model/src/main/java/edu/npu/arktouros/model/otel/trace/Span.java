@@ -13,6 +13,7 @@ import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.ToString;
@@ -30,7 +31,8 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@EqualsAndHashCode
+@ToString(callSuper = true)
 public class Span implements Source {
     private String name;
     private String id;
