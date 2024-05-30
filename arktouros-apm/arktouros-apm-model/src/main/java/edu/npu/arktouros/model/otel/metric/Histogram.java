@@ -46,6 +46,7 @@ public class Histogram extends Metric {
 
     public Histogram(edu.npu.arktouros.proto.metric.v1.Histogram histogram) {
         super(histogram.getMetric());
+        this.metricType = MetricType.HISTOGRAM;
         this.sampleCount = histogram.getSampleCount();
         this.sampleSum = histogram.getSampleSum();
         histogram.getBucketsList().forEach(bucket ->

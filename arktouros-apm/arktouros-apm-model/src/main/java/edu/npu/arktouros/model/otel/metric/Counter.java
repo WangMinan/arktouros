@@ -67,6 +67,7 @@ public class Counter extends Metric {
     @Override
     public Metric sum(Metric m) {
         this.value = this.value + m.value();
+        this.metricType = MetricType.COUNTER;
         return this;
     }
 

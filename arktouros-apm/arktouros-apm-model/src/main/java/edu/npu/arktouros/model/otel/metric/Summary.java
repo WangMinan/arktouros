@@ -26,6 +26,7 @@ public class Summary extends Metric {
 
     public Summary(edu.npu.arktouros.proto.metric.v1.Summary summary) {
         super(summary.getMetric());
+        this.metricType = MetricType.SUMMARY;
         this.sampleCount = summary.getSampleCount();
         this.sampleSum = summary.getSampleSum();
         summary.getQuantilesList().forEach(quantile ->

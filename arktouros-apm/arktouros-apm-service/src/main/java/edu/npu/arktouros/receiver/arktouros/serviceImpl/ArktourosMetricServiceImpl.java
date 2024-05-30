@@ -32,6 +32,7 @@ public class ArktourosMetricServiceImpl extends MetricServiceGrpc.MetricServiceI
         MetricResponse.Builder builder = MetricResponse.newBuilder();
         try {
             for (edu.npu.arktouros.proto.collector.v1.Metric metric : request.getMetricsList()) {
+                log.debug("Handling metric:{}", metric);
                 if (metric.hasGauge()) {
                     edu.npu.arktouros.proto.metric.v1.Gauge gauge = metric.getGauge();
                     Gauge gaugeForSink = new Gauge(gauge);

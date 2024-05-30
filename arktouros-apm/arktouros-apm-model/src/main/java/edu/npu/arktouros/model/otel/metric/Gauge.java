@@ -51,6 +51,7 @@ public class Gauge extends Metric {
 
     public Gauge(edu.npu.arktouros.proto.metric.v1.Gauge gauge) {
         super(gauge.getMetric());
+        this.metricType = MetricType.GAUGE;
         this.value = gauge.getValue();
     }
 
