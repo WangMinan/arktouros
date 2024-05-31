@@ -89,7 +89,7 @@ jobs:
 
   build-and-push-image:
     runs-on: ubuntu-latest
-#    needs: analyze-with-sonarqube
+    needs: analyze-with-sonarqube
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -210,6 +210,5 @@ jobs:
 
       - name: 授权并执行部署脚本
         run: >
-          scp -i private_key.pem -r -o StrictHostKeyChecking=no 
-          root@${{secrets.REMOTE_IP_1}} 
+          ssh -i private_key.pem -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP_1}} 
           "chmod +x /root/arktouros/run-backend.sh && /root/arktouros/run-backend.sh"

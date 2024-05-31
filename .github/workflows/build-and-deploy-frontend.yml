@@ -128,6 +128,5 @@ jobs:
 
       - name: 授权并执行部署脚本
         run: >
-          scp -i private_key.pem -r -o StrictHostKeyChecking=no 
-          root@${{secrets.REMOTE_IP_1}} 
+          ssh -i private_key.pem -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP_1}} 
           "chmod +x /root/arktouros/run-frontend.sh && /root/arktouros/run-frontend.sh"
