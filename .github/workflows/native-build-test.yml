@@ -29,3 +29,19 @@ jobs:
       # 我对native构建的要求是不报错就行
       - name: Build with Maven with native env
         run: mvn -Dmaven.test.skip=true -T 2C -Pnative clean package
+
+      - name: 传输构建结果到服务器
+        run: >
+          sshpass -p ${{secrets.REMOTE_PWD}} 
+          scp -r -o StrictHostKeyChecking=no 
+          build/*.tar.gz root@${{secrets.REMOTE_IP}}:/root/arktouros
+
+      - name: 写pem到临时文件
+        run: echo "${{REMOTE_KEY}}" > private_key.pem
+
+      - name: 传输构建结果到服务器
+        run: >
+          scp -i private_key.pem
+          scp -r -o StrictHostKeyChecking=no 
+          build/*.tar.gz root@${{secrets.REMOTE_IP_1}}:/root/arktouros
+
