@@ -112,7 +112,7 @@ jobs:
       #          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-webapp/src/main/resources root@${{secrets.REMOTE_IP}}:/root/arktouros/ui/config
 
       - name: 写pem到临时文件
-        run: echo "${{REMOTE_KEY}}" > private_key.pem
+        run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem
 
       - name: 传输docker-compose到服务器
         run: >
