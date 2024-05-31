@@ -112,22 +112,22 @@ jobs:
       #          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-webapp/src/main/resources root@${{secrets.REMOTE_IP}}:/root/arktouros/ui/config
 
       - name: 写pem到临时文件
-        run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem
+        run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem && chmod 600 private_key.pem
 
       - name: 传输docker-compose到服务器
         run: >
-          scp -i private_key.pem
-          scp -r -o StrictHostKeyChecking=no deploy/docker-compose.yaml 
+          scp -i private_key.pem -r -o StrictHostKeyChecking=no 
+          deploy/docker-compose.yaml 
           root@${{secrets.REMOTE_IP_1}}:/root/arktouros
 
       - name: 传输部署脚本到服务器
         run: >
-          scp -i private_key.pem
-          scp -r -o StrictHostKeyChecking=no deploy/run-backend.sh 
+          scp -i private_key.pem -r -o StrictHostKeyChecking=no
+          deploy/run-frontend.sh 
           root@${{secrets.REMOTE_IP_1}}:/root/arktouros
 
       - name: 授权并执行部署脚本
         run: >
-          scp -i private_key.pem
-          ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP_1}} 
-          "chmod +x /root/arktouros/run-backend.sh && /root/arktouros/run-backend.sh"
+          scp -i private_key.pem -r -o StrictHostKeyChecking=no 
+          root@${{secrets.REMOTE_IP_1}} 
+          "chmod +x /root/arktouros/run-frontend.sh && /root/arktouros/run-frontend.sh"

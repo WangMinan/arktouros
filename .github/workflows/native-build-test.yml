@@ -37,11 +37,10 @@ jobs:
           build/*.tar.gz root@${{secrets.REMOTE_IP}}:/root/arktouros
 
       - name: 写pem到临时文件
-        run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem
+        run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem && chmod 600 private_key.pem
 
       - name: 传输构建结果到服务器
         run: >
-          scp -i private_key.pem
-          scp -r -o StrictHostKeyChecking=no 
+          scp -i private_key.pem -r -o StrictHostKeyChecking=no 
           build/*.tar.gz root@${{secrets.REMOTE_IP_1}}:/root/arktouros
 
