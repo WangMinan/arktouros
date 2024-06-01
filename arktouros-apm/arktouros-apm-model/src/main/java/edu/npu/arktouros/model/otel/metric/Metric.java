@@ -37,6 +37,7 @@ public abstract class Metric implements Source {
         this.labels = metric.getLabelsMap();
         this.timestamp = metric.getTimestamp();
         this.serviceName = metric.getServiceName();
+        this.metricType = MetricType.valueOf(metric.getMetricType().name());
     }
 
     private static final Map<String, Property> labelProperty =
