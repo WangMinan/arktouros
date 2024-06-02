@@ -7,6 +7,7 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.ExistsQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
@@ -139,7 +140,7 @@ public class ElasticsearchMapper extends SearchMapper {
     public R getLogListByQuery(LogQueryDto logQueryDto) {
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
-
+        log.info(logQueryDto.toString());
         SortOptions sort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()
                         .field(TIMESTAMP)
@@ -148,10 +149,19 @@ public class ElasticsearchMapper extends SearchMapper {
                 .build();
 
         if (StringUtils.isNotEmpty(logQueryDto.serviceName())) {
-            boolQueryBuilder.must(new MatchQuery.Builder()
-                    .field(SERVICE_NAME)
-                    .query(logQueryDto.serviceName())
-                    .build()._toQuery());
+            if (logQueryDto.serviceName().equals("null")) {
+                boolQueryBuilder.mustNot(
+                        new ExistsQuery.Builder()
+                                .field(SERVICE_NAME)
+                                .build()._toQuery()
+                );
+            }
+            else {
+                boolQueryBuilder.must(new MatchQuery.Builder()
+                        .field(SERVICE_NAME)
+                        .query(logQueryDto.serviceName())
+                        .build()._toQuery());
+            }
         }
         if (StringUtils.isNotEmpty(logQueryDto.traceId())) {
             boolQueryBuilder.must(new TermQuery.Builder()
