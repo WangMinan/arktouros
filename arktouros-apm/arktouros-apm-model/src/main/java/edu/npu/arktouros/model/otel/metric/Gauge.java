@@ -23,6 +23,7 @@ import co.elastic.clients.elasticsearch._types.mapping.Property;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -32,7 +33,7 @@ import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Getter
+@Data
 public class Gauge extends Metric {
 
     private double value;

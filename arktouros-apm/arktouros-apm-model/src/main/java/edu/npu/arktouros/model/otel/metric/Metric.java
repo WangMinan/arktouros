@@ -10,6 +10,7 @@ import edu.npu.arktouros.model.otel.basic.SourceType;
 import io.micrometer.common.util.StringUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.Map;
  * @author : [wangminan]
  * @description : prometheus指标基类
  */
+@NoArgsConstructor
 @Data
 @EqualsAndHashCode
 @ToString(callSuper = true)

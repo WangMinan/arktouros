@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -162,5 +163,57 @@ class ElasticSearchClientTest {
                         .size(10);
         List<Gauge> gauges = ElasticsearchUtil.scrollSearch(searchRequestBuilder, Gauge.class);
         log.info("result:{}", gauges);
+    }
+
+    @Test
+    void addMetricToTestService() throws IOException, InterruptedException {
+        double[] throughPuts = {2.0, 3.0, 2.0, 5.0, 0.0, 1.0};
+        for (double value : throughPuts) {
+            Gauge build = Gauge.builder()
+                    .name("throughput")
+                    .description("Request to service per second")
+                    .value(value)
+                    .labels(new HashMap<>())
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+            build.setServiceName("test");
+            ElasticsearchUtil.sink(
+                    ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
+                    build
+            );
+            Thread.sleep(1000);
+        }
+        double[] responseTimes = {50.5, 30.5, 30.0, 40.0, 45.0, 32.5, 44.5};
+        for (double value : responseTimes) {
+            Gauge build = Gauge.builder()
+                    .name("response_time")
+                    .description("Response time of service, unit ms.")
+                    .value(value)
+                    .labels(new HashMap<>())
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+            build.setServiceName("test");
+            ElasticsearchUtil.sink(
+                    ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
+                    build
+            );
+            Thread.sleep(1000);
+        }
+        double[] errorRates = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        for (double value : errorRates) {
+            Gauge build = Gauge.builder()
+                    .name("error_rate")
+                    .description("Error rate of service")
+                    .value(value)
+                    .labels(new HashMap<>())
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+            build.setServiceName("test");
+            ElasticsearchUtil.sink(
+                    ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
+                    build
+            );
+            Thread.sleep(1000);
+        }
     }
 }
