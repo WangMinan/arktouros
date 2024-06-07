@@ -68,7 +68,9 @@ public class ElasticsearchUtil {
                     esClient.search(searchRequestBuilder
                             .scroll(new Time.Builder().time(
                                     PropertiesProvider
-                                            .getProperty("elasticsearch.scroll.maxWait" + "ms", "5000ms")
+                                            .getProperty(
+                                                    "elasticsearch.scroll.maxWait",
+                                                    "5000") + "ms"
                             ).build())
                             .build(), clazz);
             String scrollId = searchResponse.scrollId();
@@ -81,8 +83,7 @@ public class ElasticsearchUtil {
                                 PropertiesProvider
                                         .getProperty(
                                                 "elasticsearch.scroll.maxWait",
-                                                "5000")
-                                        + "ms"
+                                                "5000") + "ms"
                         ).build())
                         .build();
                 scrollResponse = esClient.scroll(scrollRequest, clazz);
