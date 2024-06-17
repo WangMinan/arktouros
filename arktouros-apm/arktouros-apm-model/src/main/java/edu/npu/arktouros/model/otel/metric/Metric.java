@@ -30,7 +30,7 @@ public abstract class Metric implements Source {
     protected String description;
     protected Map<String, String> labels = new HashMap<>();
     protected long timestamp;
-    protected final SourceType sourceType = SourceType.METRIC;
+    protected SourceType sourceType = SourceType.METRIC;
     protected MetricType metricType = MetricType.METRIC;
 
     protected Metric(edu.npu.arktouros.proto.metric.v1.Metric metric) {
@@ -40,6 +40,7 @@ public abstract class Metric implements Source {
         this.timestamp = metric.getTimestamp();
         this.serviceName = metric.getServiceName();
         this.metricType = MetricType.valueOf(metric.getMetricType().name());
+        this.sourceType = SourceType.METRIC;
     }
 
     private static final Map<String, Property> labelProperty =

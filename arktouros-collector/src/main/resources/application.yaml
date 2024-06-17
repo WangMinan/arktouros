@@ -10,12 +10,12 @@ instance:
 
 receiver:
   otlpLogFile:
-    logDir: otel_logs
+    logDir: D:\code\arktouros-main\otel_logs
 
 emitter:
   grpc:
-#    host: 38.147.172.149
-    host: 127.0.0.1
+    host: 38.147.172.149
+#    host: 127.0.0.1
     port: 50051
     keepAlive:
       enabled: true # 是否进行连接检查 置空默认true

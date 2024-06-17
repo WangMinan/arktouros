@@ -44,6 +44,7 @@ public class EndPoint implements Source {
         this.ip = endPoint.getIp();
         this.port = endPoint.getPort();
         this.latency = endPoint.getLatency();
+        this.type = SourceType.ENDPOINT;
     }
 
     public static final Map<String, Property> documentMap = new HashMap<>();

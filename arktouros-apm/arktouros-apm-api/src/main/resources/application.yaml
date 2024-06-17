@@ -57,3 +57,9 @@ elasticsearch:
     maxDocs: 100000
     maxAge: 1d
     maxSize: 5gb
+  # 定时任务 以cronjob的字符串形式进行表示
+  schedule:
+    # 默认一小时一次
+    rollover: 0 0 * * * ?
+    # 默认五分钟一次
+    throughput: 0 0/5 * * * ?

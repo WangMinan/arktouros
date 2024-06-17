@@ -72,4 +72,14 @@ public class H2SearchMapper extends SearchMapper {
         return R.ok();
     }
 
+    @Override
+    public List<Service> getAllServices() {
+        return List.of();
+    }
+
+    @Override
+    public int getSpanCount(Service service, long startTime, long endTime) {
+        return 0;
+    }
+
 }

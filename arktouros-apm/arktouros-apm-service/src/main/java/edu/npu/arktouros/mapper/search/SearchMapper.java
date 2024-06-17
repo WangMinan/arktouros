@@ -38,4 +38,8 @@ public abstract class SearchMapper {
     public abstract R getNamespaceList(String query);
 
     public abstract R getAllLogLevels(String query);
+
+    public abstract List<Service> getAllServices();
+
+    public abstract int getSpanCount(Service service, long startTime, long endTime);
 }

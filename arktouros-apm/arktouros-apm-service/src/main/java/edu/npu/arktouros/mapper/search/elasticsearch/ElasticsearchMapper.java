@@ -446,6 +446,33 @@ public class ElasticsearchMapper extends SearchMapper {
         return r;
     }
 
+    @Override
+    public List<Service> getAllServices() {
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        searchRequestBuilder.index(ElasticsearchIndex.SERVICE_INDEX.getIndexName());
+        return ElasticsearchUtil.scrollSearch(searchRequestBuilder, Service.class);
+    }
+
+    @Override
+    public int getSpanCount(Service service, long startTime, long endTime) {
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        boolQueryBuilder.must(new TermQuery.Builder()
+                .field(SERVICE_NAME)
+                .value(service.getName())
+                .build()._toQuery());
+        RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
+        rangeQueryBuilder.field(TIMESTAMP)
+                .gte(JsonData.of(startTime))
+                .lte(JsonData.of(endTime));
+        boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        searchRequestBuilder
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
+                .query(boolQueryBuilder.build()._toQuery());
+        List<Span> spanList = ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
+        return spanList.size();
+    }
+
     private <T extends Metric> List<T> getMetricsFromBoolQuery(
             String indexName, Query query, Class<T> clazz) {
         SortOptions sort = new SortOptions.Builder()

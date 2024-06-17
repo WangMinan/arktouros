@@ -216,4 +216,14 @@ public class SearchServiceImpl implements SearchService {
     public R getAllLogLevels(String query) {
         return searchMapper.getAllLogLevels(query);
     }
+
+    @Override
+    public List<Service> getAllServices() {
+        return searchMapper.getAllServices();
+    }
+
+    @Override
+    public int getSpanCount(Service service, long startTime, long endTime) {
+        return searchMapper.getSpanCount(service, startTime, endTime);
+    }
 }

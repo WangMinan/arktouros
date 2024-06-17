@@ -90,7 +90,7 @@ public class Log implements Source {
         this.serviceName = log.getServiceName();
         this.traceId = log.getTraceId();
         this.spanId = log.getSpanId();
-        this.type = SourceType.valueOf(log.getType().name());
+        this.type = SourceType.LOG;
         this.content = log.getContent();
         this.tags = new ArrayList<>();
         log.getTagsList().forEach(tag -> this.tags.add(new Tag(tag)));

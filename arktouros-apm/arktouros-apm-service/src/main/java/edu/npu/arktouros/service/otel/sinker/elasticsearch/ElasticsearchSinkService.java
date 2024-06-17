@@ -134,7 +134,7 @@ public class ElasticsearchSinkService extends SinkService {
         return createIndexRequestBuilder;
     }
 
-    private static TypeMapping getMappings(String indexName) {
+    protected static TypeMapping getMappings(String indexName) {
         TypeMapping.Builder typeMappingBuilder = new TypeMapping.Builder();
         if (ElasticsearchIndex.SERVICE_INDEX.getIndexName().equals(indexName)) {
             typeMappingBuilder.properties(Service.documentMap);
@@ -240,49 +240,6 @@ public class ElasticsearchSinkService extends SinkService {
                 default:
                     throw new IllegalStateException("Unexpected source type value: " + source);
             }
-        }
-    }
-
-    // 一个小时执行一次
-    @Scheduled(cron = "0 0 0/1 * * ?")
-    public void tryRollover() {
-        for (String indexName : ElasticsearchIndex.getIndexList()) {
-            try {
-                handleRollOver(indexName);
-            } catch (IOException e) {
-                // 不抛异常 大不了我们就不分嘛
-                log.error("Rollover index:{} error.", indexName, e);
-            }
-        }
-    }
-
-    @Retryable(retryFor = IOException.class, backoff = @Backoff(delay = 1000))
-    public void handleRollOver(String indexName) throws IOException {
-        RolloverRequest rolloverRequest = new RolloverRequest.Builder()
-                .alias(indexName)
-                .conditions(new RolloverConditions.Builder()
-                        // 单页大小达到5gb时翻页
-                        .maxSize(PropertiesProvider.getProperty(
-                                "elasticsearch.rollover.maxSize", "5gb"))
-                        .maxAge(new Time.Builder()
-                                .time(PropertiesProvider.getProperty(
-                                "elasticsearch.rollover.maxAge", "1d"))
-                                .build())
-                        .maxDocs(Long.parseLong(PropertiesProvider.getProperty(
-                                "elasticsearch.rollover.maxDocs", "100000")))
-                        .build())
-                // 要重新制定mappings 不然会出问题
-                .mappings(getMappings(indexName))
-                .build();
-        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
-        RolloverResponse rolloverResponse = esClient.indices()
-                .rollover(rolloverRequest);
-        ElasticsearchClientPool.returnClient(esClient);
-        if (!rolloverResponse.acknowledged()) {
-            log.info("Check rollover for index:{}, nothing happened.", indexName);
-        } else {
-            log.info("Check rollover for index:{}, rollover complete, old index:{}, new index:{}.",
-                    indexName, rolloverResponse.oldIndex(), rolloverResponse.newIndex());
         }
     }
 }

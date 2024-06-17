@@ -54,9 +54,6 @@ import static org.mockito.ArgumentMatchers.any;
 @Timeout(30)
 class ElasticsearchSinkServiceTest {
 
-    @Resource
-    private SinkService sinkService;
-
     private ElasticsearchSinkService elasticsearchSinkService;
 
     private ElasticsearchClient esClient;
@@ -136,18 +133,5 @@ class ElasticsearchSinkServiceTest {
         Assertions.assertDoesNotThrow(() -> elasticsearchSinkService.sink(histogram));
         Assertions.assertDoesNotThrow(() -> elasticsearchSinkService.sink(log1));
         Assertions.assertDoesNotThrow(() -> elasticsearchSinkService.sink(span));
-    }
-
-    @Test
-    void testTryRollover() throws IOException {
-        ElasticsearchIndicesClient indices = Mockito.mock(ElasticsearchIndicesClient.class);
-        Mockito.when(esClient.indices()).thenReturn(indices);
-        RolloverResponse response = Mockito.mock(RolloverResponse.class);
-        Mockito.when(esClient.indices().rollover(any(RolloverRequest.class)))
-                .thenReturn(response);
-        Mockito.when(response.acknowledged()).thenReturn(true);
-        Assertions.assertDoesNotThrow(() -> elasticsearchSinkService.tryRollover());
-        Mockito.when(response.acknowledged()).thenReturn(false);
-        Assertions.assertDoesNotThrow(() -> elasticsearchSinkService.tryRollover());
     }
 }

@@ -5,7 +5,10 @@ import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.MetricQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
+import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.vo.R;
+
+import java.util.List;
 
 public interface SearchService {
     R getServiceList(ServiceQueryDto queryDto);
@@ -23,4 +26,8 @@ public interface SearchService {
     R getNamespaceList(String query);
 
     R getAllLogLevels(String query);
+
+    List<Service> getAllServices();
+
+    int getSpanCount(Service service, long startTime, long endTime);
 }

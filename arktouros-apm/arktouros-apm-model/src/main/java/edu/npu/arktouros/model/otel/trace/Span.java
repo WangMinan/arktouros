@@ -79,6 +79,7 @@ public class Span implements Source {
         this.startTime = span.getStartTime();
         this.endTime = span.getEndTime();
         this.root = StringUtils.isEmpty(span.getParentSpanId());
+        this.type = SourceType.SPAN;
         span.getTagsList().forEach(tag -> this.tags.add(new Tag(tag)));
     }
 
