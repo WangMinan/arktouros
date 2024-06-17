@@ -127,15 +127,21 @@ public class SearchServiceImpl implements SearchService {
             log.warn("Can't find root span for spanTopologyQueryDto: {}", spanTopologyQueryDto);
             return R.ok();
         }
+        SpanTreeNodeVo spanTreeNodeVo = new SpanTreeNodeVo(
+                generateSpanTree(rootSpan, originalSpanList));
+        R r = new R();
+        r.put(RESULT, spanTreeNodeVo);
+        return r;
+    }
+
+    private SpanTreeNode generateSpanTree(Span rootSpan, List<Span> originalSpanList) {
         SpanTreeNode.SpanTreeNodeBuilder rootBuilder = SpanTreeNode.builder();
         rootBuilder.span(rootSpan);
         SpanTreeNode rootTreeNode = rootBuilder.build();
         // 广度优先搜索
         buildTraceTree(List.of(rootTreeNode),
                 originalSpanList.stream().filter(span -> !span.equals(rootSpan)).toList());
-        R r = new R();
-        r.put(RESULT, new SpanTreeNodeVo(rootTreeNode));
-        return r;
+        return rootTreeNode;
     }
 
     private Span getRootSpan(List<Span> originalSpanList) {
@@ -223,7 +229,25 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public int getSpanCount(Service service, long startTime, long endTime) {
-        return searchMapper.getSpanCount(service, startTime, endTime);
+    public int getTraceCount(Service service, long startTime, long endTime) {
+        return searchMapper.getTraceCount(service, startTime, endTime);
+    }
+
+    @Override
+    public List<SpanTreeNode> getSpanTreeInFiveMinutes(String serviceName, String traceId,
+                                                       long startTime, long endTime) {
+        List<Span> originalSpanList =
+                searchMapper.getSpanListByTraceId(serviceName, traceId, startTime, endTime);
+        Span rootSpan = getRootSpan(originalSpanList);
+        if (rootSpan == null) {
+            log.warn("Can't find root span for traceId: {}", traceId);
+            return List.of();
+        }
+        return List.of(generateSpanTree(rootSpan, originalSpanList));
+    }
+
+    @Override
+    public List<Span> getAllSpans(Service service, long startTime, long endTime) {
+        return searchMapper.getAllSpans(service, startTime, endTime);
     }
 }

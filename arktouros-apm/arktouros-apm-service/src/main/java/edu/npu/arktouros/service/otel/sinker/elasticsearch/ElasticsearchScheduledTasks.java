@@ -7,8 +7,14 @@ import co.elastic.clients.elasticsearch.indices.RolloverResponse;
 import co.elastic.clients.elasticsearch.indices.rollover.RolloverConditions;
 import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
+import edu.npu.arktouros.model.common.PersistentDataConstants;
+import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.structure.Service;
+import edu.npu.arktouros.model.otel.topology.span.SpanTreeNode;
+import edu.npu.arktouros.model.otel.trace.Span;
+import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
+import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.service.otel.search.SearchService;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
@@ -22,6 +28,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -40,12 +47,22 @@ import static edu.npu.arktouros.service.otel.sinker.elasticsearch.ElasticsearchS
         havingValue = "elasticsearch")
 public class ElasticsearchScheduledTasks {
 
+    private static final String RESULT = "result";
+
     @Resource
     private SearchService searchService;
 
     private final ExecutorService calculateThroughputThreadPool =
-    Executors.newCachedThreadPool(new BasicThreadFactory.Builder()
-            .namingPattern("Calculate-throughput-%d").build());
+            Executors.newCachedThreadPool(new BasicThreadFactory.Builder()
+                    .namingPattern("Calculate-throughput-%d").build());
+
+    private final ExecutorService calculateResponseTimeThreadPool =
+            Executors.newCachedThreadPool(new BasicThreadFactory.Builder()
+                    .namingPattern("Calculate-response-time-%d").build());
+
+    private final ExecutorService calculateErrorRateThreadPool =
+            Executors.newCachedThreadPool(new BasicThreadFactory.Builder()
+                    .namingPattern("Calculate-error-rate-%d").build());
 
     // 一个小时执行一次
     @Scheduled(cron = "${elasticsearch.schedule.rollover}")
@@ -62,8 +79,11 @@ public class ElasticsearchScheduledTasks {
         log.info("All rollover job complete.");
     }
 
+    /**
+     * FE 计算吞吐量
+     */
     @Scheduled(cron = "${elasticsearch.schedule.throughput}")
-    public void tryCalculateThroughput() throws IOException {
+    public void calculateThroughput() {
         // 1. 获取所有service
         List<Service> services = searchService.getAllServices();
         for (Service service : services) {
@@ -80,20 +100,151 @@ public class ElasticsearchScheduledTasks {
         }
     }
 
+    /**
+     * FE 计算响应时间
+     */
+    @Scheduled(cron = "${elasticsearch.schedule.responseTime}")
+    public void calculateResponseTime() {
+        // 得把span树的那个逻辑全跑一遍 然后用span树做深度优先搜索 把一条trace的用时计算出来
+        // 1. 获取所有service
+        List<Service> services = searchService.getAllServices();
+        for (Service service : services) {
+            log.info("Start calculate response time for service:{}.", service.getName());
+            calculateResponseTimeThreadPool.submit(() -> {
+                generateResponseTimeForService(service);
+            });
+            log.info("Calculate response time for service:{} complete.", service.getName());
+        }
+    }
+
+    /**
+     * FE 计算错误率
+     */
+    @Scheduled(cron = "${elasticsearch.schedule.errorRate}")
+    public void calculateErrorRate() {
+        // 分析所有span，如果endTime为PersistentDataConstants.ERROR_SPAN_END_TIME则表示不可达
+        // 1. 获取所有service
+        List<Service> services = searchService.getAllServices();
+        for (Service service : services) {
+            log.info("Start calculate error rate for service:{}.", service.getName());
+            calculateErrorRateThreadPool.submit(() -> {
+                generateErrorRateForService(service);
+            });
+            log.info("Calculate error rate for service:{} complete.", service.getName());
+        }
+    }
+
+    private void generateErrorRateForService(Service service) {
+        // 2. 到span表对找到service在上一时间段内产生的所有Span
+        // 开始时间 头五分钟
+        long startTime = System.currentTimeMillis() - 5 * 60 * 1000;
+        // 结束时间 当前时间
+        long endTime = System.currentTimeMillis();
+        List<Span> allSpans = searchService.getAllSpans(service, startTime, endTime);
+        // 3. 计算错误率
+        long errorCount = allSpans.stream()
+                .filter(span -> span.getEndTime() == PersistentDataConstants.ERROR_SPAN_END_TIME)
+                .count();
+        // 4. 写入gauge
+        Gauge errorRate = Gauge.builder()
+                .name("error_rate")
+                .labels(Map.of("service_name", service.getName()))
+                .description("Error rate per 5 minutes.")
+                .value(errorCount * 1.0 / allSpans.size())
+                .timestamp(endTime)
+                .build();
+        try {
+            ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
+                    errorRate);
+        } catch (IOException e) {
+            log.error("Sink error rate for service:{} error.",
+                    service.getName(), e);
+        }
+    }
+
+    private void generateResponseTimeForService(Service service) {
+        // 重走一遍span树
+        R endPointListByServiceName = searchService.getEndPointListByServiceName(
+                new EndPointQueryDto(service.getName(), 1, Integer.MAX_VALUE));
+        List<String> traceIds = new ArrayList<>();
+        ((List<EndPointTraceIdVo>) endPointListByServiceName.get(RESULT))
+                .stream()
+                .map(EndPointTraceIdVo::traceIds)
+                .forEach(traceIds::addAll);
+        List<Long> costTimes = new ArrayList<>();
+        for (String traceId : traceIds) {
+            List<SpanTreeNode> spanTreeNodeVos = searchService
+                    .getSpanTreeInFiveMinutes(service.getName(),
+                            traceId,
+                            System.currentTimeMillis() - 5 * 60 * 1000,
+                            System.currentTimeMillis());
+            costTimes.addAll(spanTreeNodeVos.stream()
+                    .map(this::getCostTimeForSpanTree)
+                    .toList()
+            );
+        }
+        // costTime求均值
+        double avgCostTime = costTimes.stream()
+                .mapToLong(Long::longValue)
+                .average()
+                .orElse(0);
+        // 写入gauge
+        Gauge responseTime = Gauge.builder()
+                .name("response_time")
+                .labels(Map.of("service_name", service.getName()))
+                .description("Average response time per 5 minutes.")
+                .value(avgCostTime)
+                .timestamp(System.currentTimeMillis())
+                .build();
+        try {
+            ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
+                    responseTime);
+        } catch (IOException e) {
+            log.error("Sink response time for service:{} error.",
+                    service.getName(), e);
+        }
+    }
+
+    /**
+     * 递归计算span树的用时
+     * @param spanTreeNode 调用树
+     * @return 当前层级及以下层级的最大时间开销
+     */
+    private Long getCostTimeForSpanTree(SpanTreeNode spanTreeNode) {
+        // 不可达节点
+        if (spanTreeNode.getSpan().getEndTime() ==
+                PersistentDataConstants.ERROR_SPAN_END_TIME) {
+            return 0L;
+        }
+        // 深度优先搜索
+        if (spanTreeNode.getChildren().isEmpty()) {
+            return spanTreeNode.getSpan().getEndTime() -
+                    spanTreeNode.getSpan().getStartTime();
+        }
+        // 当前用时=当前span用时+下层Span用时
+        return spanTreeNode.getSpan().getEndTime() -
+                spanTreeNode.getSpan().getStartTime() +
+                spanTreeNode.getChildren().stream()
+                        .map(this::getCostTimeForSpanTree)
+                        .max(Long::compareTo)
+                        .orElse(0L);
+    }
+
     private void generateThroughputForService(Service service) throws IOException {
-        // 2. 到span表对找到service在上一时间段内产生的span数量
+        // 2. 到span表对找到service在上一时间段内产生的trace数量 我们用traceId聚合计算
         // 开始时间 头五分钟
         long startTime = System.currentTimeMillis() - 5 * 60 * 1000;
         // 结束时间 当前时间
         long endTime = System.currentTimeMillis();
         // 通过service name查询
-        int spanCount = searchService.getSpanCount(service, startTime, endTime);
+        int traceCount = searchService.getTraceCount(service, startTime, endTime);
         // 3. 时间/数量=吞吐量 写入gauge
         Gauge throughput = Gauge.builder()
                 .name("throughput")
                 .labels(Map.of("service_name", service.getName()))
                 .description("Total request count per 5 minutes.")
-                .value((double) spanCount / 5)
+                .value(traceCount / 5.0)
+                .timestamp(endTime)
                 .build();
         ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(), throughput);
     }

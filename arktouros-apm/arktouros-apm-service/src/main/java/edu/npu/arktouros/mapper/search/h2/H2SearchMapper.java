@@ -78,8 +78,18 @@ public class H2SearchMapper extends SearchMapper {
     }
 
     @Override
-    public int getSpanCount(Service service, long startTime, long endTime) {
+    public int getTraceCount(Service service, long startTime, long endTime) {
         return 0;
+    }
+
+    @Override
+    public List<Span> getSpanListByTraceId(String serviceName, String traceId, long startTime, long endTime) {
+        return List.of();
+    }
+
+    @Override
+    public List<Span> getAllSpans(Service service, long startTime, long endTime) {
+        return List.of();
     }
 
 }

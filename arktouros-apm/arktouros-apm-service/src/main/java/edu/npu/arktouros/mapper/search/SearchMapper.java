@@ -41,5 +41,9 @@ public abstract class SearchMapper {
 
     public abstract List<Service> getAllServices();
 
-    public abstract int getSpanCount(Service service, long startTime, long endTime);
+    public abstract int getTraceCount(Service service, long startTime, long endTime);
+
+    public abstract List<Span> getSpanListByTraceId(String serviceName, String traceId, long startTime, long endTime);
+
+    public abstract List<Span> getAllSpans(Service service, long startTime, long endTime);
 }

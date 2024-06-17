@@ -454,7 +454,56 @@ public class ElasticsearchMapper extends SearchMapper {
     }
 
     @Override
-    public int getSpanCount(Service service, long startTime, long endTime) {
+    public int getTraceCount(Service service, long startTime, long endTime) {
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        boolQueryBuilder.must(new TermQuery.Builder()
+                .field(SERVICE_NAME)
+                .value(service.getName())
+                .build()._toQuery());
+        RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
+        rangeQueryBuilder.field(TIMESTAMP)
+                .gte(JsonData.of(startTime))
+                .lte(JsonData.of(endTime));
+        boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        searchRequestBuilder
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
+                .query(boolQueryBuilder.build()._toQuery())
+                .aggregations("traceIdAgg",
+                        agg -> agg.terms(term -> term.field("traceId")));
+        searchRequestBuilder.size(ElasticsearchConstants.MAX_PAGE_SIZE);
+        SearchResponse<Span> searchResponse =
+                ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
+        Aggregate traceIdAgg = searchResponse.aggregations().get("traceIdAgg");
+        return traceIdAgg.sterms().buckets().array().size();
+    }
+
+    @Override
+    public List<Span> getSpanListByTraceId(String serviceName, String traceId,
+                                           long startTime, long endTime) {
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        boolQueryBuilder.must(new TermQuery.Builder()
+                .field(SERVICE_NAME)
+                .value(serviceName)
+                .build()._toQuery());
+        boolQueryBuilder.must(new TermQuery.Builder()
+                .field("traceId")
+                .value(traceId)
+                .build()._toQuery());
+        RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
+        rangeQueryBuilder.field(TIMESTAMP)
+                .gte(JsonData.of(startTime))
+                .lte(JsonData.of(endTime));
+        boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        searchRequestBuilder
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
+                .query(boolQueryBuilder.build()._toQuery());
+        return ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
+    }
+
+    @Override
+    public List<Span> getAllSpans(Service service, long startTime, long endTime) {
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         boolQueryBuilder.must(new TermQuery.Builder()
                 .field(SERVICE_NAME)
@@ -469,8 +518,7 @@ public class ElasticsearchMapper extends SearchMapper {
         searchRequestBuilder
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(boolQueryBuilder.build()._toQuery());
-        List<Span> spanList = ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
-        return spanList.size();
+        return ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
     }
 
     private <T extends Metric> List<T> getMetricsFromBoolQuery(
