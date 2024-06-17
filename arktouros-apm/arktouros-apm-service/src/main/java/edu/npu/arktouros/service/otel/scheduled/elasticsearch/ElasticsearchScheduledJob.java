@@ -38,6 +38,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
 
     public ElasticsearchScheduledJob(SearchService searchService) {
         super(searchService);
+        log.info("ElasticsearchScheduledJob initialize complete.");
     }
 
     @Override

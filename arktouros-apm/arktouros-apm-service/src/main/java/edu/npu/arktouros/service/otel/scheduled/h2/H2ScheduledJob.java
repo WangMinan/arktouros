@@ -14,6 +14,7 @@ public class H2ScheduledJob extends ScheduledJob {
 
     public H2ScheduledJob(SearchService searchService) {
         super(searchService);
+        log.info("H2ScheduledJob initialize complete.");
     }
 
     @Override
