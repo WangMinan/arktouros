@@ -8,6 +8,7 @@ import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
+import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.R;
 
 import java.util.List;
@@ -91,5 +92,10 @@ public class H2SearchMapper extends SearchMapper {
     public List<Span> getAllSpans(Service service, long startTime, long endTime) {
         return List.of();
     }
+
+    @Override
+    public List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto){
+        return List.of();
+    };
 
 }

@@ -2,6 +2,7 @@ package edu.npu.arktouros;
 
 import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.receiver.DataReceiver;
+import edu.npu.arktouros.service.otel.scheduled.ScheduledJob;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,9 @@ public class ApmMain implements CommandLineRunner {
     @Resource
     private SinkService sinkService;
 
+    @Resource
+    private ScheduledJob scheduledJob;
+
     @Override
     public void run(String... args) {
         log.info("APM starting, adding shutdown hook.");
@@ -38,6 +42,8 @@ public class ApmMain implements CommandLineRunner {
         }
         // 拉起数据接收器 接收器会自动调用analyzer analyzer会自动调用sinker
         dataReceiver.start();
+        // 拉起所有定时任务
+        scheduledJob.startJobs();
         Thread thread = new Thread(
                 () -> {
                     // 停止数据接收器

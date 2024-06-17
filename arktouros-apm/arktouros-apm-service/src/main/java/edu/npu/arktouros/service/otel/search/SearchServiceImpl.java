@@ -13,6 +13,7 @@ import edu.npu.arktouros.model.otel.topology.service.TopologyCall;
 import edu.npu.arktouros.model.otel.topology.service.TopologyNode;
 import edu.npu.arktouros.model.otel.topology.span.SpanTreeNode;
 import edu.npu.arktouros.model.otel.trace.Span;
+import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.MetricVo;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.model.vo.SpanTreeNodeVo;
@@ -249,5 +250,10 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<Span> getAllSpans(Service service, long startTime, long endTime) {
         return searchMapper.getAllSpans(service, startTime, endTime);
+    }
+
+    @Override
+    public List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto) {
+        return searchMapper.getEndPointTraceIdVos(endPointQueryDto);
     }
 }

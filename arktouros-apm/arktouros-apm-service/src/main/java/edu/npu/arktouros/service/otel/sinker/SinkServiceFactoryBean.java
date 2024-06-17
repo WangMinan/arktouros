@@ -33,6 +33,7 @@ public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
                 throw new IllegalArgumentException("Invalid sinker type: " + activeSinker);
             }
         }
+        // 这个日志实在打的太多了 所以换成debug
         log.debug("SinkServiceFactory init, current sinker:{}", activeSinker);
         return sinkService;
     }

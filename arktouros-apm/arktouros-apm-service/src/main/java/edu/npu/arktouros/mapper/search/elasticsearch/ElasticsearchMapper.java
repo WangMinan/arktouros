@@ -221,6 +221,14 @@ public class ElasticsearchMapper extends SearchMapper {
 
     @Override
     public R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto) {
+        List<EndPointTraceIdVo> endPointTraceIdVoList = getEndPointTraceIdVos(endPointQueryDto);
+        R r = new R();
+        r.put(RESULT, endPointTraceIdVoList);
+        return r;
+    }
+
+    @Override
+    public List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto) {
         TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
         termQueryBuilder
                 .field(SERVICE_NAME)
@@ -233,13 +241,11 @@ public class ElasticsearchMapper extends SearchMapper {
         SearchResponse<Span> searchResponse =
                 ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
         List<Hit<Span>> hits = searchResponse.hits().hits();
-        R r = new R();
         Set<EndPoint> endPointSet = new HashSet<>();
         List<EndPointTraceIdVo> endPointTraceIdVoList = new ArrayList<>();
 
         hits.forEach(hit -> resolveHit(hit, endPointSet, endPointTraceIdVoList));
-        r.put(RESULT, endPointTraceIdVoList);
-        return r;
+        return endPointTraceIdVoList;
     }
 
     private static void resolveHit(Hit<Span> hit, Set<EndPoint> endPointSet, List<EndPointTraceIdVo> endPointTraceIdVoList) {

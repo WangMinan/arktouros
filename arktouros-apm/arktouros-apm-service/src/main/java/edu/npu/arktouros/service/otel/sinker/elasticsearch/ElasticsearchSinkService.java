@@ -1,17 +1,11 @@
 package edu.npu.arktouros.service.otel.sinker.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.Time;
 import co.elastic.clients.elasticsearch._types.mapping.TypeMapping;
 import co.elastic.clients.elasticsearch.indices.Alias;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
-import co.elastic.clients.elasticsearch.indices.RolloverRequest;
-import co.elastic.clients.elasticsearch.indices.RolloverResponse;
-import co.elastic.clients.elasticsearch.indices.rollover.RolloverConditions;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
-import co.elastic.clients.util.ObjectBuilder;
-import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.Source;
@@ -27,11 +21,9 @@ import edu.npu.arktouros.service.otel.sinker.SinkService;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,7 +31,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 
 /**
  * @author : [wangminan]
@@ -134,7 +125,7 @@ public class ElasticsearchSinkService extends SinkService {
         return createIndexRequestBuilder;
     }
 
-    protected static TypeMapping getMappings(String indexName) {
+    public static TypeMapping getMappings(String indexName) {
         TypeMapping.Builder typeMappingBuilder = new TypeMapping.Builder();
         if (ElasticsearchIndex.SERVICE_INDEX.getIndexName().equals(indexName)) {
             typeMappingBuilder.properties(Service.documentMap);

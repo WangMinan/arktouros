@@ -8,6 +8,7 @@ import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.topology.span.SpanTreeNode;
 import edu.npu.arktouros.model.otel.trace.Span;
+import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.R;
 
 import java.util.List;
@@ -36,4 +37,6 @@ public interface SearchService {
     List<SpanTreeNode> getSpanTreeInFiveMinutes(String name, String traceId, long startTime, long endTime);
 
     List<Span> getAllSpans(Service service, long startTime, long endTime);
+
+    List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto);
 }
