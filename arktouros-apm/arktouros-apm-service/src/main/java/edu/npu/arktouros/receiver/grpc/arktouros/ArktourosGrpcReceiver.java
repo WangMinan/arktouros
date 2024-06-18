@@ -1,10 +1,10 @@
-package edu.npu.arktouros.receiver.arktouros;
+package edu.npu.arktouros.receiver.grpc.arktouros;
 
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.receiver.DataReceiver;
-import edu.npu.arktouros.receiver.arktouros.serviceImpl.ArktourosLogServiceImpl;
-import edu.npu.arktouros.receiver.arktouros.serviceImpl.ArktourosMetricServiceImpl;
-import edu.npu.arktouros.receiver.arktouros.serviceImpl.ArktourosSpanServiceImpl;
+import edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl.ArktourosLogServiceImpl;
+import edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl.ArktourosMetricServiceImpl;
+import edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl.ArktourosSpanServiceImpl;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -18,12 +18,12 @@ import java.util.concurrent.TimeUnit;
  * @description : Arktouros私有格式的otel数据接收器
  */
 @Slf4j
-public class ArktourosReceiver extends DataReceiver {
+public class ArktourosGrpcReceiver extends DataReceiver {
 
     private final int port;
     private final Server server;
 
-    public ArktourosReceiver(SinkService sinkService, int port) {
+    public ArktourosGrpcReceiver(SinkService sinkService, int port) {
         this.port = port;
         this.server = ServerBuilder
                 .forPort(port)
@@ -37,7 +37,7 @@ public class ArktourosReceiver extends DataReceiver {
     public void start() {
         try {
             server.start();
-            log.info("ArktourosReceiver start to receive data, listening on port:{}", port);
+            log.info("ArktourosGrpcReceiver start to receive data, listening on port:{}", port);
         } catch (IOException e) {
             log.error("Grpc receiver start error", e);
             throw new ArktourosException(e);

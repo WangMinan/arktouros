@@ -1,4 +1,4 @@
-package edu.npu.arktouros.receiver.arktouros;
+package edu.npu.arktouros.receiver.grpc.arktouros;
 
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
@@ -14,19 +14,19 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * @author : [wangminan]
- * @description : {@link ArktourosReceiver}
+ * @description : {@link ArktourosGrpcReceiver}
  */
 @SpringBootTest
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @Slf4j
 @MockitoSettings(strictness = Strictness.LENIENT)
 @Timeout(30)
-public class ArktourosReceiverTest {
+public class ArktourosGrpcReceiverTest {
 
     @Test
     void testMain() {
         SinkService sinkService = Mockito.mock(SinkService.class);
-        ArktourosReceiver receiver = new ArktourosReceiver(sinkService, 50058);
+        ArktourosGrpcReceiver receiver = new ArktourosGrpcReceiver(sinkService, 50058);
         receiver.start();
         receiver.stop();
     }

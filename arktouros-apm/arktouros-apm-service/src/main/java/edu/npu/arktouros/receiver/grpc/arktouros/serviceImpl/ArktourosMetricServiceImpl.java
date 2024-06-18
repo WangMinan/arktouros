@@ -1,4 +1,4 @@
-package edu.npu.arktouros.receiver.arktouros.serviceImpl;
+package edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl;
 
 import edu.npu.arktouros.model.otel.metric.Counter;
 import edu.npu.arktouros.model.otel.metric.Gauge;

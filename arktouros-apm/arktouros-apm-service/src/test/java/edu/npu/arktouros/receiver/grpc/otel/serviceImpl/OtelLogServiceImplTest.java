@@ -1,6 +1,7 @@
-package edu.npu.arktouros.receiver.otel.serviceImpl;
+package edu.npu.arktouros.receiver.grpc.otel.serviceImpl;
 
 import edu.npu.arktouros.analyzer.otel.OtelLogAnalyzer;
+import edu.npu.arktouros.receiver.grpc.otel.serviceImpl.OtelLogServiceImpl;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse;

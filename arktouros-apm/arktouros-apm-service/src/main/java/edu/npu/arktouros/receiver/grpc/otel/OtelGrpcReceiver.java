@@ -1,13 +1,13 @@
-package edu.npu.arktouros.receiver.otel;
+package edu.npu.arktouros.receiver.grpc.otel;
 
 import edu.npu.arktouros.analyzer.otel.OtelLogAnalyzer;
 import edu.npu.arktouros.analyzer.otel.OtelMetricsAnalyzer;
 import edu.npu.arktouros.analyzer.otel.OtelTraceAnalyzer;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.receiver.DataReceiver;
-import edu.npu.arktouros.receiver.otel.serviceImpl.OtelLogServiceImpl;
-import edu.npu.arktouros.receiver.otel.serviceImpl.OtelMetricsServiceImpl;
-import edu.npu.arktouros.receiver.otel.serviceImpl.OtelTraceServiceImpl;
+import edu.npu.arktouros.receiver.grpc.otel.serviceImpl.OtelLogServiceImpl;
+import edu.npu.arktouros.receiver.grpc.otel.serviceImpl.OtelMetricsServiceImpl;
+import edu.npu.arktouros.receiver.grpc.otel.serviceImpl.OtelTraceServiceImpl;
 import edu.npu.arktouros.service.otel.queue.LogQueueService;
 import edu.npu.arktouros.service.otel.queue.MetricsQueueService;
 import edu.npu.arktouros.service.otel.queue.TraceQueueService;

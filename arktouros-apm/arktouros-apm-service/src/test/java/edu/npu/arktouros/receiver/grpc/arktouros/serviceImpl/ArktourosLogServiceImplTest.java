@@ -1,8 +1,9 @@
-package edu.npu.arktouros.receiver.arktouros.serviceImpl;
+package edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl;
 
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.proto.collector.v1.LogRequest;
 import edu.npu.arktouros.proto.collector.v1.LogResponse;
+import edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl.ArktourosLogServiceImpl;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;

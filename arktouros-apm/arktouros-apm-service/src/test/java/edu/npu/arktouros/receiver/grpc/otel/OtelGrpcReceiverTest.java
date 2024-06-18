@@ -1,5 +1,6 @@
-package edu.npu.arktouros.receiver.otel;
+package edu.npu.arktouros.receiver.grpc.otel;
 
+import edu.npu.arktouros.receiver.grpc.otel.OtelGrpcReceiver;
 import edu.npu.arktouros.service.otel.queue.LogQueueService;
 import edu.npu.arktouros.service.otel.queue.MetricsQueueService;
 import edu.npu.arktouros.service.otel.queue.TraceQueueService;
