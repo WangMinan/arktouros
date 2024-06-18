@@ -2,6 +2,7 @@ package edu.npu.arktouros.receiver;
 
 import edu.npu.arktouros.receiver.grpc.arktouros.ArktourosGrpcReceiver;
 import edu.npu.arktouros.receiver.grpc.otel.OtelGrpcReceiver;
+import edu.npu.arktouros.receiver.tcp.arktouros.ArktourosTcpReceiver;
 import edu.npu.arktouros.service.otel.queue.LogQueueService;
 import edu.npu.arktouros.service.otel.queue.MetricsQueueService;
 import edu.npu.arktouros.service.otel.queue.TraceQueueService;
@@ -58,16 +59,22 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
 
     @Override
     public DataReceiver getObject() {
-        if (activeDataReceiver.equals("otelGrpc")) {
-            log.info("OtelGrpc receiver is active");
-            return new OtelGrpcReceiver(logAnalyzerNumber, traceAnalyzerNumber, metricsAnalyzerNumber,
-                    logQueueService, traceQueueService,
-                    metricsQueueService, sinkService, grpcPort);
-        } else if (activeDataReceiver.equals("arktourosGrpc")) {
-            log.info("ArktourosGrpc receiver is active");
-            return new ArktourosGrpcReceiver(sinkService, grpcPort);
-        } else {
-            throw new IllegalArgumentException("can not find data receiver type from profile");
+        switch (activeDataReceiver) {
+            case "otelGrpc" -> {
+                log.info("OtelGrpc receiver is active");
+                return new OtelGrpcReceiver(logAnalyzerNumber, traceAnalyzerNumber, metricsAnalyzerNumber,
+                        logQueueService, traceQueueService,
+                        metricsQueueService, sinkService, grpcPort);
+            }
+            case "arktourosGrpc" -> {
+                log.info("ArktourosGrpc receiver is active");
+                return new ArktourosGrpcReceiver(sinkService, grpcPort);
+            }
+            case "arktourosTcp" -> {
+                log.info("ArktourosTcp receiver is active");
+                return new ArktourosTcpReceiver();
+            }
+            default -> throw new IllegalArgumentException("can not find data receiver type from profile");
         }
     }
 
