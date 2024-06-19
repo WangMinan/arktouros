@@ -7,7 +7,11 @@ COPY build/arktouros-apm-api/config ./config
 COPY build/arktouros-apm-api/lib ./lib
 COPY build/arktouros-apm-api/arktouros-apm-api-0.0.1.jar ./arktouros-apm-api-0.0.1.jar
 # RUN ls -l
+# tcp receive port
+EXPOSE 50049
+# http server port
 EXPOSE 50050
+# grpc receive port
 EXPOSE 50051
 ENV TZ Asia/Shanghai
 ENTRYPOINT java -jar -Dloader.path=lib arktouros-apm-api-0.0.1.jar
