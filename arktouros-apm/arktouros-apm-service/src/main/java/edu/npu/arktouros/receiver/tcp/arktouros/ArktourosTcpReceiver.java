@@ -44,6 +44,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
 
     @Override
     public void start() {
+        log.info("Starting arktouros tcp receiver on port: {}", tcpPort);
         // 我也不知道这个netty是哪个依赖引进来的 反正咱有得用是好事
         new ServerBootstrap()
                 .group(new NioEventLoopGroup())
@@ -100,6 +101,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
     }
 
     private void persistInput(String jsonStr) throws IOException {
+        log.debug("Sinking an object in json:{}", jsonStr);
         // 结构相似 都能转 所以只能用关键字试探
         // 深拷贝
         String tmpJson = jsonStr.trim();
@@ -119,6 +121,6 @@ public class ArktourosTcpReceiver extends DataReceiver {
 
     @Override
     public void stop() {
-
+        log.info("Tcp receiver shutdown. All unreceived data will be lost.");
     }
 }
