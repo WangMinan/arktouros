@@ -4,6 +4,10 @@ import co.elastic.clients.elasticsearch._types.mapping.DateProperty;
 import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.ElasticsearchProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
@@ -24,6 +28,14 @@ import java.util.Map;
 @Data
 @EqualsAndHashCode
 @ToString(callSuper = true)
+// 加上下面这些东西之后，就可以在序列化的时候，根据metricType的值，来确定具体的子类
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "metricType")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Gauge.class, name = "GAUGE"),
+        @JsonSubTypes.Type(value = Histogram.class, name = "HISTOGRAM"),
+        @JsonSubTypes.Type(value = Counter.class, name = "COUNTER"),
+        @JsonSubTypes.Type(value = Summary.class, name = "SUMMARY")
+})
 public abstract class Metric implements Source {
     protected String name;
     protected String serviceName;
@@ -66,8 +78,11 @@ public abstract class Metric implements Source {
             "metricType", ElasticsearchProperties.keywordIndexProperty
     );
 
-    protected Metric(String name, String description,
-                     Map<String, String> labels, long timestamp) {
+    @JsonCreator
+    protected Metric(@JsonProperty("name") String name,
+                     @JsonProperty("description") String description,
+                     @JsonProperty("labels") Map<String, String> labels,
+                     @JsonProperty("timestamp") long timestamp) {
         this.name = name;
         this.description = description;
         this.labels = new HashMap<>(labels);

@@ -1,5 +1,6 @@
 package edu.npu.arktouros.receiver;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.receiver.grpc.arktouros.ArktourosGrpcReceiver;
 import edu.npu.arktouros.receiver.grpc.otel.OtelGrpcReceiver;
 import edu.npu.arktouros.receiver.tcp.arktouros.ArktourosTcpReceiver;
@@ -29,6 +30,9 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
     @Value("${receiver.grpc.port}")
     private int grpcPort;
 
+    @Value("${receiver.tcp.port}")
+    private int tcpPort;
+
     @Value("${instance.number.analyzer.otel.log}")
     private int logAnalyzerNumber;
 
@@ -46,15 +50,18 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
 
     private final SinkService sinkService;
 
+    private final ObjectMapper objectMapper;
+
     @Lazy
     public DataReceiverFactoryBean(LogQueueService logQueueService,
                                    TraceQueueService traceQueueService,
                                    MetricsQueueService metricsQueueService,
-                                   SinkService sinkService) {
+                                   SinkService sinkService, ObjectMapper objectMapper) {
         this.logQueueService = logQueueService;
         this.traceQueueService = traceQueueService;
         this.metricsQueueService = metricsQueueService;
         this.sinkService = sinkService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -72,7 +79,7 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
             }
             case "arktourosTcp" -> {
                 log.info("ArktourosTcp receiver is active");
-                return new ArktourosTcpReceiver();
+                return new ArktourosTcpReceiver(sinkService, tcpPort, objectMapper);
             }
             default -> throw new IllegalArgumentException("can not find data receiver type from profile");
         }

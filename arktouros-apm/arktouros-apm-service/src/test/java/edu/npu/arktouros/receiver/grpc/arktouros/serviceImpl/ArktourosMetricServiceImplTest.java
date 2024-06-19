@@ -2,7 +2,6 @@ package edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl;
 
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.proto.collector.v1.MetricRequest;
-import edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl.ArktourosMetricServiceImpl;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;

@@ -3,6 +3,8 @@ package edu.npu.arktouros.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.model.otel.log.Log;
+import edu.npu.arktouros.model.otel.metric.Gauge;
+import edu.npu.arktouros.model.otel.metric.Metric;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +16,8 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.HashMap;
 
 /**
  * @author : [wangminan]
@@ -63,4 +67,17 @@ class JacksonConfigTest {
         Assertions.assertDoesNotThrow(() -> objectMapper.writeValueAsString(logValue));
     }
 
+    @Test
+    void testMetric() throws JsonProcessingException {
+        Gauge gauge = Gauge.builder()
+                .name("test")
+                .value(1.0)
+                .timestamp(System.currentTimeMillis())
+                .labels(new HashMap<>())
+                .build();
+        String str = objectMapper.writeValueAsString(gauge);
+        Metric metric = objectMapper.readValue(str, Metric.class);
+        System.out.println(metric);
+        Assertions.assertNotNull(metric);
+    }
 }
