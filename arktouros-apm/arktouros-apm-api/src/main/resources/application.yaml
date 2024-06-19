@@ -38,6 +38,8 @@ instance:
 receiver:
   grpc:
     port: 50051
+  tcp:
+    port: 50049
 
 elasticsearch:
   serverUrl: https://localhost:9200
