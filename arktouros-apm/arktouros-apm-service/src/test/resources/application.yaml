@@ -24,9 +24,10 @@ var:
 # 对象选择，目前只完善了otelGrpc->elasticsearch全链路,h2暂不可选
 instance:
   active:
-    dataReceiver: arktourosGrpc # otelGrpc/arktourosGrpc
+    dataReceiver: otelGrpc # otelGrpc/arktourosGrpc/arktourosTcp
     sinker: elasticsearch # elasticsearch/h2
     searchMapper: elasticsearch # elasticsearch/h2
+    scheduledJob: elasticsearch # elasticsearch/h2
   number:
     analyzer:
       otel:
@@ -50,3 +51,14 @@ elasticsearch:
     maxWait: 3000
   scroll:
     maxWait: 5000
+  # rolloverApi configuration部分配置
+  rollover:
+    maxDocs: 100000
+    maxAge: 1d
+    maxSize: 5gb
+  # 定时
+  schedule:
+    rollover: 1 # 单位小时
+    throughput: 1 # 单位分钟
+    responseTime: 1 # 单位分钟
+    errorRate: 1 # 单位分钟
