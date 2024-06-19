@@ -48,9 +48,10 @@ elasticsearch:
   password: elastic
   ca: D:/code/arktouros/docs/http_ca.crt # 证书位置 留空或文件不存在则不开启SSL
   pool:
-    maxTotal: 10
-    minIdle: 1
-    maxWait: 3000
+    # 连接池给大一点，给小了会炸
+    maxTotal: 50
+    minIdle: 5
+    maxWait: 2000
   scroll:
     maxWait: 5000
   # rolloverApi configuration部分配置

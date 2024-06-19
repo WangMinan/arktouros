@@ -5,6 +5,7 @@ services:
     image: wangminan/arktouros-apm-server:latest
     container_name: arktouros-apm-server
     ports:
+      - "50049:50049"
       - "50050:50050"
       - "50051:50051"
     volumes:

@@ -7,6 +7,7 @@ import lombok.Getter;
  * @author : [wangminan]
  * @description : 自定义异常类
  */
+@SuppressWarnings("CallToPrintStackTrace")
 @Getter
 public class ArktourosException extends RuntimeException{
 
@@ -15,18 +16,21 @@ public class ArktourosException extends RuntimeException{
 
     public ArktourosException(Throwable cause) {
         super(cause);
+        cause.printStackTrace();
         this.code = ResponseCodeEnum.SERVER_ERROR;
         this.message = cause.getMessage();
     }
 
     public ArktourosException(Throwable cause, String message) {
         super(cause);
+        cause.printStackTrace();
         this.code = ResponseCodeEnum.SERVER_ERROR;
         this.message = message;
     }
 
     public ArktourosException(Throwable cause, ResponseCodeEnum code, String message) {
         super(cause);
+        cause.printStackTrace();
         this.code = code;
         this.message = message;
     }
