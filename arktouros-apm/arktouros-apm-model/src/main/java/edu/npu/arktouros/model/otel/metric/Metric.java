@@ -28,14 +28,6 @@ import java.util.Map;
 @Data
 @EqualsAndHashCode
 @ToString(callSuper = true)
-// 加上下面这些东西之后，就可以在序列化的时候，根据metricType的值，来确定具体的子类
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "metricType")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = Gauge.class, name = "GAUGE"),
-        @JsonSubTypes.Type(value = Histogram.class, name = "HISTOGRAM"),
-        @JsonSubTypes.Type(value = Counter.class, name = "COUNTER"),
-        @JsonSubTypes.Type(value = Summary.class, name = "SUMMARY")
-})
 public abstract class Metric implements Source {
     protected String name;
     protected String serviceName;

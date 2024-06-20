@@ -3,7 +3,11 @@ package edu.npu.arktouros.receiver.tcp.arktouros;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.log.Log;
+import edu.npu.arktouros.model.otel.metric.Counter;
+import edu.npu.arktouros.model.otel.metric.Gauge;
+import edu.npu.arktouros.model.otel.metric.Histogram;
 import edu.npu.arktouros.model.otel.metric.Metric;
+import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
@@ -113,9 +117,20 @@ public class ArktourosTcpReceiver extends DataReceiver {
         } else if (tmpJson.contains("\"type\":\"span\"")) {
             Span span = objectMapper.readValue(jsonStr, Span.class);
             sinkService.sink(span);
-        } else {
-            Metric metric = objectMapper.readValue(jsonStr, Metric.class);
+        } else if (tmpJson.contains("\"metrictype:\"gauge\"")) {
+            Gauge gauge = objectMapper.readValue(jsonStr, Gauge.class);
+            sinkService.sink(gauge);
+        } else if (tmpJson.contains("\"metrictype:\"counter\"")) {
+            Counter metric = objectMapper.readValue(jsonStr, Counter.class);
             sinkService.sink(metric);
+        } else if (tmpJson.contains("\"metrictype:\"summary\"")) {
+            Summary metric = objectMapper.readValue(jsonStr, Summary.class);
+            sinkService.sink(metric);
+        } else if (tmpJson.contains("\"metrictype:\"histogram\"")) {
+            Histogram metric = objectMapper.readValue(jsonStr, Histogram.class);
+            sinkService.sink(metric);
+        } else {
+            log.warn("Unknown json type:{}", jsonStr);
         }
     }
 

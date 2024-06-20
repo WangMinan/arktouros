@@ -43,7 +43,6 @@ public class ScheduledJobFactoryBean implements FactoryBean<ScheduledJob> {
                 throw new IllegalArgumentException("Invalid scheduledJob type: " + activeScheduledJob);
             }
         }
-        log.info("ScheduledJobFactory init, current scheduledJob:{}", activeScheduledJob);
         return scheduledJob;
     }
 
