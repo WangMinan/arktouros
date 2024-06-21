@@ -6,7 +6,6 @@ import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;
 import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.metric.Histogram;
-import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.receiver.DataReceiver;

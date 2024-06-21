@@ -64,9 +64,12 @@ public class ElasticsearchClientPoolFactory implements PooledObjectFactory<Elast
         this.username = PropertiesProvider.getProperty("elasticsearch.username");
         this.password = PropertiesProvider.getProperty("elasticsearch.password");
         this.ca = PropertiesProvider.getProperty("elasticsearch.ca");
-        this.maxTotal = Integer.parseInt(PropertiesProvider.getProperty("elasticsearch.pool.maxTotal"));
-        this.maxWait = Integer.parseInt(PropertiesProvider.getProperty("elasticsearch.pool.maxWait"));
-        this.minIdle = Integer.parseInt(PropertiesProvider.getProperty("elasticsearch.pool.minIdle"));
+        this.maxTotal = Integer.parseInt(
+                PropertiesProvider.getProperty("elasticsearch.pool.maxTotal"));
+        this.maxWait = Integer.parseInt(
+                PropertiesProvider.getProperty("elasticsearch.pool.maxWait"));
+        this.minIdle = Integer.parseInt(
+                PropertiesProvider.getProperty("elasticsearch.pool.minIdle"));
         Jackson2ObjectMapperBuilder builder = getJackson2ObjectMapperBuilder();
         this.mapper = builder.build();
         log.info("Initializing ElasticsearchClientPoolFactory, serverUrl:{}", serverUrl);

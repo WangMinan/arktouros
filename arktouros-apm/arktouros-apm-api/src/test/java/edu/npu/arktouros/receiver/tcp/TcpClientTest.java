@@ -28,7 +28,7 @@ import java.util.HashMap;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @Disabled
-public class TcpClientTest {
+class TcpClientTest {
 
     @Test
     void testTcpClient() throws InterruptedException, JsonProcessingException {
@@ -60,7 +60,7 @@ public class TcpClientTest {
                     }
                 })
                 // 5. 连接到服务器
-                .connect("localhost", 50049)
+                .connect("38.147.172.149", 50049)
                 .sync()
                 .channel();
         tcpChannel.writeAndFlush(mapper.writeValueAsString(log1));

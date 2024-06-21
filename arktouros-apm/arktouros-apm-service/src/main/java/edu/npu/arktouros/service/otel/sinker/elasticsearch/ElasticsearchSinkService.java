@@ -154,6 +154,7 @@ public class ElasticsearchSinkService extends SinkService {
         if (source instanceof Metric sourceMetric) {
             Service service =
                     Service.builder().name(sourceMetric.getServiceName()).build();
+            log.debug("Extract service from source, service:{}", service);
             ElasticsearchUtil.sink(service.getId(),
                     ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);
             switch (sourceMetric.getMetricType()) {

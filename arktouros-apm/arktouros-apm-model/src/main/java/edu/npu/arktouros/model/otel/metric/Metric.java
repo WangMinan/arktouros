@@ -6,8 +6,6 @@ import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.basic.ElasticsearchProperties;
 import edu.npu.arktouros.model.otel.basic.SourceType;
