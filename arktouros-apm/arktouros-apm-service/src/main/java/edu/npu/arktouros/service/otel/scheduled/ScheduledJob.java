@@ -40,6 +40,12 @@ public abstract class ScheduledJob {
                     new BasicThreadFactory.Builder()
                             .namingPattern("Calculate-error-rate-%d").build());
 
+    // 模拟数值数据
+    protected final ScheduledExecutorService simulateMetricThreadPool =
+            Executors.newScheduledThreadPool(10,
+                    new BasicThreadFactory.Builder()
+                            .namingPattern("Simulate-metrics-%d").build());
+
     public ScheduledJob(SearchService searchService) {
         log.info("All scheduledJob init.");
         this.searchService = searchService;
@@ -48,6 +54,8 @@ public abstract class ScheduledJob {
     public abstract void startJobs();
 
     protected abstract void rollOver();
+
+    protected abstract void simulateMetrics(Service service);
 
     protected abstract void calculateThroughput(Service service);
 

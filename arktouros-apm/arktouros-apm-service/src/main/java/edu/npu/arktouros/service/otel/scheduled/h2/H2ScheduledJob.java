@@ -28,6 +28,11 @@ public class H2ScheduledJob extends ScheduledJob {
     }
 
     @Override
+    protected void simulateMetrics(Service service) {
+        log.warn("Stimulate metrics has not been implemented yet.");
+    }
+
+    @Override
     protected void calculateThroughput(Service service) {
         log.warn("Calculate throughput has not been implemented yet.");
     }

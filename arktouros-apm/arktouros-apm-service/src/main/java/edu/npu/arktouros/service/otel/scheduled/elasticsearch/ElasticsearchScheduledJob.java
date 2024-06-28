@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static edu.npu.arktouros.service.otel.sinker.elasticsearch.ElasticsearchSinkService.getMappings;
@@ -47,7 +48,9 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         List<Service> services = searchService.getAllServices();
         // 启动所有定时任务
         rollOverThreadPool.scheduleAtFixedRate(
-                this::rollOver, 0,
+                this::rollOver,
+                // 随机0-60秒
+                (long) (Math.random() * 60),
                 Integer.parseInt(PropertiesProvider.getProperty(
                         "elasticsearch.schedule.rollover",
                         "1")),
@@ -55,7 +58,8 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         for (Service service : services) {
             calculateThroughputThreadPool.scheduleAtFixedRate(
                     () -> calculateThroughput(service),
-                    0,
+                    // 随机0-60秒
+                    (long) (Math.random() * 60),
                     Integer.parseInt(
                             PropertiesProvider.getProperty(
                                     "elasticsearch.schedule.throughput",
@@ -63,16 +67,26 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                     TimeUnit.MINUTES);
             calculateResponseTimeThreadPool.scheduleAtFixedRate(
                     () -> calculateResponseTime(service),
-                    0,
+                    // 随机0-60秒
+                    (long) (Math.random() * 60),
                     Integer.parseInt(PropertiesProvider.getProperty(
                             "elasticsearch.schedule.responseTime",
                             "5")),
                     TimeUnit.MINUTES);
             calculateErrorRateThreadPool.scheduleAtFixedRate(
                     () -> calculateErrorRate(service),
-                    0,
+                    // 随机0-60秒
+                    (long) (Math.random() * 60),
                     Integer.parseInt(PropertiesProvider.getProperty(
                             "elasticsearch.schedule.errorRate",
+                            "5")),
+                    TimeUnit.MINUTES);
+            simulateMetricThreadPool.scheduleAtFixedRate(
+                    () -> simulateMetrics(service),
+                    // 随机0-60秒
+                    (long) (Math.random() * 60),
+                    Integer.parseInt(PropertiesProvider.getProperty(
+                            "elasticsearch.schedule.metric",
                             "5")),
                     TimeUnit.MINUTES);
         }
@@ -90,6 +104,43 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
             }
         }
         log.info("All rollover job complete.");
+    }
+
+    @Override
+    protected void simulateMetrics(Service service) {
+        // 开始制造数据
+        log.info("Stimulate metrics start.");
+        Random random = new Random();
+        // 1. CPU usage
+        Gauge cpuUsage = Gauge.builder()
+                .name("cpu_usage")
+                .description("Average CPU usage per 5 minutes in percentage.")
+                // 0-10 小数点后1位
+                .value(random.nextInt(101) / 10.0)
+                .timestamp(System.currentTimeMillis())
+                .labels(new HashMap<>())
+                .build();
+        cpuUsage.setServiceName(service.getName());
+        // 2. Memory usage
+        Gauge memoryUsage = Gauge.builder()
+                .name("memory_usage")
+                .description("Average memory usage per 5 minutes in MB.")
+                // 50-150 小数点后1位
+                .value(50 + (random.nextInt(1001) / 10.0))
+                .timestamp(System.currentTimeMillis())
+                .labels(new HashMap<>())
+                .build();
+        memoryUsage.setServiceName(service.getName());
+        try {
+            ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
+                    cpuUsage);
+            ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
+                    memoryUsage);
+        } catch (IOException e) {
+            log.error("Sink stimulate metrics for service:{} error.",
+                    service.getName(), e);
+        }
+        log.info("Stimulate metrics for service:{} complete.", service.getName());
     }
 
     @Override

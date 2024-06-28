@@ -67,3 +67,4 @@ elasticsearch:
     throughput: 1 # 单位分钟
     responseTime: 1 # 单位分钟
     errorRate: 1 # 单位分钟
+    metric: 1 # 单位分钟
