@@ -33,8 +33,8 @@ jobs:
       - name: 传输构建结果到服务器
         run: >
           sshpass -p ${{secrets.REMOTE_PWD}} 
-          scp -r -o StrictHostKeyChecking=no 
-          build/*.tar.gz root@${{secrets.REMOTE_IP}}:/root/arktouros
+          scp -r -o StrictHostKeyChecking=no build/*.tar.gz 
+          root@${{secrets.REMOTE_IP}}:/root/arktouros
 
       - name: 写pem到临时文件
         run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem && chmod 600 private_key.pem
