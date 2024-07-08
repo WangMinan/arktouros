@@ -85,6 +85,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- 这玩意会是个重大的隐患 但我暂时换不掉这个依赖 -->
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
