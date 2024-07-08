@@ -2,7 +2,9 @@
 
 "Άρκτουρος"（Arktouros/玉衡）。在希腊神话中，Άρκτουρος是大熊座中最亮的星星，代表着守护和指引的意义。
 
-Arktouros项目将是我的本科毕业设计，这是一个轻量级的APM系统，用于适配中航工业西安计算所的天脉3操作系统。
+Arktouros项目是我的本科毕业设计，这是一个轻量级的APM系统，适配中航工业西安计算所的天脉3操作系统。
+
+毕业论文已经获得西北工业大学首届百篇优秀本科毕业设计（论文）
 
 如果不需要ui项目，可以直接clone；如果需要ui项目，请使用--recursive参数进行clone。
 
@@ -35,3 +37,5 @@ java -jar -Djava.library.path=lib/ *.jar
 如有需要可自行改动config目录下的对应配置文件。
 
 如果需要使用docker运行请自行修改apm-api的resources目录下的[docker-compose](arktouros-apm/arktouros-apm-api/src/main/resources/docker-compose.yaml)文件，注意config文件夹映射。
+
+目标端机采集软件请见[https://github.com/wangminan/simple-otel](https://github.com/wangminan/simple-otel)
