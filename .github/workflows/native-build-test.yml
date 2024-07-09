@@ -30,17 +30,17 @@ jobs:
       - name: Build with Maven with native env
         run: mvn -Dmaven.test.skip=true -T 2C -Pnative clean package
 
-      - name: 传输构建结果到服务器1
-        run: >
-          sshpass -p ${{secrets.REMOTE_PWD}} 
-          scp -r -o StrictHostKeyChecking=no build/*.tar.gz 
-          root@${{secrets.REMOTE_IP}}:/root/arktouros
+#      - name: 传输构建结果到服务器1
+#        run: >
+#          sshpass -p ${{secrets.REMOTE_PWD}}
+#          scp -r -o StrictHostKeyChecking=no build/*.tar.gz
+#          root@${{secrets.REMOTE_IP}}:/root/arktouros
 
       - name: 写pem到临时文件
         run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem && chmod 600 private_key.pem
 
-      - name: 传输构建结果到服务器2
-        run: >
-          scp -i private_key.pem -r -o StrictHostKeyChecking=no 
-          build/*.tar.gz root@${{secrets.REMOTE_IP_1}}:/root/arktouros
+#      - name: 传输构建结果到服务器2
+#        run: >
+#          scp -i private_key.pem -r -o StrictHostKeyChecking=no
+#          build/*.tar.gz root@${{secrets.REMOTE_IP_1}}:/root/arktouros
 
