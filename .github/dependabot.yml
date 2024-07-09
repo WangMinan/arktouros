@@ -22,3 +22,6 @@ updates:
     commit-message:
       # Prefix all commit messages with "maven: "
       prefix: "maven"
+    ignore:
+      - dependency-name: "*grpc*"
+      - dependency-name: "*protobuf*"
