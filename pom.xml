@@ -45,7 +45,7 @@
         <!-- assembly-plugin用最新的3.7.0会报空指针问题 -->
         <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-        <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
+        <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <front-end-maven-plugin.version>1.15.0</front-end-maven-plugin.version>
         <!-- maven plugin -->
