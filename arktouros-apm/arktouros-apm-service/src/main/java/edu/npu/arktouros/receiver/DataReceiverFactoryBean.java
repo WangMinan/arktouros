@@ -1,6 +1,7 @@
 package edu.npu.arktouros.receiver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.npu.arktouros.receiver.file.json.JsonFileReceiver;
 import edu.npu.arktouros.receiver.grpc.arktouros.ArktourosGrpcReceiver;
 import edu.npu.arktouros.receiver.grpc.otel.OtelGrpcReceiver;
 import edu.npu.arktouros.receiver.tcp.arktouros.ArktourosTcpReceiver;
@@ -42,6 +43,15 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
     @Value("${instance.number.analyzer.otel.metric}")
     private int metricsAnalyzerNumber;
 
+    @Value("${receiver.file.json.logDir}")
+    private String logDir;
+
+    @Value("${receiver.file.json.indexFilePath}")
+    private String indexFilePath;
+
+    @Value("${receiver.file.json.type}")
+    private String fileType;
+
     private final LogQueueService logQueueService;
 
     private final TraceQueueService traceQueueService;
@@ -81,7 +91,11 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
                 log.info("ArktourosTcp receiver is active");
                 return new ArktourosTcpReceiver(sinkService, tcpPort, objectMapper);
             }
-            default -> throw new IllegalArgumentException("can not find data receiver type from profile");
+            case "jsonFile" -> {
+                log.info("OtelFile receiver is active");
+                return new JsonFileReceiver(logDir, indexFilePath, fileType, sinkService, objectMapper);
+            }
+            case null, default -> throw new IllegalArgumentException("can not find data receiver type from profile");
         }
     }
 
