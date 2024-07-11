@@ -105,7 +105,7 @@ jobs:
         with:
           java-version: '21'      # See 'Options' section below for all supported versions
           distribution: 'graalvm' # See 'Options' section below for all available distributions
-          version: '21.0.2'
+          version: '21.0.3'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
 
