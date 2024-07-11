@@ -23,7 +23,7 @@ public class H2ScheduledJob extends ScheduledJob {
     }
 
     @Override
-    protected void rollOver() {
+    protected void rollover() {
        log.warn("Rollover has not been implemented yet.");
     }
 

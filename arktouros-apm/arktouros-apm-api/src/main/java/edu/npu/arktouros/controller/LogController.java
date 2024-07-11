@@ -15,18 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
  * @description : 日志有关的接口
  */
 @RestController
-@RequestMapping("/log")
 public class LogController {
 
     @Resource
     private SearchService searchService;
 
-    @GetMapping
+    @GetMapping("/logs")
     public R getLogList(@Validated LogQueryDto logQueryDto) {
         return searchService.getLogList(logQueryDto);
     }
 
-    @GetMapping("/level")
+    @GetMapping("/log/levels")
     public R getAllLogLevels(@RequestParam(value = "query", required = false) String query) {
         return searchService.getAllLogLevels(query);
     }

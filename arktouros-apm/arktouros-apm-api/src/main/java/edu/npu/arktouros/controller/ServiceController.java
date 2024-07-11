@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
  * @description : Service有关的接口
  */
 @RestController
-@RequestMapping("/service")
 @Slf4j
 public class ServiceController {
 
@@ -25,17 +24,17 @@ public class ServiceController {
     private SearchService searchService;
 
     // 获取服务列表
-    @GetMapping
+    @GetMapping("/services")
     public R getServiceList(@Validated ServiceQueryDto query) {
         return searchService.getServiceList(query);
     }
 
-    @GetMapping("/namespace")
+    @GetMapping("/service/namespaces")
     public R getNamespaceList(@RequestParam(value = "query", required = false) String query) {
         return searchService.getNamespaceList(query);
     }
 
-    @GetMapping("/topology")
+    @GetMapping("/service/topology")
     public R getTopology(@RequestParam(value = "namespace", required = false) String namespace) {
         if (StringUtils.isEmpty(namespace)) {
             namespace = "default";

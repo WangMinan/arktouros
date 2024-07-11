@@ -17,7 +17,7 @@ public abstract class ScheduledJob {
     protected SearchService searchService;
 
     // Elasticsearch主用 负责调用rollover api
-    protected final ScheduledExecutorService rollOverThreadPool =
+    protected final ScheduledExecutorService rolloverThreadPool =
             Executors.newScheduledThreadPool(10,
                     new BasicThreadFactory.Builder()
                             .namingPattern("Roll-over-%d").build());
@@ -53,7 +53,7 @@ public abstract class ScheduledJob {
 
     public abstract void startJobs();
 
-    protected abstract void rollOver();
+    protected abstract void rollover();
 
     protected abstract void simulateMetrics(Service service);
 

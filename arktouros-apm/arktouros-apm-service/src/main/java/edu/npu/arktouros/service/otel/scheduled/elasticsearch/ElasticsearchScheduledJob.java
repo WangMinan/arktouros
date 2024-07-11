@@ -47,8 +47,8 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         // 获取所有service
         List<Service> services = searchService.getAllServices();
         // 启动所有定时任务
-        rollOverThreadPool.scheduleAtFixedRate(
-                this::rollOver,
+        rolloverThreadPool.scheduleAtFixedRate(
+                this::rollover,
                 // 随机0-60秒
                 (long) (Math.random() * 60),
                 Integer.parseInt(PropertiesProvider.getProperty(
@@ -93,11 +93,11 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     }
 
     @Override
-    protected void rollOver() {
+    protected void rollover() {
         log.info("Rollover start.");
         for (String indexName : ElasticsearchIndex.getIndexList()) {
             try {
-                handleRollOver(indexName);
+                handleRollover(indexName);
             } catch (IOException e) {
                 // 不抛异常 大不了我们就不分嘛
                 log.error("Rollover index:{} error.", indexName, e);
@@ -274,7 +274,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                         .orElse(0L);
     }
 
-    public void handleRollOver(String indexName) throws IOException {
+    public void handleRollover(String indexName) throws IOException {
         RolloverRequest rolloverRequest = new RolloverRequest.Builder()
                 .alias(indexName)
                 .conditions(new RolloverConditions.Builder()

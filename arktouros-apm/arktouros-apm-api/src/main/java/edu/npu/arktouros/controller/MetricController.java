@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @description : 数值有关查询接口
  */
 @RestController
-@RequestMapping("/metric")
+@RequestMapping("/metrics")
 public class MetricController {
 
     @Resource
