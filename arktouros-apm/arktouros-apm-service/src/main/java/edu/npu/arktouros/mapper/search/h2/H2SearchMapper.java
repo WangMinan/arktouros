@@ -89,7 +89,7 @@ public class H2SearchMapper extends SearchMapper {
     }
 
     @Override
-    public List<Span> getAllSpans(Service service, long startTime, long endTime) {
+    public List<Span> getAllSpans(Service service, long startTime) {
         return List.of();
     }
 

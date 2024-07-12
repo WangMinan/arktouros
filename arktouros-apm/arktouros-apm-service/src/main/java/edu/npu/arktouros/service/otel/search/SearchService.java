@@ -34,9 +34,9 @@ public interface SearchService {
 
     int getTraceCount(Service service, long startTime, long endTime);
 
-    List<SpanTreeNode> getSpanTreeInFiveMinutes(String name, String traceId, long startTime, long endTime);
+    List<SpanTreeNode> getSpanTreeInMinutes(String name, String traceId, long startTime, long endTime);
 
-    List<Span> getAllSpans(Service service, long startTime, long endTime);
+    List<Span> getAllSpans(Service service, long startTime);
 
     List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto);
 }

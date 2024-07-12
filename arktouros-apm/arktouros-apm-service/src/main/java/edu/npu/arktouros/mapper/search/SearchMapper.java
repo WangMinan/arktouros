@@ -46,7 +46,7 @@ public abstract class SearchMapper {
 
     public abstract List<Span> getSpanListByTraceId(String serviceName, String traceId, long startTime, long endTime);
 
-    public abstract List<Span> getAllSpans(Service service, long startTime, long endTime);
+    public abstract List<Span> getAllSpans(Service service, long startTime);
 
     public abstract List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto);
 }

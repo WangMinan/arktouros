@@ -235,8 +235,8 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public List<SpanTreeNode> getSpanTreeInFiveMinutes(String serviceName, String traceId,
-                                                       long startTime, long endTime) {
+    public List<SpanTreeNode> getSpanTreeInMinutes(String serviceName, String traceId,
+                                                   long startTime, long endTime) {
         List<Span> originalSpanList =
                 searchMapper.getSpanListByTraceId(serviceName, traceId, startTime, endTime);
         Span rootSpan = getRootSpan(originalSpanList);
@@ -248,8 +248,8 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public List<Span> getAllSpans(Service service, long startTime, long endTime) {
-        return searchMapper.getAllSpans(service, startTime, endTime);
+    public List<Span> getAllSpans(Service service, long startTime) {
+        return searchMapper.getAllSpans(service, startTime);
     }
 
     @Override

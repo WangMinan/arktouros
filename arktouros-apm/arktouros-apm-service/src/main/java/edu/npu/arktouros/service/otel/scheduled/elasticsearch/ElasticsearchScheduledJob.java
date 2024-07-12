@@ -183,7 +183,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         List<Long> costTimes = new ArrayList<>();
         for (String traceId : traceIds) {
             List<SpanTreeNode> spanTreeNodeVos = searchService
-                    .getSpanTreeInFiveMinutes(service.getName(),
+                    .getSpanTreeInMinutes(service.getName(),
                             traceId,
                             System.currentTimeMillis() - 5 * 60 * 1000,
                             System.currentTimeMillis());
@@ -223,7 +223,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         long startTime = System.currentTimeMillis() - 5 * 60 * 1000;
         // 结束时间 当前时间
         long endTime = System.currentTimeMillis();
-        List<Span> allSpans = searchService.getAllSpans(service, startTime, endTime);
+        List<Span> allSpans = searchService.getAllSpans(service, startTime);
         // 3. 计算错误率
         long errorCount = allSpans.stream()
                 .filter(span -> span.getEndTime() == PersistentDataConstants.ERROR_SPAN_END_TIME)

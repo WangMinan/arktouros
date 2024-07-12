@@ -509,7 +509,7 @@ public class ElasticsearchMapper extends SearchMapper {
     }
 
     @Override
-    public List<Span> getAllSpans(Service service, long startTime, long endTime) {
+    public List<Span> getAllSpans(Service service, long startTime) {
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         boolQueryBuilder.must(new TermQuery.Builder()
                 .field(SERVICE_NAME)
@@ -517,8 +517,7 @@ public class ElasticsearchMapper extends SearchMapper {
                 .build()._toQuery());
         RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
         rangeQueryBuilder.field(TIMESTAMP)
-                .gte(JsonData.of(startTime))
-                .lte(JsonData.of(endTime));
+                .gte(JsonData.of(startTime));
         boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         searchRequestBuilder
