@@ -11,9 +11,10 @@ import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -22,6 +23,8 @@ import io.netty.handler.codec.string.StringEncoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Stack;
 
@@ -50,7 +53,8 @@ public class ArktourosTcpReceiver extends DataReceiver {
         log.info("Starting arktouros tcp receiver on port: {}", tcpPort);
         // 我也不知道这个netty是哪个依赖引进来的 反正咱有得用是好事
         new ServerBootstrap()
-                .group(new NioEventLoopGroup())
+                // boss and worker 进一步提高性能
+                .group(new NioEventLoopGroup(), new NioEventLoopGroup())
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
@@ -58,13 +62,22 @@ public class ArktourosTcpReceiver extends DataReceiver {
                         // 添加具体的handler
                         channel.pipeline().addLast(new StringDecoder());
                         channel.pipeline().addLast(new StringEncoder());
-                        channel.pipeline().addLast(new SimpleChannelInboundHandler<String>() {
+                        channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                             @Override
-                            protected void channelRead0(
-                                    ChannelHandlerContext channelHandlerContext, String inputStr)
+                            public void channelRead(ChannelHandlerContext ctx, Object msg)
                                     throws Exception {
-                                cacheStringBuilder.append(inputStr.trim());
+                                ByteBuf byteBuf = (ByteBuf) msg;
+                                cacheStringBuilder.append(byteBuf.toString(Charset.defaultCharset()));
                                 handleChannelInput();
+                            }
+
+                            // 异常处理
+                            @Override
+                            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+                                log.error("Error caught by tcp receiver when handling channel input. Cause: {}",
+                                        Arrays.toString(cause.getStackTrace()));
+                                //释放资源
+                                ctx.close();
                             }
                         });
                     }
