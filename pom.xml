@@ -40,13 +40,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- maven plugin -->
-        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
-        <native-maven-plugin.version>0.10.1</native-maven-plugin.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <native-maven-plugin.version>0.10.2</native-maven-plugin.version>
         <!-- assembly-plugin用最新的3.7.0会报空指针问题 -->
         <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
         <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
-        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+        <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
         <front-end-maven-plugin.version>1.15.0</front-end-maven-plugin.version>
         <!-- maven plugin -->
 
@@ -55,7 +55,7 @@
         <lombok.version>1.18.34</lombok.version>
         <snakeyaml.verison>2.2</snakeyaml.verison>
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
-        <jackson.version>2.17.1</jackson.version>
+        <jackson.version>2.17.2</jackson.version>
         <elasticsearch-java.version>8.14.2</elasticsearch-java.version>
         <armeria.version>1.29.1</armeria.version>
 
@@ -79,7 +79,7 @@
         <!-- grpc -->
 
         <!-- UT -->
-        <junit-jupiter.version>5.10.2</junit-jupiter.version>
+        <junit-jupiter.version>5.10.3</junit-jupiter.version>
         <mockito.version>5.11.0</mockito.version>
         <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
