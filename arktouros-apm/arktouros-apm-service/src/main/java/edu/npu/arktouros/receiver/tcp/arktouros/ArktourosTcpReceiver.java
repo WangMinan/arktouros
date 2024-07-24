@@ -12,14 +12,15 @@ import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -39,6 +40,9 @@ public class ArktourosTcpReceiver extends DataReceiver {
     private final StringBuilder cacheStringBuilder;
     private final SinkService sinkService;
     private final ObjectMapper objectMapper;
+    private final NioEventLoopGroup bossGroup;
+    private final NioEventLoopGroup workerGroup;
+    private Channel channel;
 
     public ArktourosTcpReceiver(SinkService sinkService, int tcpPort,
                                 ObjectMapper objectMapper) {
@@ -46,43 +50,68 @@ public class ArktourosTcpReceiver extends DataReceiver {
         this.tcpPort = tcpPort;
         this.cacheStringBuilder = new StringBuilder();
         this.objectMapper = objectMapper;
+        this.bossGroup = new NioEventLoopGroup();
+        this.workerGroup = new NioEventLoopGroup();
     }
 
     @Override
     public void start() {
         log.info("Starting arktouros tcp receiver on port: {}", tcpPort);
         // 我也不知道这个netty是哪个依赖引进来的 反正咱有得用是好事
-        new ServerBootstrap()
+        ChannelFuture channelFuture = new ServerBootstrap()
                 // boss and worker 进一步提高性能
-                .group(new NioEventLoopGroup(), new NioEventLoopGroup())
+                .group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
                     protected void initChannel(NioSocketChannel channel) {
                         // 添加具体的handler
-                        channel.pipeline().addLast(new StringDecoder());
-                        channel.pipeline().addLast(new StringEncoder());
-                        channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
-                            @Override
-                            public void channelRead(ChannelHandlerContext ctx, Object msg)
-                                    throws Exception {
-                                ByteBuf byteBuf = (ByteBuf) msg;
-                                cacheStringBuilder.append(byteBuf.toString(Charset.defaultCharset()));
-                                handleChannelInput();
-                            }
+                        channel.pipeline()
+                                // head -> add last 加入的处理器 -> tail
+                                .addLast(new ChannelInboundHandlerAdapter() {
+                                    @Override
+                                    public void channelRead(ChannelHandlerContext ctx, Object msg)
+                                            throws Exception {
+                                        ByteBuf byteBuf = (ByteBuf) msg;
+                                        log.debug("Tcp netty receiver receives data: {}",
+                                                byteBuf.toString(Charset.defaultCharset()));
+                                        cacheStringBuilder.append(
+                                                byteBuf.toString(Charset.defaultCharset()));
+                                        handleChannelInput();
+                                        // 如果有响应要写就放在这个位置
+                                        // ctx.writeAndFlush();
+                                    }
 
-                            // 异常处理
-                            @Override
-                            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-                                log.error("Error caught by tcp receiver when handling channel input. Cause: {}",
-                                        Arrays.toString(cause.getStackTrace()));
-                                //释放资源
-                                ctx.close();
-                            }
-                        });
+                                    // 异常处理
+                                    @Override
+                                    public void exceptionCaught(
+                                            ChannelHandlerContext ctx, Throwable cause) {
+                                        log.error("Error caught by tcp receiver when handling channel input. Cause: {}",
+                                                Arrays.toString(cause.getStackTrace()));
+                                        //释放资源
+                                        ctx.close();
+                                    }
+                                });
                     }
                 })
                 .bind(tcpPort);
+        // 定义channel.close之后会执行的操作
+        channelFuture.addListener(future -> {
+            if (future.isSuccess()) {
+                log.info("Arktouros tcp receiver started successfully.");
+                // 同步获取channel
+                channel = channelFuture.sync().channel();
+                // 异步定义shutdown hook
+                ChannelFuture closeFuture = channel.closeFuture();
+                closeFuture.addListener((ChannelFutureListener) close -> {
+                    log.info("Arktouros tcp receiver start shutting down NioEventLoopGroups.");
+                    bossGroup.shutdownGracefully();
+                    workerGroup.shutdownGracefully();
+                });
+            } else {
+                log.error("Arktouros tcp receiver failed to start.");
+            }
+        });
     }
 
     private void handleChannelInput() throws IOException {
@@ -149,5 +178,6 @@ public class ArktourosTcpReceiver extends DataReceiver {
     @Override
     public void stop() {
         log.info("Tcp receiver shutdown. All unreceived data will be lost.");
+        channel.close();
     }
 }
