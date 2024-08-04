@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +26,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author : [wangminan]
@@ -46,22 +49,26 @@ public class JsonFileReceiver extends DataReceiver {
     // 阻塞队列 不需要考虑并发问题 用synchronize或者lock画蛇添足会导致线程阻塞
     private final ArrayBlockingQueue<String> outputCache =
             new ArrayBlockingQueue<>(DEFAULT_CAPACITY);
-    private final String fileType;
-    private final SinkService sinkService;
+    private final ExecutorService jsonFilePreHandlerExecutor = Executors.newSingleThreadExecutor(
+            new BasicThreadFactory.Builder()
+                    .namingPattern("Json-file-preHandler-%d").build()
+    );
 
-    @SneakyThrows
     public JsonFileReceiver(@NonNull String logDir, @NonNull String indexFilePath,
                             String fileType, SinkService sinkService, ObjectMapper objectMapper) {
         this.logDirName = logDir;
         this.logDirFile = new File(logDir);
         this.indexFilePath = indexFilePath;
         this.indexFile = new File(indexFilePath);
-        this.fileType = fileType;
-        this.sinkService = sinkService;
         initCreateTimeFileMap();
-        initParamsWithIndex();
+        try {
+            initParamsWithIndex();
+        } catch (IOException e) {
+            throw new ArktourosException(e);
+        }
         // 启动JsonFilePreHandler
-        new Thread(new JsonFilePreHandler(outputCache, fileType, sinkService, objectMapper)).start();
+        jsonFilePreHandlerExecutor.submit(
+                new JsonFilePreHandler(outputCache, fileType, sinkService, objectMapper));
     }
 
     public void initCreateTimeFileMap() {
@@ -223,5 +230,6 @@ public class JsonFileReceiver extends DataReceiver {
     @Override
     public void stop() {
         log.info("JsonFileReceiver stop reading log files");
+        jsonFilePreHandlerExecutor.shutdown();
     }
 }
