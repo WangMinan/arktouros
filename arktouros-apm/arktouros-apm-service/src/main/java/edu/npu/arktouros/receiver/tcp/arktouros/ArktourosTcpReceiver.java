@@ -14,7 +14,6 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -58,58 +57,54 @@ public class ArktourosTcpReceiver extends DataReceiver {
     public void start() {
         log.info("Starting arktouros tcp receiver on port: {}", tcpPort);
         // 我也不知道这个netty是哪个依赖引进来的 反正咱有得用是好事
-        ChannelFuture channelFuture = new ServerBootstrap()
-                // boss and worker 进一步提高性能
-                .group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
-                .childHandler(new ChannelInitializer<NioSocketChannel>() {
-                    @Override
-                    protected void initChannel(NioSocketChannel channel) {
-                        // 添加具体的handler
-                        channel.pipeline()
-                                // head -> add last 加入的处理器 -> tail
-                                .addLast(new ChannelInboundHandlerAdapter() {
-                                    @Override
-                                    public void channelRead(ChannelHandlerContext ctx, Object msg)
-                                            throws Exception {
-                                        ByteBuf byteBuf = (ByteBuf) msg;
-                                        log.debug("Tcp netty receiver receives data: {}",
-                                                byteBuf.toString(Charset.defaultCharset()));
-                                        cacheStringBuilder.append(
-                                                byteBuf.toString(Charset.defaultCharset()));
-                                        handleChannelInput();
-                                        // 如果有响应要写就放在这个位置
-                                        // ctx.writeAndFlush();
-                                    }
+        ServerBootstrap serverBootstrap = new ServerBootstrap();
+        // boss and worker 进一步提高性能
+        serverBootstrap.group(bossGroup, workerGroup);
+        serverBootstrap.channel(NioServerSocketChannel.class);
+        serverBootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
+            @Override
+            protected void initChannel(NioSocketChannel channel) {
+                // 添加具体的handler
+                channel.pipeline()
+                        // head -> add last 加入的处理器 -> tail
+                        .addLast(new ChannelInboundHandlerAdapter() {
+                            @Override
+                            public void channelRead(ChannelHandlerContext ctx, Object msg)
+                                    throws Exception {
+                                ByteBuf byteBuf = (ByteBuf) msg;
+                                log.debug("Tcp netty receiver receives data: {}",
+                                        byteBuf.toString(Charset.defaultCharset()));
+                                cacheStringBuilder.append(
+                                        byteBuf.toString(Charset.defaultCharset()));
+                                handleChannelInput();
+                                // 如果有响应要写就放在这个位置
+                                // ctx.writeAndFlush();
+                            }
 
-                                    // 异常处理
-                                    @Override
-                                    public void exceptionCaught(
-                                            ChannelHandlerContext ctx, Throwable cause) {
-                                        log.error("Error caught by tcp receiver when handling channel input. Cause: {}",
-                                                Arrays.toString(cause.getStackTrace()));
-                                        //释放资源
-                                        ctx.close();
-                                    }
-                                });
-                    }
-                })
-                .bind(tcpPort);
-        // 定义channel.close之后会执行的操作
+                            // 异常处理
+                            @Override
+                            public void exceptionCaught(
+                                    ChannelHandlerContext ctx, Throwable cause) {
+                                log.error("Error caught by tcp receiver when handling channel input. Cause: {}",
+                                        Arrays.toString(cause.getStackTrace()));
+                                //释放资源
+                                ctx.close();
+                            }
+                        });
+            }
+        });
+        ChannelFuture channelFuture = serverBootstrap.bind(tcpPort);
+        log.info("Arktouros tcp receiver started on port: {}", tcpPort);
+        channel = channelFuture.channel();
+        // 定义channel.close之后会执行的操作 异步写法 同步的话用try catch
         channelFuture.addListener(future -> {
             if (future.isSuccess()) {
-                log.info("Arktouros tcp receiver started successfully.");
-                // 同步获取channel
-                channel = channelFuture.sync().channel();
-                // 异步定义shutdown hook
-                ChannelFuture closeFuture = channel.closeFuture();
-                closeFuture.addListener((ChannelFutureListener) close -> {
-                    log.info("Arktouros tcp receiver start shutting down NioEventLoopGroups.");
-                    bossGroup.shutdownGracefully();
-                    workerGroup.shutdownGracefully();
-                });
+                log.info("Arktouros tcp receiver start shutting down NioEventLoopGroups.");
+                bossGroup.shutdownGracefully();
+                workerGroup.shutdownGracefully();
             } else {
-                log.error("Arktouros tcp receiver failed to start.");
+                log.error("Arktouros tcp receiver caught error, cause: \n{}",
+                        Arrays.stream(future.cause().getStackTrace()).toList());
             }
         });
     }
