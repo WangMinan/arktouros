@@ -170,11 +170,11 @@ jobs:
           scp -r -o StrictHostKeyChecking=no deploy/run-backend.sh 
           root@${{secrets.REMOTE_IP}}:/root/arktouros
 
-      - name: 授权并执行部署脚本
-        run: >
-          sshpass -p ${{secrets.REMOTE_PWD}} 
-          ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP}} 
-          "chmod +x /root/arktouros/run-backend.sh && /root/arktouros/run-backend.sh"
+#      - name: 授权并执行部署脚本
+#        run: >
+#          sshpass -p ${{secrets.REMOTE_PWD}}
+#          ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP}}
+#          "chmod +x /root/arktouros/run-backend.sh && /root/arktouros/run-backend.sh"
 
   deploy-on-another-remote:
     runs-on: ubuntu-latest
