@@ -1,7 +1,6 @@
 FROM ghcr.io/graalvm/jdk-community:21
 LABEL authors="wangminan"
 RUN mkdir arktouros
-# https://www.iszy.cc/posts/13/
 WORKDIR /arktouros
 COPY build/arktouros-apm-api/config ./config
 COPY build/arktouros-apm-api/lib ./lib
