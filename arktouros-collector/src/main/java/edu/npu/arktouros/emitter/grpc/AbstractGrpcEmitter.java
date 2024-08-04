@@ -31,7 +31,7 @@ public class AbstractGrpcEmitter extends AbstractEmitter {
             // 定时线程池
             new ScheduledThreadPoolExecutor(1,
                     new BasicThreadFactory.Builder()
-                            .namingPattern("keepAlive-check-%d").build());
+                            .namingPattern("Keep-alive-check-%d").build());
     protected final AtomicInteger connectRetryTimes = new AtomicInteger(0);
 
     protected AbstractGrpcEmitter(AbstractCache inputCache) {

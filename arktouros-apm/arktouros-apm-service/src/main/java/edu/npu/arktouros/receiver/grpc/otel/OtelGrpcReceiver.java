@@ -95,11 +95,11 @@ public class OtelGrpcReceiver extends DataReceiver {
 
     private void initAndStartAnalyzers() {
         ThreadFactory logAnalyzerThreadFactory = new BasicThreadFactory.Builder()
-                .namingPattern("log-analyzer-%d").build();
+                .namingPattern("Log-analyzer-%d").build();
         ThreadFactory traceAnalyzerThreadFactory = new BasicThreadFactory.Builder()
-                .namingPattern("trace-analyzer-%d").build();
+                .namingPattern("Trace-analyzer-%d").build();
         ThreadFactory metricsAnalyzerThreadFactory = new BasicThreadFactory.Builder()
-                .namingPattern("metrics-analyzer-%d").build();
+                .namingPattern("Metrics-analyzer-%d").build();
         logAnalyzerThreadPool = new ThreadPoolExecutor(logAnalyzerNumber, logAnalyzerNumber,
                 0L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<>(logAnalyzerNumber),

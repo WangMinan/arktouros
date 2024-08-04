@@ -41,14 +41,14 @@ public class CollectorMain {
                 PropertiesProvider.getProperty("instance.number.emitter", "3"));
         receiverThreadPool = Executors.newSingleThreadExecutor(
                 new BasicThreadFactory.Builder()
-                        .namingPattern("receiver-%d").build());
+                        .namingPattern("Receiver-%d").build());
         preHandlerThreadPool = Executors.newFixedThreadPool(preHandlerNum,
                 new BasicThreadFactory.Builder()
-                        .namingPattern("preHandler-%d").build());
+                        .namingPattern("PreHandler-%d").build());
         emitterThreadPool =
                 Executors.newFixedThreadPool(emitterNum,
                         new BasicThreadFactory.Builder()
-                                .namingPattern("emitter-%d").build());
+                                .namingPattern("Emitter-%d").build());
     }
 
     public static void main(String[] args) throws InterruptedException {
