@@ -36,6 +36,6 @@ java -jar -Djava.library.path=lib/ *.jar
 
 如有需要可自行改动config目录下的对应配置文件。
 
-如果需要使用docker运行请自行修改apm-api的resources目录下的[docker-compose](arktouros-apm/arktouros-apm-api/src/main/resources/docker-compose.yaml)文件，注意config文件夹映射。
+如果需要使用docker运行请自行修改deploy目录下的[docker-compose](deploy/docker-compose.yaml)文件，注意config文件夹映射。
 
 目标端机采集软件请见[https://github.com/wangminan/simple-otel](https://github.com/wangminan/simple-otel)
