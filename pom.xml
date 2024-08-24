@@ -60,7 +60,7 @@
         <armeria.version>1.29.3</armeria.version>
 
         <!-- commons -->
-        <commons-lang3.version>3.15.0</commons-lang3.version>
+        <commons-lang3.version>3.16.0</commons-lang3.version>
         <commons-io.version>2.16.1</commons-io.version>
         <commons-pool2.version>2.12.0</commons-pool2.version>
         <!-- commons -->
