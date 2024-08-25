@@ -5,7 +5,6 @@ import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
