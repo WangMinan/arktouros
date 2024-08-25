@@ -26,4 +26,3 @@ updates:
       - dependency-name: "*grpc*"
       - dependency-name: "*protobuf*"
       - dependency-name: "elasticsearch-java"
-        version: ">=8.15.0"
