@@ -313,11 +313,15 @@ public class ElasticsearchMapper extends SearchMapper {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         searchRequestBuilder
                 .index(indexName)
-                .query(matchQueryBuilder.build()._toQuery());
-        return ElasticsearchUtil.scrollSearch(searchRequestBuilder, clazz)
-                .stream()
-                .map(Metric::getName)
-                .toList();
+                .query(matchQueryBuilder.build()._toQuery())
+                .aggregations("nameAgg",
+                        agg -> agg.terms(term -> term.field("name")));
+        searchRequestBuilder.size(ElasticsearchConstants.MAX_PAGE_SIZE);
+        SearchResponse<T> searchResponse = ElasticsearchUtil
+                .simpleSearch(searchRequestBuilder, clazz);
+        Aggregate namespaceAgg = searchResponse.aggregations().get("nameAgg");
+        List<StringTermsBucket> buckets = namespaceAgg.sterms().buckets().array();
+        return buckets.stream().map(bucket -> bucket.key().stringValue()).toList();
     }
 
     @Override
