@@ -5,3 +5,4 @@ cd /root/arktouros || exit
 docker stop arktouros-ui
 docker rm arktouros-ui
 docker compose up arktouros-ui -d
+docker image prune -a -f
