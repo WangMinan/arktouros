@@ -1,17 +1,21 @@
 package edu.npu.arktouros.util.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.RequestBase;
 import co.elastic.clients.elasticsearch._types.Time;
 import co.elastic.clients.elasticsearch.core.ScrollRequest;
 import co.elastic.clients.elasticsearch.core.ScrollResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.Source;
+import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.client.Request;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -97,5 +101,18 @@ public class ElasticsearchUtil {
             ElasticsearchClientPool.returnClient(esClient);
         }
         return result;
+    }
+
+    public static <TDocument, TPartialDocument> void update(
+            UpdateRequest<TDocument, TPartialDocument> updateRequest, Class<TDocument> clazz) {
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+        try {
+            esClient.update(updateRequest, clazz);
+        } catch (IOException e) {
+            log.error("Failed to update: {}", e.getMessage());
+            throw new ArktourosException(e, "Failed to update");
+        } finally {
+            ElasticsearchClientPool.returnClient(esClient);
+        }
     }
 }

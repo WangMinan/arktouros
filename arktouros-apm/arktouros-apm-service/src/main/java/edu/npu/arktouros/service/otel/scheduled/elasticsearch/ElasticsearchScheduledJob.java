@@ -2,6 +2,7 @@ package edu.npu.arktouros.service.otel.scheduled.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.Time;
+import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import co.elastic.clients.elasticsearch.indices.RolloverRequest;
 import co.elastic.clients.elasticsearch.indices.RolloverResponse;
 import co.elastic.clients.elasticsearch.indices.rollover.RolloverConditions;
@@ -218,6 +219,23 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
 
     @Override
     protected void calculateErrorRate(Service service) {
+        double errorRate = sinkErrorRate(service);
+        updateServiceStatus(service, errorRate);
+    }
+
+    private void updateServiceStatus(Service service, double errorRate) {
+        service.setStatus(errorRate == 0);
+        UpdateRequest<Service, Service> updateRequest =
+                new UpdateRequest.Builder<Service, Service>()
+                        .id(service.getId())
+                        .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
+                        .upsert(service)
+                        .doc(service)
+                        .build();
+        ElasticsearchUtil.update(updateRequest, Service.class);
+    }
+
+    private double sinkErrorRate(Service service) {
         log.info("Calculate error rate start for service:{}.", service.getName());
         // 开始时间 头五分钟
         long startTime = System.currentTimeMillis() - 5 * 60 * 1000;
@@ -245,7 +263,8 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
             log.error("Sink error rate for service:{} error.",
                     service.getName(), e);
         }
-        log.info("Calculate error rate for service:{} complete.", service.getName());
+        log.info("Calculate error rate for service:{} complete. Error rate: {}.", service.getName(), value);
+        return value;
     }
 
     /**
