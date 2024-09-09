@@ -31,7 +31,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(of = "id")
 @ToString(callSuper = true)
 public class Span implements Source {
     private String name;
@@ -54,7 +54,7 @@ public class Span implements Source {
     @Builder
     public Span(String id, String serviceName, String name, String traceId,
                 String parentSpanId, EndPoint localEndPoint, EndPoint remoteEndPoint,
-                Long startTime, Long endTime, @Singular List<Tag> tags) {
+                Long startTime, Long endTime, boolean root, @Singular List<Tag> tags) {
         this.id = id;
         this.serviceName = serviceName;
         this.name = name;
@@ -64,7 +64,7 @@ public class Span implements Source {
         this.remoteEndPoint = remoteEndPoint;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.root = StringUtils.isEmpty(parentSpanId);
+        this.root = root;
         this.tags = tags;
     }
 
@@ -78,7 +78,7 @@ public class Span implements Source {
         this.remoteEndPoint = new EndPoint(span.getRemoteEndPoint());
         this.startTime = span.getStartTime();
         this.endTime = span.getEndTime();
-        this.root = StringUtils.isEmpty(span.getParentSpanId());
+        this.root = span.getRoot();
         this.type = SourceType.SPAN;
         span.getTagsList().forEach(tag -> this.tags.add(new Tag(tag)));
     }

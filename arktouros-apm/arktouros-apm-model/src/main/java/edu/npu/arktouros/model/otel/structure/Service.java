@@ -10,6 +10,7 @@ import edu.npu.arktouros.model.otel.basic.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.nio.charset.StandardCharsets;
@@ -26,6 +27,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Service implements Source {
     private String id;
     private String name;
