@@ -2,6 +2,7 @@ package edu.npu.arktouros.model.vo;
 
 import edu.npu.arktouros.model.common.PersistentDataConstants;
 import edu.npu.arktouros.model.otel.topology.span.SpanTreeNode;
+import edu.npu.arktouros.model.otel.trace.Span;
 import lombok.Builder;
 import lombok.Data;
 
@@ -18,6 +19,8 @@ public class SpanTreeNodeVo {
     private boolean collapsed = false;
     private List<SpanTreeNodeVo> children = new ArrayList<>();
     private ItemStyle itemStyle;
+    // 我要加这个字段 不然前端看不出来span的实时状态
+    private Span span;
 
     private static final String COLOR_ERROR_RED_RGB = "#FF2700";
     private static final String COLOR_ERROR_YELLOW_RGB = "#FFEE00";
@@ -25,6 +28,7 @@ public class SpanTreeNodeVo {
 
     // 直接递归
     public SpanTreeNodeVo(SpanTreeNode spanTreeNode) {
+        this.span = spanTreeNode.getSpan();
         this.name = spanTreeNode.getSpan().getName();
         if (spanTreeNode.getSpan().getEndTime() ==
                 PersistentDataConstants.ERROR_SPAN_END_TIME) {
