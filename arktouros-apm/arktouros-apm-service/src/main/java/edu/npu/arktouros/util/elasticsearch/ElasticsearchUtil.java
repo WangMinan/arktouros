@@ -2,11 +2,14 @@ package edu.npu.arktouros.util.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.Time;
+import co.elastic.clients.elasticsearch.core.DeleteRequest;
+import co.elastic.clients.elasticsearch.core.DeleteResponse;
 import co.elastic.clients.elasticsearch.core.ScrollRequest;
 import co.elastic.clients.elasticsearch.core.ScrollResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.UpdateRequest;
+import co.elastic.clients.elasticsearch.core.UpdateResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.exception.ArktourosException;
@@ -100,16 +103,32 @@ public class ElasticsearchUtil {
         return result;
     }
 
-    public static <TDocument, TPartialDocument> void update(
+    public static <TDocument, TPartialDocument> boolean update(
             UpdateRequest<TDocument, TPartialDocument> updateRequest, Class<TDocument> clazz) {
         ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+        UpdateResponse<TDocument> updateResponse;
         try {
-            esClient.update(updateRequest, clazz);
+            updateResponse = esClient.update(updateRequest, clazz);
         } catch (IOException e) {
             log.error("Failed to update: {}", e.getMessage());
             throw new ArktourosException(e, "Failed to update");
         } finally {
             ElasticsearchClientPool.returnClient(esClient);
         }
+        return updateResponse.result() != null;
+    }
+
+    public static boolean delete(DeleteRequest deleteRequest) {
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+        DeleteResponse deleteResponse;
+        try {
+            deleteResponse = esClient.delete(deleteRequest);
+        } catch (IOException e) {
+            log.error("Failed to delete: {}", e.getMessage());
+            throw new ArktourosException(e, "Failed to delete");
+        } finally {
+            ElasticsearchClientPool.returnClient(esClient);
+        }
+        return deleteResponse.result() != null;
     }
 }

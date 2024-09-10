@@ -2,6 +2,7 @@ package edu.npu.arktouros.service.otel.scheduled.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.Time;
+import co.elastic.clients.elasticsearch.core.DeleteRequest;
 import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import co.elastic.clients.elasticsearch.indices.RolloverRequest;
 import co.elastic.clients.elasticsearch.indices.RolloverResponse;
@@ -21,6 +22,9 @@ import edu.npu.arktouros.service.otel.search.SearchService;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -224,15 +228,43 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     }
 
     private void updateServiceStatus(Service service, double errorRate) {
-        service.setStatus(errorRate == 0);
-        UpdateRequest<Service, Service> updateRequest =
-                new UpdateRequest.Builder<Service, Service>()
-                        .id(service.getId())
-                        .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
-                        .upsert(service)
-                        .doc(service)
-                        .build();
-        ElasticsearchUtil.update(updateRequest, Service.class);
+        // 这是private方法 我们要做一个手动rollback
+        Service sourceService = new Service();
+        // 深拷贝
+        BeanUtils.copyProperties(service, sourceService);
+        DeleteRequest deleteRequest = new DeleteRequest.Builder()
+                .id(service.getId())
+                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
+                .build();
+        boolean deleteResult = ElasticsearchUtil.delete(deleteRequest);
+        if (deleteResult) {
+            try {
+                service.setStatus(errorRate == 0);
+                // 先删除 然后再添加 因为原来的service和这个service可能在不一样的分片上
+                UpdateRequest<Service, Service> updateRequest =
+                        new UpdateRequest.Builder<Service, Service>()
+                                .id(service.getId())
+                                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
+                                .doc(service)
+                                .build();
+                boolean updateResult = ElasticsearchUtil.update(updateRequest, Service.class);
+                if (!updateResult) {
+                    rollbackUpdate(sourceService);
+                }
+            } catch (Exception e) {
+                try {
+                    // 手动回滚
+                    rollbackUpdate(sourceService);
+                } catch (IOException ex) {
+                    log.error("Rollback update service:{} error. Need manual recover", service, ex);
+                }
+            }
+        }
+    }
+
+    @Retryable(retryFor = {IOException.class}, maxAttempts = 3)
+    private static void rollbackUpdate(Service service) throws IOException {
+        ElasticsearchUtil.sink(ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);
     }
 
     private double sinkErrorRate(Service service) {
