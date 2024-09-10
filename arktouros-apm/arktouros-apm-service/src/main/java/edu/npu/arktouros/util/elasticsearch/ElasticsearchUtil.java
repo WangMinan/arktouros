@@ -1,7 +1,6 @@
 package edu.npu.arktouros.util.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.RequestBase;
 import co.elastic.clients.elasticsearch._types.Time;
 import co.elastic.clients.elasticsearch.core.ScrollRequest;
 import co.elastic.clients.elasticsearch.core.ScrollResponse;
@@ -12,10 +11,8 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.Source;
-import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.client.Request;
 
 import java.io.IOException;
 import java.util.ArrayList;
