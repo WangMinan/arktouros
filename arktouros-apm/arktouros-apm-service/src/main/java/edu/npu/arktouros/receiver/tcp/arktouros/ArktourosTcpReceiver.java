@@ -108,7 +108,8 @@ public class ArktourosTcpReceiver extends DataReceiver {
 
     private void handleChannelInput() throws IOException {
         String input = cacheStringBuilder.toString();
-        if (!input.startsWith("{")) {
+        String tmpInput = input.trim();
+        if (!tmpInput.startsWith("{")) {
             // 直接就挂了
             log.warn("Invalid input for json when handling: {}", input);
             throw new ArktourosException("Invalid input for json when handling: " + input);
