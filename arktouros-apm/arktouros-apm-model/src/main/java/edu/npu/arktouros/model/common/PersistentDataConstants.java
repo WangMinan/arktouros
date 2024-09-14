@@ -6,4 +6,5 @@ package edu.npu.arktouros.model.common;
  */
 public class PersistentDataConstants {
     public static final int ERROR_SPAN_END_TIME = -1;
+    public static final String ERROR_SPAN_ID = "error_span_id";
 }

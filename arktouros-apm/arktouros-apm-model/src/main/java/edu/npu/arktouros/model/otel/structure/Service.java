@@ -70,10 +70,11 @@ public class Service implements Source {
     }
 
     @Builder
-    public Service(String name) {
+    public Service(String name, boolean status) {
         this.namespace = DEFAULT_NAMESPACE;
         this.name = name;
         this.id = generateServiceId();
+        this.status = status;
     }
 
     public Service(String namespace, String name) {

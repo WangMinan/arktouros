@@ -7,8 +7,10 @@ import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
+import edu.npu.arktouros.model.common.PersistentDataConstants;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.Source;
+import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;
 import edu.npu.arktouros.model.otel.metric.Gauge;
@@ -218,7 +220,17 @@ public class ElasticsearchSinkService extends SinkService {
                     break;
                 case Span sourceSpan:
                     try {
-                        Service service = Service.builder().name(sourceSpan.getServiceName()).build();
+                        Service service = Service.builder()
+                                .name(sourceSpan.getServiceName())
+                                .status(!(sourceSpan.getEndTime() ==
+                                        PersistentDataConstants.ERROR_SPAN_END_TIME))
+                                .build();
+                        if (sourceSpan.getEndTime() ==
+                                PersistentDataConstants.ERROR_SPAN_END_TIME) {
+                            // 加Tag
+                            service.setTags(List.of(new Tag(
+                                    PersistentDataConstants.ERROR_SPAN_ID, sourceSpan.getId())));
+                        }
                         ElasticsearchUtil.sink(service.getId(),
                                 ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);
                         ElasticsearchUtil.sink(sourceSpan.getId(),
@@ -228,6 +240,10 @@ public class ElasticsearchSinkService extends SinkService {
                         log.error("Sink span error.", e);
                         throw e;
                     }
+                    break;
+                case Service service:
+                    ElasticsearchUtil.sink(service.getId(),
+                            ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);
                     break;
                 default:
                     throw new IllegalStateException("Unexpected source type value: " + source);

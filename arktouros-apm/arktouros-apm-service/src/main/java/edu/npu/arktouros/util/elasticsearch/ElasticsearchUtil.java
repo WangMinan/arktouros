@@ -74,7 +74,7 @@ public class ElasticsearchUtil {
                                     PropertiesProvider
                                             .getProperty(
                                                     "elasticsearch.scroll.maxWait",
-                                                    "5000") + "ms"
+                                                    "2000") + "ms"
                             ).build())
                             .build(), clazz);
             String scrollId = searchResponse.scrollId();
