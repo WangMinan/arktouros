@@ -11,6 +11,7 @@ import edu.npu.arktouros.model.common.ElasticsearchConstants;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.common.PersistentDataConstants;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
+import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.topology.span.SpanTreeNode;
@@ -21,6 +22,9 @@ import edu.npu.arktouros.service.otel.search.SearchService;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.retry.annotation.Retryable;
@@ -176,6 +180,13 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
 
     @Override
     protected void calculateResponseTime(Service service) {
+        UpdateServiceGauge updateServiceGauge = sinkResponseTime(service);
+        if (updateServiceGauge.isShouldUpdate()) {
+            updateServiceLatency(service, updateServiceGauge.value);
+        }
+    }
+
+    private UpdateServiceGauge sinkResponseTime(Service service) {
         log.info("Calculate response time start for service:{}.", service.getName());
         // 重走一遍span树
         List<EndPointTraceIdVo> traceIdVos = searchService.getEndPointTraceIdVos(
@@ -218,13 +229,17 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                     service.getName(), e);
         }
         log.info("Calculate response time for service:{} complete.", service.getName());
+        return new UpdateServiceGauge(!costTimes.isEmpty(), avgCostTime);
     }
 
     @Override
     protected void calculateErrorRate(Service service) {
-        double errorRate = sinkErrorRate(service);
-        if (errorRate > 0) {
-            updateServiceStatus(service, errorRate);
+        UpdateServiceGauge updateServiceGauge = sinkErrorRate(service);
+        if (updateServiceGauge.isShouldUpdate() &&
+                ((service.isStatus() && updateServiceGauge.value > 0) ||
+                        (!service.isStatus() && updateServiceGauge.value == 0))) {
+            // 有请求发生才更新
+            updateServiceStatus(service, updateServiceGauge.value);
         }
     }
 
@@ -243,6 +258,38 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
             log.info("Delete source service success, inserting now.");
             try {
                 service.setStatus(errorRate == 0);
+                if (errorRate == 0) {
+                    service.setTags(new ArrayList<>());
+                } else {
+
+                }
+                sinkService.sink(service);
+            } catch (Exception e) {
+                try {
+                    // 手动回滚
+                    rollbackUpdate(sourceService);
+                } catch (IOException ex) {
+                    log.error("Rollback update service:{} error. Need manual recover", service, ex);
+                }
+            }
+        }
+    }
+
+    private void updateServiceLatency(Service service, double latency) {
+        log.info("Start update service latency: {}", service.getName());
+        // 这是private方法 我们要做一个手动rollback
+        Service sourceService = new Service();
+        // 深拷贝
+        BeanUtils.copyProperties(service, sourceService);
+        DeleteRequest deleteRequest = new DeleteRequest.Builder()
+                .id(service.getId())
+                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
+                .build();
+        boolean deleteResult = ElasticsearchUtil.delete(deleteRequest);
+        if (deleteResult) {
+            log.info("Delete source service success, inserting now.");
+            try {
+                service.setLatency((int) latency);
                 sinkService.sink(service);
             } catch (Exception e) {
                 try {
@@ -260,7 +307,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         ElasticsearchUtil.sink(ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);
     }
 
-    private double sinkErrorRate(Service service) {
+    private UpdateServiceGauge sinkErrorRate(Service service) {
         log.info("Calculate error rate start for service:{}.", service.getName());
         // 开始时间 头五分钟
         long startTime = System.currentTimeMillis() - 5 * 60 * 1000;
@@ -269,8 +316,18 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         List<Span> allSpans = searchService.getAllSpans(service, startTime);
         // 3. 计算错误率
         long errorCount = allSpans.stream()
-                .filter(span -> span.getEndTime() == PersistentDataConstants.ERROR_SPAN_END_TIME)
+                .filter(span -> span.getEndTime() ==
+                        PersistentDataConstants.ERROR_SPAN_END_TIME)
                 .count();
+        if (errorCount > 0) {
+            List<Tag> tags = new ArrayList<>();
+            allSpans.stream()
+                    .filter(span -> span.getEndTime() ==
+                            PersistentDataConstants.ERROR_SPAN_END_TIME)
+                    .forEach(span -> tags.add(new Tag(
+                            PersistentDataConstants.ERROR_SPAN_ID, span.getId())));
+            service.setTags(tags);
+        }
         double value = allSpans.isEmpty() ? 0 : errorCount * 1.0 / allSpans.size();
         // 4. 写入gauge
         Gauge errorRate = Gauge.builder()
@@ -289,7 +346,15 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                     service.getName(), e);
         }
         log.info("Calculate error rate for service:{} complete. Error rate: {}.", service.getName(), value);
-        return value;
+        return new UpdateServiceGauge(!allSpans.isEmpty(), value);
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class UpdateServiceGauge {
+        private boolean shouldUpdate;
+        private double value;
     }
 
     /**
