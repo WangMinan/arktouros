@@ -258,11 +258,6 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
             log.info("Delete source service success, inserting now.");
             try {
                 service.setStatus(errorRate == 0);
-                if (errorRate == 0) {
-                    service.setTags(new ArrayList<>());
-                } else {
-
-                }
                 sinkService.sink(service);
             } catch (Exception e) {
                 try {
