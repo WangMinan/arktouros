@@ -3,7 +3,6 @@ package edu.npu.arktouros.service.otel.scheduled.elasticsearch;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.Time;
 import co.elastic.clients.elasticsearch.core.DeleteRequest;
-import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import co.elastic.clients.elasticsearch.indices.RolloverRequest;
 import co.elastic.clients.elasticsearch.indices.RolloverResponse;
 import co.elastic.clients.elasticsearch.indices.rollover.RolloverConditions;
@@ -19,11 +18,11 @@ import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.service.otel.scheduled.ScheduledJob;
 import edu.npu.arktouros.service.otel.search.SearchService;
+import edu.npu.arktouros.service.otel.sinker.SinkService;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 
 import java.io.IOException;
@@ -42,8 +41,8 @@ import static edu.npu.arktouros.service.otel.sinker.elasticsearch.ElasticsearchS
 @Slf4j
 public class ElasticsearchScheduledJob extends ScheduledJob {
 
-    public ElasticsearchScheduledJob(SearchService searchService) {
-        super(searchService);
+    public ElasticsearchScheduledJob(SearchService searchService, SinkService sinkService) {
+        super(searchService, sinkService);
         log.info("ElasticsearchScheduledJob initialize complete.");
     }
 
@@ -224,10 +223,13 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     @Override
     protected void calculateErrorRate(Service service) {
         double errorRate = sinkErrorRate(service);
-        updateServiceStatus(service, errorRate);
+        if (errorRate > 0) {
+            updateServiceStatus(service, errorRate);
+        }
     }
 
     private void updateServiceStatus(Service service, double errorRate) {
+        log.info("Start update service status: {}", service.getName());
         // 这是private方法 我们要做一个手动rollback
         Service sourceService = new Service();
         // 深拷贝
@@ -238,19 +240,10 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                 .build();
         boolean deleteResult = ElasticsearchUtil.delete(deleteRequest);
         if (deleteResult) {
+            log.info("Delete source service success, inserting now.");
             try {
                 service.setStatus(errorRate == 0);
-                // 先删除 然后再添加 因为原来的service和这个service可能在不一样的分片上
-                UpdateRequest<Service, Service> updateRequest =
-                        new UpdateRequest.Builder<Service, Service>()
-                                .id(service.getId())
-                                .index(ElasticsearchIndex.SERVICE_INDEX.getIndexName())
-                                .doc(service)
-                                .build();
-                boolean updateResult = ElasticsearchUtil.update(updateRequest, Service.class);
-                if (!updateResult) {
-                    rollbackUpdate(sourceService);
-                }
+                sinkService.sink(service);
             } catch (Exception e) {
                 try {
                     // 手动回滚

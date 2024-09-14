@@ -2,6 +2,7 @@ package edu.npu.arktouros.service.otel.scheduled;
 
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.service.otel.search.SearchService;
+import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
@@ -15,6 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public abstract class ScheduledJob {
 
     protected SearchService searchService;
+    protected SinkService sinkService;
 
     // Elasticsearch主用 负责调用rollover api
     protected final ScheduledExecutorService rolloverThreadPool =
@@ -46,9 +48,10 @@ public abstract class ScheduledJob {
                     new BasicThreadFactory.Builder()
                             .namingPattern("Simulate-metrics-%d").build());
 
-    public ScheduledJob(SearchService searchService) {
+    public ScheduledJob(SearchService searchService, SinkService sinkService) {
         log.info("All scheduledJob init.");
         this.searchService = searchService;
+        this.sinkService = sinkService;
     }
 
     public abstract void startJobs();

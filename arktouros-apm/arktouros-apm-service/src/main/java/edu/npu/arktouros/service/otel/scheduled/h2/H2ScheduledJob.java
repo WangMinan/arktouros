@@ -3,6 +3,7 @@ package edu.npu.arktouros.service.otel.scheduled.h2;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.service.otel.scheduled.ScheduledJob;
 import edu.npu.arktouros.service.otel.search.SearchService;
+import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -12,8 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class H2ScheduledJob extends ScheduledJob {
 
-    public H2ScheduledJob(SearchService searchService) {
-        super(searchService);
+    public H2ScheduledJob(SearchService searchService, SinkService sinkService) {
+        super(searchService, sinkService);
         log.info("H2ScheduledJob initialize complete.");
     }
 

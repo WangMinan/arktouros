@@ -3,6 +3,7 @@ package edu.npu.arktouros.service.otel.scheduled;
 import edu.npu.arktouros.service.otel.scheduled.elasticsearch.ElasticsearchScheduledJob;
 import edu.npu.arktouros.service.otel.scheduled.h2.H2ScheduledJob;
 import edu.npu.arktouros.service.otel.search.SearchService;
+import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,12 +24,14 @@ public class ScheduledJobFactoryBean implements FactoryBean<ScheduledJob> {
     private String activeScheduledJob;
 
     private final SearchService searchService;
+    private final SinkService sinkService;
 
     private ScheduledJob scheduledJob;
 
     @Lazy
-    public ScheduledJobFactoryBean(SearchService searchService) {
+    public ScheduledJobFactoryBean(SearchService searchService, SinkService sinkService) {
         this.searchService = searchService;
+        this.sinkService = sinkService;
     }
 
     @Override
@@ -36,9 +39,9 @@ public class ScheduledJobFactoryBean implements FactoryBean<ScheduledJob> {
         log.info("ScheduledJobFactory init, current scheduledJob:{}", activeScheduledJob);
         if (scheduledJob == null) {
             if (activeScheduledJob.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
-                scheduledJob = new ElasticsearchScheduledJob(searchService);
+                scheduledJob = new ElasticsearchScheduledJob(searchService, sinkService);
             } else if (activeScheduledJob.toLowerCase(Locale.ROOT).equals("h2")) {
-                scheduledJob = new H2ScheduledJob(searchService);
+                scheduledJob = new H2ScheduledJob(searchService, sinkService);
             } else {
                 throw new IllegalArgumentException("Invalid scheduledJob type: " + activeScheduledJob);
             }

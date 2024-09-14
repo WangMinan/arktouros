@@ -12,7 +12,6 @@ import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -41,7 +40,6 @@ public class ArktourosTcpReceiver extends DataReceiver {
     private final ObjectMapper objectMapper;
     private final NioEventLoopGroup bossGroup;
     private final NioEventLoopGroup workerGroup;
-    private Channel channel;
 
     public ArktourosTcpReceiver(SinkService sinkService, int tcpPort,
                                 ObjectMapper objectMapper) {
@@ -62,7 +60,8 @@ public class ArktourosTcpReceiver extends DataReceiver {
             // boss and worker 进一步提高性能
             serverBootstrap.group(bossGroup, workerGroup);
             serverBootstrap.channel(NioServerSocketChannel.class);
-            serverBootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
+            ChannelInitializer<NioSocketChannel> channelInitializer =
+                    new ChannelInitializer<>() {
                 @Override
                 protected void initChannel(NioSocketChannel channel) {
                     // 添加具体的handler
@@ -93,7 +92,8 @@ public class ArktourosTcpReceiver extends DataReceiver {
                                 }
                             });
                 }
-            });
+            };
+            serverBootstrap.childHandler(channelInitializer);
             ChannelFuture channelFuture = serverBootstrap.bind(tcpPort);
             log.info("Arktouros tcp receiver started on port: {}", tcpPort);
             channelFuture.channel().closeFuture().sync();
@@ -171,6 +171,5 @@ public class ArktourosTcpReceiver extends DataReceiver {
     @Override
     public void stop() {
         log.info("Tcp receiver shutdown. All unreceived data will be lost.");
-        channel.close();
     }
 }
