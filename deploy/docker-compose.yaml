@@ -5,9 +5,9 @@ services:
     image: wangminan/arktouros-apm-server:latest
     container_name: arktouros-apm-server
     ports:
-      - "50049:50049"
-      - "50050:50050"
-      - "50051:50051"
+      - "50049:50049" # tcp receiver默认运行端口
+      - "50050:50050" # 后端服务器默认运行端口
+      - "50051:50051" # grpc receiver默认运行端口
     volumes:
       # 配置文件目录映射进去
       - /root/arktouros/apm/config:/arktouros/config
@@ -19,7 +19,7 @@ services:
     image: wangminan/arktouros-ui:latest
     container_name: arktouros-ui
     ports:
-      - "50052:50052"
+      - "50052:50052" # 前端程序默认运行端口
     volumes:
       - /root/arktouros/ui/config:/arktouros-ui/config
       - /root/arktouros/ui/logs:/arktouros-ui/logs
