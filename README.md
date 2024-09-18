@@ -9,7 +9,7 @@ Arktouros项目是我的本科毕业设计，这是一个轻量级的APM系统�
 如果不需要ui项目，可以直接clone；如果需要ui项目，请使用--recursive参数进行clone。
 
 ```shell
-git clone --recursive https://github.com/WangMinan/Arktouros-ui
+git clone --recursive https://github.com/wangminan-arktouros
 # 或者
 git submodule update --init --recursive
 ```
