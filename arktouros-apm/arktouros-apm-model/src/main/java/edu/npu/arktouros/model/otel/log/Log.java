@@ -20,6 +20,7 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -45,7 +46,7 @@ public class Log implements Source {
     private boolean error = false;
     private Long timestamp;
     @Builder.Default
-    private String severityText = "Info"; // logLevel
+    private String severityText = "INFO"; // logLevel
 
     public static final Map<String, Property> documentMap = new HashMap<>();
 
@@ -66,7 +67,8 @@ public class Log implements Source {
         this.tags = tags;
         this.error = error;
         this.timestamp = timestamp;
-        this.severityText = severityText;
+        // 全大写
+        this.severityText = severityText.toUpperCase(Locale.ROOT);
     }
 
     // 不能用在类上的Builder注解，否则default设置会失效
@@ -83,7 +85,7 @@ public class Log implements Source {
         this.content = content;
         this.tags = tags;
         this.error = error;
-        this.severityText = severityText;
+        this.severityText = severityText.toUpperCase(Locale.ROOT);
     }
 
     public Log(edu.npu.arktouros.proto.log.v1.Log log) {
@@ -96,7 +98,7 @@ public class Log implements Source {
         log.getTagsList().forEach(tag -> this.tags.add(new Tag(tag)));
         this.error = log.getError();
         this.timestamp = log.getTimestamp();
-        this.severityText = log.getSeverityText();
+        this.severityText = log.getSeverityText().toUpperCase(Locale.ROOT);
     }
 
     static {
