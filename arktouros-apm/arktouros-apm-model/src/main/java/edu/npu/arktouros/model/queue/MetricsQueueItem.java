@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetricsQueueItem {
-
     private Long id;
     private String data;
 }
