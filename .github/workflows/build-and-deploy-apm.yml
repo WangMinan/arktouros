@@ -6,6 +6,112 @@ on:
       - 'v*'
 
 jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Get version from tag
+        id: vars
+        run: echo "tag=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+
+      - name: Set up Graal JDK 21
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'      # See 'Options' section below for all supported versions
+          distribution: 'graalvm' # See 'Options' section below for all available distributions
+          version: '21.0.4'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: mvn -Dmaven.test.skip=true -T 2C clean package
+
+      - name: Generate Changelog
+        run: npm install -g auto-changelog && auto-changelog
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create ${{ steps.vars.outputs.tag }} --notes-file CHANGELOG.md build/*.tar.gz
+
+      - name: Unzip package
+        run: tar -zxvf build/arktouros-apm-api-leaves.tar.gz -C build/
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker BuildX
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Apm
+        id: docker_build_apm
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile-apm
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:${{ steps.vars.outputs.tag }} 
+            ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:latest
+
+  deploy-on-remote:
+    runs-on: ubuntu-latest
+    needs: build-and-push-image
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: 传输docker-compose到服务器
+        run: >
+          sshpass -p ${{secrets.REMOTE_PWD}} 
+          scp -r -o StrictHostKeyChecking=no deploy/docker-compose.yaml 
+          root@${{secrets.REMOTE_IP}}:/root/arktouros
+
+      - name: 传输部署脚本到服务器
+        run: >
+          sshpass -p ${{secrets.REMOTE_PWD}} 
+          scp -r -o StrictHostKeyChecking=no deploy/run-backend.sh 
+          root@${{secrets.REMOTE_IP}}:/root/arktouros
+
+  deploy-on-another-remote:
+    runs-on: ubuntu-latest
+    needs: build-and-push-image
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: 写pem到临时文件
+        run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem && chmod 600 private_key.pem
+
+      - name: 传输docker-compose到服务器
+        run: >
+          scp -i private_key.pem -r -o StrictHostKeyChecking=no 
+          deploy/docker-compose.yaml 
+          root@${{secrets.REMOTE_IP_1}}:/root/arktouros
+
+      - name: 传输部署脚本到服务器
+        run: >
+          scp -i private_key.pem -r -o StrictHostKeyChecking=no
+          deploy/run-backend.sh 
+          root@${{secrets.REMOTE_IP_1}}:/root/arktouros
+
+      - name: 授权并执行部署脚本
+        run: >
+          ssh -i private_key.pem -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP_1}} 
+          "chmod +x /root/arktouros/run-backend.sh && /root/arktouros/run-backend.sh"
+
 #  analyze-with-sonarqube:
 #    name: analyze with sonarqube
 #    runs-on: ubuntu-latest
@@ -86,129 +192,3 @@ jobs:
 #          # Optional plain body:
 #          body: Build job of ${{github.repository}} completed successfully!
 #          attachments: ./jacoco-aggregate.tar.gz
-
-  build-and-push-image:
-    runs-on: ubuntu-latest
-#    needs: analyze-with-sonarqube
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-
-      - name: Get version from tag
-        id: vars
-        run: echo "tag=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
-
-      - name: Set up Graal JDK 21
-        uses: graalvm/setup-graalvm@v1
-        with:
-          java-version: '21'      # See 'Options' section below for all supported versions
-          distribution: 'graalvm' # See 'Options' section below for all available distributions
-          version: '21.0.4'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          cache: 'maven'
-
-      - name: Build with Maven
-        run: mvn -Dmaven.test.skip=true -T 2C clean package
-
-      - name: Unzip package
-        run: tar -zxvf build/arktouros-apm-api-leaves.tar.gz -C build/
-
-      #      - name: 传输部署脚本到服务器
-      #        run: |
-      #          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources/run.sh root@${{secrets.REMOTE_IP}}:/root/arktouros
-
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set up Docker BuildX
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push Apm
-        id: docker_build_apm
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile-apm
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:${{ steps.vars.outputs.tag }} 
-            ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:latest
-
-  deploy-on-remote:
-    runs-on: ubuntu-latest
-    needs: build-and-push-image
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-
-#      - name: 传输apm-config文件夹到服务器
-#        run: |
-#          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources root@${{secrets.REMOTE_IP}}:/root/arktouros/apm/config
-#
-#      - name: 传输webapp-config文件夹到服务器
-#        run: |
-#          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-webapp/src/main/resources root@${{secrets.REMOTE_IP}}:/root/arktouros/ui/config
-
-      - name: 传输docker-compose到服务器
-        run: >
-          sshpass -p ${{secrets.REMOTE_PWD}} 
-          scp -r -o StrictHostKeyChecking=no deploy/docker-compose.yaml 
-          root@${{secrets.REMOTE_IP}}:/root/arktouros
-
-      - name: 传输部署脚本到服务器
-        run: >
-          sshpass -p ${{secrets.REMOTE_PWD}} 
-          scp -r -o StrictHostKeyChecking=no deploy/run-backend.sh 
-          root@${{secrets.REMOTE_IP}}:/root/arktouros
-
-#      - name: 授权并执行部署脚本
-#        run: >
-#          sshpass -p ${{secrets.REMOTE_PWD}}
-#          ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP}}
-#          "chmod +x /root/arktouros/run-backend.sh && /root/arktouros/run-backend.sh"
-
-  deploy-on-another-remote:
-    runs-on: ubuntu-latest
-    needs: build-and-push-image
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-
-      #      - name: 传输apm-config文件夹到服务器
-      #        run: |
-      #          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-apm/arktouros-apm-api/src/main/resources root@${{secrets.REMOTE_IP}}:/root/arktouros/apm/config
-      #
-      #      - name: 传输webapp-config文件夹到服务器
-      #        run: |
-      #          sshpass -p ${{secrets.REMOTE_PWD}} scp -r -o StrictHostKeyChecking=no arktouros-webapp/src/main/resources root@${{secrets.REMOTE_IP}}:/root/arktouros/ui/config
-
-      - name: 写pem到临时文件
-        run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem && chmod 600 private_key.pem
-
-      - name: 传输docker-compose到服务器
-        run: >
-          scp -i private_key.pem -r -o StrictHostKeyChecking=no 
-          deploy/docker-compose.yaml 
-          root@${{secrets.REMOTE_IP_1}}:/root/arktouros
-
-      - name: 传输部署脚本到服务器
-        run: >
-          scp -i private_key.pem -r -o StrictHostKeyChecking=no
-          deploy/run-backend.sh 
-          root@${{secrets.REMOTE_IP_1}}:/root/arktouros
-
-      - name: 授权并执行部署脚本
-        run: >
-          ssh -i private_key.pem -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP_1}} 
-          "chmod +x /root/arktouros/run-backend.sh && /root/arktouros/run-backend.sh"
