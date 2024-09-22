@@ -30,12 +30,6 @@ jobs:
         id: vars
         run: echo "tag=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
 
-      - name: Set up node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
       - name: Generate Changelog
         run: npm install -g auto-changelog && auto-changelog
 
