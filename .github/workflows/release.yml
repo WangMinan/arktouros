@@ -1,0 +1,42 @@
+name: "release"
+on:
+  push:
+    tags:
+      # 只有有tag的时候才触发部署操作
+      - 'v*'
+
+jobs:
+  generate-release-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Graal JDK 21
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'      # See 'Options' section below for all supported versions
+          distribution: 'graalvm' # See 'Options' section below for all available distributions
+          version: '21.0.4'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: mvn -Dmaven.test.skip=true -T 2C clean package
+
+      - name: Get version from tag
+        id: vars
+        run: echo "tag=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+
+      - name: Generate Changelog
+        uses: spring-io/github-changelog-generator@v0.0.11
+        with:
+          # 从tag中提取milestone
+          milestone: ${{ steps.vars.outputs.tag }}
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: gh release create ${{ github.ref_name }} --notes-file=changelog.md build/*.tar.gz
