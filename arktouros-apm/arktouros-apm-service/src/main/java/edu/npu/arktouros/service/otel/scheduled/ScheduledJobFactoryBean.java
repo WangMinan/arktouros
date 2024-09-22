@@ -29,7 +29,8 @@ public class ScheduledJobFactoryBean implements FactoryBean<ScheduledJob> {
     private ScheduledJob scheduledJob;
 
     @Lazy
-    public ScheduledJobFactoryBean(SearchService searchService, SinkService sinkService) {
+    public ScheduledJobFactoryBean(SearchService searchService,
+                                   SinkService sinkService) {
         this.searchService = searchService;
         this.sinkService = sinkService;
     }
