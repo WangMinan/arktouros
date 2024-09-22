@@ -52,6 +52,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
 
     @Override
     public void startJobs() {
+        log.info("Starting all scheduled jobs.");
         // 获取所有service
         List<Service> services = searchService.getAllServices();
         // 启动所有定时任务
@@ -63,41 +64,40 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                         "elasticsearch.schedule.rollover",
                         "1")),
                 TimeUnit.HOURS);
-        for (Service service : services) {
-            calculateThroughputThreadPool.scheduleAtFixedRate(
-                    () -> calculateThroughput(service),
-                    // 随机0-60秒
-                    (long) (Math.random() * 60),
-                    Integer.parseInt(
-                            PropertiesProvider.getProperty(
-                                    "elasticsearch.schedule.throughput",
-                                    "5")),
-                    TimeUnit.MINUTES);
-            calculateResponseTimeThreadPool.scheduleAtFixedRate(
-                    () -> calculateResponseTime(service),
-                    // 随机0-60秒
-                    (long) (Math.random() * 60),
-                    Integer.parseInt(PropertiesProvider.getProperty(
-                            "elasticsearch.schedule.responseTime",
-                            "5")),
-                    TimeUnit.MINUTES);
-            calculateErrorRateThreadPool.scheduleAtFixedRate(
-                    () -> calculateErrorRate(service),
-                    // 随机0-60秒
-                    (long) (Math.random() * 60),
-                    Integer.parseInt(PropertiesProvider.getProperty(
-                            "elasticsearch.schedule.errorRate",
-                            "5")),
-                    TimeUnit.MINUTES);
-            simulateMetricThreadPool.scheduleAtFixedRate(
-                    () -> simulateMetrics(service),
-                    // 随机0-60秒
-                    (long) (Math.random() * 60),
-                    Integer.parseInt(PropertiesProvider.getProperty(
-                            "elasticsearch.schedule.metric",
-                            "5")),
-                    TimeUnit.MINUTES);
-        }
+        calculateThroughputThreadPool.scheduleAtFixedRate(
+                () -> calculateThroughput(services),
+                // 随机0-10分钟
+                (long) (Math.random() * 10),
+                Integer.parseInt(
+                        PropertiesProvider.getProperty(
+                                "elasticsearch.schedule.throughput",
+                                "5")),
+                TimeUnit.MINUTES);
+        calculateResponseTimeThreadPool.scheduleAtFixedRate(
+                () -> calculateResponseTime(services),
+                // 随机0-10分钟
+                (long) (Math.random() * 10),
+                Integer.parseInt(PropertiesProvider.getProperty(
+                        "elasticsearch.schedule.responseTime",
+                        "5")),
+                TimeUnit.MINUTES);
+        calculateErrorRateThreadPool.scheduleAtFixedRate(
+                () -> calculateErrorRate(services),
+                // 随机0-10分钟
+                (long) (Math.random() * 10),
+                Integer.parseInt(PropertiesProvider.getProperty(
+                        "elasticsearch.schedule.errorRate",
+                        "5")),
+                TimeUnit.MINUTES);
+        simulateMetricThreadPool.scheduleAtFixedRate(
+                () -> simulateMetrics(services),
+                // 随机0-10分钟
+                (long) (Math.random() * 10),
+                Integer.parseInt(PropertiesProvider.getProperty(
+                        "elasticsearch.schedule.metric",
+                        "5")),
+                TimeUnit.MINUTES);
+
     }
 
     @Override
@@ -105,6 +105,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         log.info("Rollover start.");
         for (String indexName : ElasticsearchIndex.getIndexList()) {
             try {
+                log.info("Rollover index: {}", indexName);
                 handleRollover(indexName);
             } catch (IOException e) {
                 // 不抛异常 大不了我们就不分嘛
@@ -115,75 +116,81 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     }
 
     @Override
-    protected void simulateMetrics(Service service) {
-        // 开始制造数据
-        log.info("Stimulate metrics start.");
-        Random random = new Random();
-        // 1. CPU usage
-        Gauge cpuUsage = Gauge.builder()
-                .name("cpu_usage")
-                .description("Average CPU usage per 5 minutes in percentage.")
-                // 0-10 小数点后1位
-                .value(random.nextInt(101) / 10.0)
-                .timestamp(System.currentTimeMillis())
-                .labels(new HashMap<>())
-                .build();
-        cpuUsage.setServiceName(service.getName());
-        // 2. Memory usage
-        Gauge memoryUsage = Gauge.builder()
-                .name("memory_usage")
-                .description("Average memory usage per 5 minutes in MB.")
-                // 50-150 小数点后1位
-                .value(50 + (random.nextInt(1001) / 10.0))
-                .timestamp(System.currentTimeMillis())
-                .labels(new HashMap<>())
-                .build();
-        memoryUsage.setServiceName(service.getName());
-        try {
-            ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
-                    cpuUsage);
-            ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
-                    memoryUsage);
-        } catch (IOException e) {
-            log.error("Sink stimulate metrics for service:{} error.",
-                    service.getName(), e);
-        }
-        log.info("Stimulate metrics for service:{} complete.", service.getName());
+    protected void simulateMetrics(List<Service> services) {
+        services.forEach(service -> {
+            // 开始制造数据
+            log.info("Stimulate metrics start.");
+            Random random = new Random();
+            // 1. CPU usage
+            Gauge cpuUsage = Gauge.builder()
+                    .name("cpu_usage")
+                    .description("Average CPU usage per 5 minutes in percentage.")
+                    // 0-10 小数点后1位
+                    .value(random.nextInt(101) / 10.0)
+                    .timestamp(System.currentTimeMillis())
+                    .labels(new HashMap<>())
+                    .build();
+            cpuUsage.setServiceName(service.getName());
+            // 2. Memory usage
+            Gauge memoryUsage = Gauge.builder()
+                    .name("memory_usage")
+                    .description("Average memory usage per 5 minutes in MB.")
+                    // 50-150 小数点后1位
+                    .value(50 + (random.nextInt(1001) / 10.0))
+                    .timestamp(System.currentTimeMillis())
+                    .labels(new HashMap<>())
+                    .build();
+            memoryUsage.setServiceName(service.getName());
+            try {
+                ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
+                        cpuUsage);
+                ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
+                        memoryUsage);
+            } catch (IOException e) {
+                log.error("Sink stimulate metrics for service:{} error.",
+                        service.getName(), e);
+            }
+            log.info("Stimulate metrics for service:{} complete.", service.getName());
+        });
     }
 
     @Override
-    protected void calculateThroughput(Service service) {
-        log.info("Calculate throughput start for service:{}.", service.getName());
-        // 开始时间 头五分钟
-        long startTime = System.currentTimeMillis() - 5 * 60 * 1000;
-        // 结束时间 当前时间
-        long endTime = System.currentTimeMillis();
-        // 通过service name查询
-        int traceCount = searchService.getTraceCount(service, startTime, endTime);
-        // 3. 时间/时间=吞吐量 写入gauge
-        Gauge throughput = Gauge.builder()
-                .name("throughput")
-                .description("Total request count per 5 minutes.")
-                .value(traceCount / 5.0)
-                .timestamp(endTime)
-                .labels(new HashMap<>())
-                .build();
-        throughput.setServiceName(service.getName());
-        try {
-            ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(), throughput);
-        } catch (IOException e) {
-            log.error("Sink response time for service:{} error.",
-                    service.getName(), e);
-        }
-        log.info("Calculate throughput for service:{} complete.", service.getName());
+    protected void calculateThroughput(List<Service> services) {
+        services.forEach(service -> {
+            log.info("Calculate throughput start for service:{}.", service.getName());
+            // 开始时间 头五分钟
+            long startTime = System.currentTimeMillis() - 5 * 60 * 1000;
+            // 结束时间 当前时间
+            long endTime = System.currentTimeMillis();
+            // 通过service name查询
+            int traceCount = searchService.getTraceCount(service, startTime, endTime);
+            // 3. 时间/时间=吞吐量 写入gauge
+            Gauge throughput = Gauge.builder()
+                    .name("throughput")
+                    .description("Total request count per 5 minutes.")
+                    .value(traceCount / 5.0)
+                    .timestamp(endTime)
+                    .labels(new HashMap<>())
+                    .build();
+            throughput.setServiceName(service.getName());
+            try {
+                ElasticsearchUtil.sink(ElasticsearchIndex.GAUGE_INDEX.getIndexName(), throughput);
+            } catch (IOException e) {
+                log.error("Sink response time for service:{} error.",
+                        service.getName(), e);
+            }
+            log.info("Calculate throughput for service:{} complete.", service.getName());
+        });
     }
 
     @Override
-    protected void calculateResponseTime(Service service) {
-        UpdateServiceGauge updateServiceGauge = sinkResponseTime(service);
-        if (updateServiceGauge.isShouldUpdate()) {
-            updateServiceLatency(service, updateServiceGauge.value);
-        }
+    protected void calculateResponseTime(List<Service> services) {
+        services.forEach(service -> {
+            UpdateServiceGauge updateServiceGauge = sinkResponseTime(service);
+            if (updateServiceGauge.isShouldUpdate()) {
+                updateServiceLatency(service, updateServiceGauge.value);
+            }
+        });
     }
 
     private UpdateServiceGauge sinkResponseTime(Service service) {
@@ -233,14 +240,16 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     }
 
     @Override
-    protected void calculateErrorRate(Service service) {
-        UpdateServiceGauge updateServiceGauge = sinkErrorRate(service);
-        if (updateServiceGauge.isShouldUpdate() &&
-                ((service.isStatus() && updateServiceGauge.value > 0) ||
-                        (!service.isStatus() && updateServiceGauge.value == 0))) {
-            // 有请求发生才更新
-            updateServiceStatus(service, updateServiceGauge.value);
-        }
+    protected void calculateErrorRate(List<Service> services) {
+        services.forEach(service -> {
+            UpdateServiceGauge updateServiceGauge = sinkErrorRate(service);
+            if (updateServiceGauge.isShouldUpdate() &&
+                    ((service.isStatus() && updateServiceGauge.value > 0) ||
+                            (!service.isStatus() && updateServiceGauge.value == 0))) {
+                // 有请求发生才更新
+                updateServiceStatus(service, updateServiceGauge.value);
+            }
+        });
     }
 
     private void updateServiceStatus(Service service, double errorRate) {

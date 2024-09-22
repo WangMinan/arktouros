@@ -6,6 +6,8 @@ import edu.npu.arktouros.service.otel.search.SearchService;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 /**
  * @author : [wangminan]
  * @description : H2定时任务
@@ -29,22 +31,22 @@ public class H2ScheduledJob extends ScheduledJob {
     }
 
     @Override
-    protected void simulateMetrics(Service service) {
+    protected void simulateMetrics(List<Service> services) {
         log.warn("Stimulate metrics has not been implemented yet.");
     }
 
     @Override
-    protected void calculateThroughput(Service service) {
+    protected void calculateThroughput(List<Service> services) {
         log.warn("Calculate throughput has not been implemented yet.");
     }
 
     @Override
-    protected void calculateResponseTime(Service service) {
+    protected void calculateResponseTime(List<Service> services) {
         log.warn("Calculate response time has not been implemented yet.");
     }
 
     @Override
-    protected void calculateErrorRate(Service service) {
+    protected void calculateErrorRate(List<Service> services) {
         log.warn("Calculate error rate has not been implemented yet.");
     }
 }
