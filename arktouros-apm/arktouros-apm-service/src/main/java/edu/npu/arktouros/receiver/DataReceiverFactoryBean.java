@@ -66,7 +66,8 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
     public DataReceiverFactoryBean(LogQueueService logQueueService,
                                    TraceQueueService traceQueueService,
                                    MetricsQueueService metricsQueueService,
-                                   SinkService sinkService, ObjectMapper objectMapper) {
+                                   SinkService sinkService,
+                                   ObjectMapper objectMapper) {
         this.logQueueService = logQueueService;
         this.traceQueueService = traceQueueService;
         this.metricsQueueService = metricsQueueService;
