@@ -30,13 +30,17 @@ jobs:
         id: vars
         run: echo "tag=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
 
-      - name: Generate Changelog
-        uses: spring-io/github-changelog-generator@v0.0.11
+      - name: Set up node
+        uses: actions/setup-node@v4
         with:
-          # 从tag中提取milestone
-          milestone: ${{ steps.vars.outputs.tag }}
+          node-version: 20
+          cache: 'npm'
+
+      - name: Generate Changelog
+        run:
+          npm install -g auto-changelog && auto-changelog
 
       - name: Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: gh release create ${{ github.ref_name }} --notes-file=changelog.md build/*.tar.gz
+        run: gh release create ${{ steps.vars.outputs.tag }} --notes-file CHANGELOG.md build/*.tar.gz
