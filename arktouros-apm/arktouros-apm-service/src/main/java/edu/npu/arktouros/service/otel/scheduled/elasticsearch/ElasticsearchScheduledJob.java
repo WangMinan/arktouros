@@ -57,8 +57,8 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         // 启动所有定时任务
         rolloverThreadPool.scheduleAtFixedRate(
                 this::rollover,
-                // 随机0-60秒
-                (long) (Math.random() * 60),
+                // rollover不延迟
+                0,
                 Integer.parseInt(PropertiesProvider.getProperty(
                         "elasticsearch.schedule.rollover",
                         "1")),
