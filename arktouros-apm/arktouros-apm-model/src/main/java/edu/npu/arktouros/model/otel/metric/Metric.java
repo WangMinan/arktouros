@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch._types.mapping.DateProperty;
 import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.NestedProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.npu.arktouros.model.otel.Source;
@@ -32,7 +33,9 @@ public abstract class Metric implements Source {
     protected String description;
     protected Map<String, String> labels = new HashMap<>();
     protected long timestamp;
-    protected SourceType sourceType = SourceType.METRIC;
+    // 反序列化的时候 sourceType也指向type 这是一个为了适配protobuf老文件的历史遗留问题
+    @JsonAlias("sourceType")
+    protected SourceType type = SourceType.METRIC;
     protected MetricType metricType = MetricType.METRIC;
 
     protected Metric(edu.npu.arktouros.proto.metric.v1.Metric metric) {
@@ -42,7 +45,7 @@ public abstract class Metric implements Source {
         this.timestamp = metric.getTimestamp();
         this.serviceName = metric.getServiceName();
         this.metricType = MetricType.valueOf(metric.getMetricType().name());
-        this.sourceType = SourceType.METRIC;
+        this.type = SourceType.METRIC;
     }
 
     private static final Map<String, Property> labelProperty =
