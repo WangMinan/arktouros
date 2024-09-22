@@ -14,19 +14,21 @@ import edu.npu.arktouros.service.otel.sinker.SinkService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Stack;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author : [wangminan]
@@ -42,6 +44,9 @@ public class ArktourosTcpReceiver extends DataReceiver {
     private final ObjectMapper objectMapper;
     private final NioEventLoopGroup bossGroup;
     private final NioEventLoopGroup workerGroup;
+    private ChannelFuture channelFuture;
+    private Future<?> bossGroupShutdownFuture;
+    private Future<?> workerGroupShutdownFuture;
 
     public ArktourosTcpReceiver(SinkService sinkService, int tcpPort,
                                 ObjectMapper objectMapper) {
@@ -57,55 +62,72 @@ public class ArktourosTcpReceiver extends DataReceiver {
     public void start() {
         try {
             log.info("Starting arktouros tcp receiver on port: {}", tcpPort);
-            // 我也不知道这个netty是哪个依赖引进来的 反正咱有得用是好事
             ServerBootstrap serverBootstrap = new ServerBootstrap();
-            // boss and worker 进一步提高性能
             serverBootstrap.group(bossGroup, workerGroup);
             serverBootstrap.channel(NioServerSocketChannel.class);
-            ChannelInitializer<NioSocketChannel> channelInitializer =
-                    new ChannelInitializer<>() {
+            ChannelInitializer<NioSocketChannel> channelInitializer = new ChannelInitializer<>() {
                 @Override
                 protected void initChannel(NioSocketChannel channel) {
-                    // 添加具体的handler
                     channel.pipeline()
-                            // head -> add last 加入的处理器 -> tail
                             .addLast(new ChannelInboundHandlerAdapter() {
                                 @Override
-                                public void channelRead(ChannelHandlerContext ctx, Object msg)
-                                        throws Exception {
+                                public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                                     ByteBuf byteBuf = (ByteBuf) msg;
-                                    log.debug("Tcp netty receiver receives data: {}",
-                                            byteBuf.toString(Charset.defaultCharset()));
-                                    cacheStringBuilder.append(
-                                            byteBuf.toString(Charset.defaultCharset()));
+                                    log.debug("Tcp netty receiver receives data: {}", byteBuf.toString(Charset.defaultCharset()));
+                                    cacheStringBuilder.append(byteBuf.toString(Charset.defaultCharset()));
                                     handleChannelInput();
                                     // 如果有响应要写就放在这个位置
                                     // ctx.writeAndFlush();
                                 }
 
-                                // 异常处理
                                 @Override
-                                public void exceptionCaught(
-                                        ChannelHandlerContext ctx, Throwable cause) {
+                                public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
                                     log.error("Error caught by tcp receiver when handling channel input.");
                                     cause.printStackTrace();
-                                    //释放资源
                                     ctx.close();
                                 }
                             });
                 }
             };
             serverBootstrap.childHandler(channelInitializer);
-            ChannelFuture channelFuture = serverBootstrap.bind(tcpPort);
-            log.info("Arktouros tcp receiver started on port: {}", tcpPort);
-            channelFuture.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            log.error("Error caught by tcp receiver when starting. Cause: {}",
-                    Arrays.toString(e.getStackTrace()));
-        } finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
-            log.info("Arktouros tcp receiver shutdown gracefully.");
+            // 异步绑定端口，不阻塞当前线程
+            channelFuture = serverBootstrap.bind(tcpPort);
+            channelFuture.addListener((ChannelFutureListener) future -> {
+                if (future.isSuccess()) {
+                    log.info("Arktouros tcp receiver started on port: {}", tcpPort);
+                } else {
+                    log.error("Failed to start arktouros tcp receiver on port: {}", tcpPort);
+                    future.cause().printStackTrace();
+                }
+            });
+            // 等待通道关闭的异步回调
+            channelFuture.channel().closeFuture().addListener((ChannelFutureListener) closeFuture -> {
+                if (closeFuture.isSuccess()) {
+                    log.info("Arktouros tcp receiver closed successfully.");
+                } else {
+                    log.error("Error closing arktouros tcp receiver.");
+                    closeFuture.cause().printStackTrace();
+                }
+
+                // 通道关闭后，才执行资源的清理工作
+                bossGroupShutdownFuture = bossGroup.shutdownGracefully().addListener(future -> {
+                    if (future.isSuccess()) {
+                        log.info("Boss group shutdown gracefully.");
+                    } else {
+                        log.error("Error shutting down boss group.");
+                    }
+                });
+                workerGroupShutdownFuture = workerGroup.shutdownGracefully().addListener(future -> {
+                    if (future.isSuccess()) {
+                        log.info("Worker group shutdown gracefully.");
+                    } else {
+                        log.error("Error shutting down worker group.");
+                    }
+                });
+            });
+        } catch (Exception e) {
+            log.error("Error caught by tcp receiver when starting.");
+            e.printStackTrace();
         }
     }
 
@@ -189,6 +211,16 @@ public class ArktourosTcpReceiver extends DataReceiver {
 
     @Override
     public void stop() {
-        log.info("Tcp receiver shutdown. All unreceived data will be lost.");
+        log.info("Tcp receiver shutdown. All unreceived data will be lost. Waiting for worker groups shutting down.");
+        channelFuture.channel().close();
+        try {
+            log.info(
+                    "BossGroup shutdown future:{}, workerGroup shutdown future:{}",
+                    bossGroupShutdownFuture.get(),
+                    workerGroupShutdownFuture.get()
+            );
+        } catch (InterruptedException | ExecutionException e) {
+            throw new ArktourosException("Error waiting for boss group and worker group shutdown future to complete.");
+        }
     }
 }
