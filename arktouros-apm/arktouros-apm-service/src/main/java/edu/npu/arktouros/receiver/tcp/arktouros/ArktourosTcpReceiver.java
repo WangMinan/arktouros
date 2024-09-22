@@ -1,5 +1,6 @@
 package edu.npu.arktouros.receiver.tcp.arktouros;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.log.Log;
@@ -31,6 +32,7 @@ import java.util.Stack;
  * @author : [wangminan]
  * @description : 自有协议数据TCP接收器 netty实现
  */
+@SuppressWarnings("CallToPrintStackTrace")
 @Slf4j
 public class ArktourosTcpReceiver extends DataReceiver {
 
@@ -85,8 +87,8 @@ public class ArktourosTcpReceiver extends DataReceiver {
                                 @Override
                                 public void exceptionCaught(
                                         ChannelHandlerContext ctx, Throwable cause) {
-                                    log.error("Error caught by tcp receiver when handling channel input. Cause: {}",
-                                            Arrays.toString(cause.getStackTrace()));
+                                    log.error("Error caught by tcp receiver when handling channel input.");
+                                    cause.printStackTrace();
                                     //释放资源
                                     ctx.close();
                                 }
@@ -103,6 +105,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
+            log.info("Arktouros tcp receiver shutdown gracefully.");
         }
     }
 
@@ -140,31 +143,47 @@ public class ArktourosTcpReceiver extends DataReceiver {
 
     private void persistInput(String jsonStr) throws IOException {
         log.debug("Sinking an object in json:{}", jsonStr);
-        // 结构相似 都能转 所以只能用关键字试探
-        // 深拷贝
-        String tmpJson = jsonStr.trim();
-        tmpJson = tmpJson.replaceAll("\\s*|\r|\n|\t", "")
-                .toLowerCase(Locale.ROOT);
-        if (tmpJson.contains("\"type\":\"log\"")) {
-            Log log = objectMapper.readValue(jsonStr, Log.class);
-            sinkService.sink(log);
-        } else if (tmpJson.contains("\"type\":\"span\"")) {
-            Span span = objectMapper.readValue(jsonStr, Span.class);
-            sinkService.sink(span);
-        } else if (tmpJson.contains("\"metrictype:\"gauge\"")) {
-            Gauge gauge = objectMapper.readValue(jsonStr, Gauge.class);
-            sinkService.sink(gauge);
-        } else if (tmpJson.contains("\"metrictype:\"counter\"")) {
-            Counter metric = objectMapper.readValue(jsonStr, Counter.class);
-            sinkService.sink(metric);
-        } else if (tmpJson.contains("\"metrictype:\"summary\"")) {
-            Summary metric = objectMapper.readValue(jsonStr, Summary.class);
-            sinkService.sink(metric);
-        } else if (tmpJson.contains("\"metrictype:\"histogram\"")) {
-            Histogram metric = objectMapper.readValue(jsonStr, Histogram.class);
-            sinkService.sink(metric);
-        } else {
-            log.warn("Unknown json type:{}", jsonStr);
+        try {
+            JsonNode jsonNode = objectMapper.readTree(jsonStr);
+            String type = jsonNode.get("type").asText().toLowerCase(Locale.ROOT);
+            switch (type) {
+                case "log":
+                    Log log1 = objectMapper.readValue(jsonStr, Log.class);
+                    sinkService.sink(log1);
+                    break;
+                case "span":
+                    Span span = objectMapper.readValue(jsonStr, Span.class);
+                    sinkService.sink(span);
+                    break;
+                case "metric":
+                    String metricType = jsonNode.get("metricType").asText().toLowerCase(Locale.ROOT);
+                    switch (metricType) {
+                        case "gauge":
+                            Gauge gauge = objectMapper.readValue(jsonStr, Gauge.class);
+                            sinkService.sink(gauge);
+                            break;
+                        case "counter":
+                            Counter metric = objectMapper.readValue(jsonStr, Counter.class);
+                            sinkService.sink(metric);
+                            break;
+                        case "summary":
+                            Summary summary = objectMapper.readValue(jsonStr, Summary.class);
+                            sinkService.sink(summary);
+                            break;
+                        case "histogram":
+                            Histogram histogram = objectMapper.readValue(jsonStr, Histogram.class);
+                            sinkService.sink(histogram);
+                            break;
+                        default:
+                            log.warn("Unknown metric type:{}", jsonStr);
+                    }
+                    break;
+                default:
+                    log.warn("Unknown json type:{}", jsonStr);
+            }
+        } catch (RuntimeException e) {
+            log.error("Encountered an error while handling json from tcp. Trying to recover.");
+            e.printStackTrace();
         }
     }
 

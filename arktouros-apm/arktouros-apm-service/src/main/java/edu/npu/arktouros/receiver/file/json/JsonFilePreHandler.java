@@ -1,5 +1,6 @@
 package edu.npu.arktouros.receiver.file.json;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.log.Log;
@@ -97,38 +98,47 @@ public class JsonFilePreHandler implements Runnable{
 
     private void persistArktouros(String subString) throws IOException {
         log.debug("Sinking an arktouros object in json:{}", subString);
-        // 结构相似 都能转 所以只能用关键字试探
-        // 深拷贝
-        String tmpJson = subString.trim();
-        tmpJson = tmpJson.replaceAll("\\s*|\r|\n|\t", "")
-                .toLowerCase(Locale.ROOT);
-        switch (tmpJson) {
-            case String s when s.contains("\"type\":\"log\""):
-                Log logForSink = objectMapper.readValue(subString, Log.class);
-                sinkService.sink(logForSink);
-                break;
-            case String s when s.contains("\"type\":\"span\""):
-                Span span = objectMapper.readValue(subString, Span.class);
-                sinkService.sink(span);
-                break;
-            case String s when s.contains("\"metrictype:\"gauge\""):
-                Gauge gauge = objectMapper.readValue(subString, Gauge.class);
-                sinkService.sink(gauge);
-                break;
-            case String s when s.contains("\"metrictype:\"counter\""):
-                Counter metric = objectMapper.readValue(subString, Counter.class);
-                sinkService.sink(metric);
-                break;
-            case String s when s.contains("\"metrictype:\"summary\""):
-                Summary summary = objectMapper.readValue(subString, Summary.class);
-                sinkService.sink(summary);
-                break;
-            case String s when s.contains("\"metrictype:\"histogram\""):
-                Histogram histogram = objectMapper.readValue(subString, Histogram.class);
-                sinkService.sink(histogram);
-                break;
-            default:
-                log.warn("Unknown json type:{}", subString);
+        try {
+            JsonNode jsonNode = objectMapper.readTree(subString);
+            String type = jsonNode.get("type").asText().toLowerCase(Locale.ROOT);
+            switch (type) {
+                case "log":
+                    Log log1 = objectMapper.readValue(subString, Log.class);
+                    sinkService.sink(log1);
+                    break;
+                case "span":
+                    Span span = objectMapper.readValue(subString, Span.class);
+                    sinkService.sink(span);
+                    break;
+                case "metric":
+                    String metricType = jsonNode.get("metricType").asText().toLowerCase(Locale.ROOT);
+                    switch (metricType) {
+                        case "gauge":
+                            Gauge gauge = objectMapper.readValue(subString, Gauge.class);
+                            sinkService.sink(gauge);
+                            break;
+                        case "counter":
+                            Counter metric = objectMapper.readValue(subString, Counter.class);
+                            sinkService.sink(metric);
+                            break;
+                        case "summary":
+                            Summary summary = objectMapper.readValue(subString, Summary.class);
+                            sinkService.sink(summary);
+                            break;
+                        case "histogram":
+                            Histogram histogram = objectMapper.readValue(subString, Histogram.class);
+                            sinkService.sink(histogram);
+                            break;
+                        default:
+                            log.warn("Unknown metric type:{}", subString);
+                    }
+                    break;
+                default:
+                    log.warn("Unknown json type:{}", subString);
+            }
+        } catch (RuntimeException e) {
+            log.error("Encountered an error while handling json from tcp. Trying to recover.");
+            e.printStackTrace();
         }
     }
 }
