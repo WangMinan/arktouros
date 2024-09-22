@@ -34,7 +34,7 @@ public abstract class Metric implements Source {
     protected Map<String, String> labels = new HashMap<>();
     protected long timestamp;
     // 反序列化的时候 sourceType也指向type 这是一个为了适配protobuf老文件的历史遗留问题
-    @JsonAlias("sourceType")
+    @JsonProperty("sourceType")
     protected SourceType type = SourceType.METRIC;
     protected MetricType metricType = MetricType.METRIC;
 
