@@ -4,8 +4,16 @@ import co.elastic.clients.elasticsearch._types.FieldSort;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.Time;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.CompositeAggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.CompositeAggregationSource;
+import co.elastic.clients.elasticsearch._types.aggregations.CompositeBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.CompositeDateHistogramAggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.TermsAggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.TopHitsAggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.ExistsQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
@@ -44,6 +52,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -155,8 +164,7 @@ public class ElasticsearchMapper extends SearchMapper {
                                 .field(SERVICE_NAME)
                                 .build()._toQuery()
                 );
-            }
-            else {
+            } else {
                 boolQueryBuilder.must(new MatchQuery.Builder()
                         .field(SERVICE_NAME)
                         .query(logQueryDto.serviceName())
@@ -251,7 +259,7 @@ public class ElasticsearchMapper extends SearchMapper {
     private static void resolveHit(Hit<Span> hit, Set<EndPoint> endPointSet, List<EndPointTraceIdVo> endPointTraceIdVoList) {
         if (hit.source() != null) {
             EndPoint localEndPoint = hit.source().getLocalEndPoint();
-            if (endPointSet.contains(localEndPoint)) {
+            if (localEndPoint != null && endPointSet.contains(localEndPoint)) {
                 // endPointTraceIdDtoList中找到对应记录 并在traceIds中做添加
                 for (EndPointTraceIdVo endPointTraceIdVo :
                         endPointTraceIdVoList) {
@@ -262,7 +270,7 @@ public class ElasticsearchMapper extends SearchMapper {
                         break;
                     }
                 }
-            } else {
+            } else if (localEndPoint != null || endPointSet.isEmpty()) {
                 endPointSet.add(localEndPoint);
                 EndPointTraceIdVo endPointTraceIdVo =
                         new EndPointTraceIdVo(localEndPoint,
@@ -352,15 +360,19 @@ public class ElasticsearchMapper extends SearchMapper {
         Query query = boolQueryBuilder.build()._toQuery();
         List<Metric> metrics = new ArrayList<>();
         metrics.addAll(getMetricsFromBoolQuery(
+                startTimestamp, endTimestamp,
                 ElasticsearchIndex.GAUGE_INDEX.getIndexName(),
                 query, Gauge.class));
         metrics.addAll(getMetricsFromBoolQuery(
+                startTimestamp, endTimestamp,
                 ElasticsearchIndex.COUNTER_INDEX.getIndexName(),
                 query, Counter.class));
         metrics.addAll(getMetricsFromBoolQuery(
+                startTimestamp, endTimestamp,
                 ElasticsearchIndex.HISTOGRAM_INDEX.getIndexName(),
                 query, Histogram.class));
         metrics.addAll(getMetricsFromBoolQuery(
+                startTimestamp, endTimestamp,
                 ElasticsearchIndex.SUMMARY_INDEX.getIndexName(),
                 query, Summary.class));
         return metrics;
@@ -531,6 +543,7 @@ public class ElasticsearchMapper extends SearchMapper {
     }
 
     private <T extends Metric> List<T> getMetricsFromBoolQuery(
+            Long startTimestamp, Long endTimestamp,
             String indexName, Query query, Class<T> clazz) {
         SortOptions sort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()
@@ -542,7 +555,95 @@ public class ElasticsearchMapper extends SearchMapper {
         searchRequestBuilder.index(indexName)
                 .query(query)
                 .sort(sort);
-        return ElasticsearchUtil.scrollSearch(searchRequestBuilder, clazz);
+        boolean samplerQuery = false;
+        if (startTimestamp != null && endTimestamp != null) {
+            samplerQuery = samplerQuery(searchRequestBuilder, startTimestamp, endTimestamp);
+        }
+        if (samplerQuery) {
+            return metricAggSearch(clazz, searchRequestBuilder);
+        } else {
+            return ElasticsearchUtil.scrollSearch(searchRequestBuilder, clazz);
+        }
+    }
+
+    private <T extends Metric> List<T> metricAggSearch(Class<T> clazz, SearchRequest.Builder searchRequestBuilder) {
+        SearchResponse<T> searchResponse = ElasticsearchUtil.simpleSearch(searchRequestBuilder, clazz);
+        Aggregate timeSamplerAgg = searchResponse.aggregations().get("timeSamplerAgg");
+        List<CompositeBucket> timeSamplerAggBuckets =
+                timeSamplerAgg.composite().buckets().array();
+        List<T> result = new ArrayList<>();
+        for (CompositeBucket bucket : timeSamplerAggBuckets) {
+            Aggregate nameAgg = bucket.aggregations().get("nameAgg");
+            List<StringTermsBucket> nameAggBuckets =
+                    nameAgg.sterms().buckets().array();
+            nameAggBuckets.forEach(nameAggBucket -> {
+                Aggregate topDocAgg = nameAggBucket.aggregations().get("topDocAgg");
+                topDocAgg.topHits().hits().hits().forEach(topDoc -> {
+                    if (topDoc.source() != null) {
+                        T t = topDoc.source().to(clazz);
+                        result.add(t);
+                    }
+                });
+            });
+        }
+        return result;
+    }
+
+    private boolean samplerQuery(SearchRequest.Builder searchRequestBuilder, Long startTimestamp, Long endTimestamp) {
+        // 如果两个时间戳相差的时间在一个小时之内 return
+        if (endTimestamp - startTimestamp < 3600000) {
+            return false; // 全采样
+        }
+        CompositeDateHistogramAggregation compositeDateHistogramAggregation;
+        if (endTimestamp - startTimestamp <= 86400000) {
+            // 如果两个时间戳相差的时间在一天之内 以小时为单位做聚合
+            compositeDateHistogramAggregation =
+                    new CompositeDateHistogramAggregation.Builder()
+                            .field("timestamp")
+                            .calendarInterval(new Time.Builder().time("1h").build())
+                            .build();
+        } else if (endTimestamp - startTimestamp <= 2592000000L) {
+            // 如果两个时间戳相差的时间在一月之内 以一天为单位做聚合
+            compositeDateHistogramAggregation =
+                    new CompositeDateHistogramAggregation.Builder()
+                            .field("timestamp")
+                            .calendarInterval(new Time.Builder().time("1d").build())
+                            .build();
+        } else {
+            // 以一年为单位做聚合
+            compositeDateHistogramAggregation =
+                    new CompositeDateHistogramAggregation.Builder()
+                            .field("timestamp")
+                            .calendarInterval(new Time.Builder().time("1y").build())
+                            .build();
+        }
+        Map<String, CompositeAggregationSource> timestampMap =
+                Map.of("timestamp", new CompositeAggregationSource.Builder()
+                        .dateHistogram(compositeDateHistogramAggregation)
+                        .build());
+        List<Map<String, CompositeAggregationSource>> timestampList = new ArrayList<>();
+        timestampList.add(timestampMap);
+        // 只去头部的doc作为采样点 虽然这样很不严谨 但就这样算了
+        Aggregation topDocAgg = new Aggregation.Builder()
+                .topHits(new TopHitsAggregation.Builder()
+                        .size(1)
+                        .build())
+                .build();
+        Aggregation nameAgg = new Aggregation.Builder()
+                .terms(new TermsAggregation.Builder()
+                        .field("name")
+                        .build())
+                .aggregations("topDocAgg", topDocAgg)
+                .build();
+        Aggregation timeSamplerAgg = new Aggregation.Builder()
+                .composite(
+                        new CompositeAggregation.Builder()
+                                .sources(timestampList)
+                                .build())
+                .aggregations("nameAgg", nameAgg)
+                .build();
+        searchRequestBuilder.aggregations("timeSamplerAgg", timeSamplerAgg);
+        return true;
     }
 
     private <T> R transformListResponseToR(SearchResponse<T> searchResponse) {
