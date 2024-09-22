@@ -37,8 +37,7 @@ jobs:
           cache: 'npm'
 
       - name: Generate Changelog
-        run:
-          npm install -g auto-changelog && auto-changelog
+        run: npm install -g auto-changelog && auto-changelog
 
       - name: Release
         env:
