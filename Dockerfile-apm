@@ -13,4 +13,4 @@ EXPOSE 50050
 # grpc receive port
 EXPOSE 50051
 ENV TZ Asia/Shanghai
-ENTRYPOINT java -jar -Dloader.path=lib arktouros-apm-api-0.0.1.jar
+ENTRYPOINT java -Dfile.encoding=UTF-8 -jar -Dloader.path=lib arktouros-apm-api-0.0.1.jar
