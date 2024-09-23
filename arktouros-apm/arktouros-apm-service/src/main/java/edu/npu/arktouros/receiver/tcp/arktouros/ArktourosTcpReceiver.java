@@ -213,14 +213,5 @@ public class ArktourosTcpReceiver extends DataReceiver {
     public void stop() {
         log.info("Tcp receiver shutdown. All unreceived data will be lost. Waiting for worker groups shutting down.");
         channelFuture.channel().close();
-        try {
-            log.info(
-                    "BossGroup shutdown future:{}, workerGroup shutdown future:{}",
-                    bossGroupShutdownFuture.get(),
-                    workerGroupShutdownFuture.get()
-            );
-        } catch (InterruptedException | ExecutionException e) {
-            throw new ArktourosException("Error waiting for boss group and worker group shutdown future to complete.");
-        }
     }
 }
