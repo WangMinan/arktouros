@@ -286,14 +286,18 @@ public class ElasticsearchMapper extends SearchMapper {
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         boolQueryBuilder.must(
                 new TermQuery.Builder()
-                        .field("serviceName")
-                        .value(spanTopologyQueryDto.serviceName())
-                        .build()._toQuery(),
-                new TermQuery.Builder()
                         .field("traceId")
                         .value(spanTopologyQueryDto.traceId())
                         .build()._toQuery()
         );
+        if (spanTopologyQueryDto.innerService()) {
+            boolQueryBuilder.must(
+                    new TermQuery.Builder()
+                            .field("serviceName")
+                            .value(spanTopologyQueryDto.serviceName())
+                            .build()._toQuery()
+            );
+        }
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(boolQueryBuilder.build()._toQuery());
