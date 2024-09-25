@@ -24,7 +24,7 @@ var:
 # 对象选择，目前只完善了elasticsearch全链路,h2暂不可选
 instance:
   active:
-    dataReceiver: arktourosGrpc # otelGrpc/arktourosGrpc/arktourosTcp/jsonFileReceiver
+    dataReceiver: arktourosTcp # otelGrpc/arktourosGrpc/arktourosTcp/jsonFileReceiver
     sinker: elasticsearch # elasticsearch/h2
     searchMapper: elasticsearch # elasticsearch/h2
     scheduledJob: elasticsearch # elasticsearch/h2
@@ -45,6 +45,10 @@ receiver:
       type: arktouros # otel/arktouros
       logDir: D:/code/arktouros/docs/otel # 目前暂时没有支持远程文件的打算 只适配本地文件
       indexFilePath: D:/code/arktouros/docs/index.json
+
+sinker:
+  span:
+    timeout: 30000 # span超时时间配置 单位毫秒 int
 
 elasticsearch:
   serverUrl: https://localhost:9200

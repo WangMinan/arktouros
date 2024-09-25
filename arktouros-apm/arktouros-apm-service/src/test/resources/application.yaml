@@ -4,7 +4,7 @@ spring:
   datasource:
     driver-class-name: org.h2.Driver
     # 一定要持久化，这玩意是用来做apm缓存的 如果用内存型的话要丢数据 仅限测试环境用
-    url: jdbc:h2:mem:apm;MODE=MySQL
+    url: jdbc:h2:./db/apm;DB_CLOSE_DELAY=-1;MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: sa
   # 不要寄希望于自启动执行SQL，已经靠编码实现了 这个H2已经给我整吐了
@@ -21,10 +21,10 @@ var:
   api:
     version: v0
 
-# 对象选择，目前只完善了otelGrpc->elasticsearch全链路,h2暂不可选
+# 对象选择，目前只完善了elasticsearch全链路,h2暂不可选
 instance:
   active:
-    dataReceiver: otelGrpc # otelGrpc/arktourosGrpc/arktourosTcp
+    dataReceiver: arktourosTcp # otelGrpc/arktourosGrpc/arktourosTcp/jsonFileReceiver
     sinker: elasticsearch # elasticsearch/h2
     searchMapper: elasticsearch # elasticsearch/h2
     scheduledJob: elasticsearch # elasticsearch/h2
@@ -40,6 +40,15 @@ receiver:
     port: 50051
   tcp:
     port: 50049
+  file:
+    json:
+      type: arktouros # otel/arktouros
+      logDir: D:/code/arktouros/docs/otel # 目前暂时没有支持远程文件的打算 只适配本地文件
+      indexFilePath: D:/code/arktouros/docs/index.json
+
+sinker:
+  span:
+    timeout: 30000 # span超时时间配置 单位毫秒 int
 
 elasticsearch:
   serverUrl: https://localhost:9200
@@ -52,16 +61,19 @@ elasticsearch:
     maxTotal: 50
     minIdle: 5
     maxWait: 2000
+  # scrollApi配置
   scroll:
+    # 对于每一次scroll 等待回调结果的最长时间
     maxWait: 5000
   # rolloverApi configuration部分配置
   rollover:
     maxDocs: 100000
-    maxAge: 1d
+    maxAge: 1w # 这玩意应该适当调大一点 或者去调大es的最大分片数
     maxSize: 5gb
   # 定时
   schedule:
-    rollover: 1 # 单位小时
+    rollover: 24 # 单位小时
     throughput: 1 # 单位分钟
     responseTime: 1 # 单位分钟
     errorRate: 1 # 单位分钟
+    metric: 1 # 单位分钟
