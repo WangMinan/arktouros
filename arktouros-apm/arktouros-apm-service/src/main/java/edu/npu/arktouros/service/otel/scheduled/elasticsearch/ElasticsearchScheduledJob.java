@@ -89,14 +89,14 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                         "elasticsearch.schedule.errorRate",
                         "5")),
                 TimeUnit.MINUTES);
-        simulateMetricThreadPool.scheduleAtFixedRate(
-                () -> simulateMetrics(services),
-                // 随机0-10分钟
-                (long) (Math.random() * 10),
-                Integer.parseInt(PropertiesProvider.getProperty(
-                        "elasticsearch.schedule.metric",
-                        "5")),
-                TimeUnit.MINUTES);
+//        simulateMetricThreadPool.scheduleAtFixedRate(
+//                () -> simulateMetrics(services),
+//                // 随机0-10分钟
+//                (long) (Math.random() * 10),
+//                Integer.parseInt(PropertiesProvider.getProperty(
+//                        "elasticsearch.schedule.metric",
+//                        "5")),
+//                TimeUnit.MINUTES);
 
     }
 
