@@ -41,10 +41,16 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class ElasticsearchSinkService extends SinkService {
 
+    private int spanTimeout;
+
     private final ExecutorService createIndexThreadPool =
             Executors.newFixedThreadPool(ElasticsearchIndex.getIndexList().size(),
                     new BasicThreadFactory.Builder()
                             .namingPattern("ElasticSearch-init-%d").build());
+
+    public ElasticsearchSinkService(int spanTimeout) {
+        this.spanTimeout = spanTimeout;
+    }
 
     @Override
     public void init() {
@@ -120,7 +126,7 @@ public class ElasticsearchSinkService extends SinkService {
         CreateIndexRequest.Builder createIndexRequestBuilder =
                 new CreateIndexRequest.Builder();
         // <my-index-{now/d}-000001>
-        createIndexRequestBuilder.index("<" + indexName+ "-{now/d}-000001>")
+        createIndexRequestBuilder.index("<" + indexName + "-{now/d}-000001>")
                 // 不区分 读写都从indexName这个虚拟索引做
                 .aliases(indexName, new Alias.Builder().isWriteIndex(true).build());
         createIndexRequestBuilder.mappings(getMappings(indexName));
@@ -220,16 +226,22 @@ public class ElasticsearchSinkService extends SinkService {
                     break;
                 case Span sourceSpan:
                     try {
+                        boolean spanStatus = true;
+                        if (sourceSpan.getEndTime() ==
+                                PersistentDataConstants.ERROR_SPAN_END_TIME) {
+                            spanStatus = false;
+                        } else if (sourceSpan.getEndTime() - sourceSpan.getStartTime() > spanTimeout) {
+                            spanStatus = false;
+                        }
                         Service service = Service.builder()
                                 .name(sourceSpan.getServiceName())
-                                .status(!(sourceSpan.getEndTime() ==
-                                        PersistentDataConstants.ERROR_SPAN_END_TIME))
+                                .status(spanStatus)
                                 .build();
                         if (sourceSpan.getEndTime() ==
                                 PersistentDataConstants.ERROR_SPAN_END_TIME) {
                             // 加Tag
                             service.setTags(List.of(new Tag(
-                                    PersistentDataConstants.ERROR_SPAN_ID, sourceSpan.getId())));
+                                    PersistentDataConstants.LATEST_ERROR_SPAN_ID, sourceSpan.getId())));
                         }
                         ElasticsearchUtil.sink(service.getId(),
                                 ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);

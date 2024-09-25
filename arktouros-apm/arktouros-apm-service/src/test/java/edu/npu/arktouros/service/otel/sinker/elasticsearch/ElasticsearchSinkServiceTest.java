@@ -73,7 +73,7 @@ class ElasticsearchSinkServiceTest {
     void beforeEach() {
         esClient = Mockito.mock(ElasticsearchClient.class);
         poolMockedStatic.when(ElasticsearchClientPool::getClient).thenReturn(esClient);
-        elasticsearchSinkService = new ElasticsearchSinkService();
+        elasticsearchSinkService = new ElasticsearchSinkService(50000);
     }
 
     // init方法不好测 跨线程了之后桩子插不进去 而且直接System.exit(1) 拿不到回调

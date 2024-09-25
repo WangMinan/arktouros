@@ -20,13 +20,16 @@ public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
     @Value("${instance.active.sinker}")
     private String activeSinker;
 
+    @Value("${sinker.span.timeout}")
+    private int spanTimeout;
+
     private SinkService sinkService;
 
     @Override
     public SinkService getObject() {
         if (sinkService == null) {
             if (activeSinker.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
-                sinkService = new ElasticsearchSinkService();
+                sinkService = new ElasticsearchSinkService(spanTimeout);
             } else if (activeSinker.toLowerCase(Locale.ROOT).equals("h2")) {
                 sinkService = new H2SinkService();
             } else {

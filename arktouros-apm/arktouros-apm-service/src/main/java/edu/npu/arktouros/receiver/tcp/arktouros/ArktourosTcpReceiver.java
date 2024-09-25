@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Stack;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author : [wangminan]
@@ -45,8 +44,6 @@ public class ArktourosTcpReceiver extends DataReceiver {
     private final NioEventLoopGroup bossGroup;
     private final NioEventLoopGroup workerGroup;
     private ChannelFuture channelFuture;
-    private Future<?> bossGroupShutdownFuture;
-    private Future<?> workerGroupShutdownFuture;
 
     public ArktourosTcpReceiver(SinkService sinkService, int tcpPort,
                                 ObjectMapper objectMapper) {
@@ -110,14 +107,14 @@ public class ArktourosTcpReceiver extends DataReceiver {
                 }
 
                 // 通道关闭后，才执行资源的清理工作
-                bossGroupShutdownFuture = bossGroup.shutdownGracefully().addListener(future -> {
+                bossGroup.shutdownGracefully().addListener(future -> {
                     if (future.isSuccess()) {
                         log.info("Boss group shutdown gracefully.");
                     } else {
                         log.error("Error shutting down boss group.");
                     }
                 });
-                workerGroupShutdownFuture = workerGroup.shutdownGracefully().addListener(future -> {
+                workerGroup.shutdownGracefully().addListener(future -> {
                     if (future.isSuccess()) {
                         log.info("Worker group shutdown gracefully.");
                     } else {

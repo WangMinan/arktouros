@@ -323,13 +323,15 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                 .filter(span -> span.getEndTime() ==
                         PersistentDataConstants.ERROR_SPAN_END_TIME)
                 .count();
+        // 首先要重置tags
+        List<Tag> tags = new ArrayList<>();
+        service.setTags(tags);
         if (errorCount > 0) {
-            List<Tag> tags = new ArrayList<>();
             allSpans.stream()
                     .filter(span -> span.getEndTime() ==
                             PersistentDataConstants.ERROR_SPAN_END_TIME)
                     .forEach(span -> tags.add(new Tag(
-                            PersistentDataConstants.ERROR_SPAN_ID, span.getId())));
+                            PersistentDataConstants.LATEST_ERROR_SPAN_ID, span.getId())));
             service.setTags(tags);
         }
         double value = allSpans.isEmpty() ? 0 : errorCount * 1.0 / allSpans.size();
