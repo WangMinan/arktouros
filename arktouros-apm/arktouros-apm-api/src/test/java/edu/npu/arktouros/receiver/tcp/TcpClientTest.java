@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Gauge;
+import edu.npu.arktouros.model.otel.structure.EndPoint;
+import edu.npu.arktouros.model.otel.trace.Span;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -19,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * @author : [wangminan]
@@ -34,13 +37,29 @@ class TcpClientTest {
     void testTcpClient() throws InterruptedException, JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Log log1 = Log.builder()
-                .serviceName("test")
+                .serviceName("local_test_tcp")
                 .severityText("INFO")
                 .content("Tcp connect test 123.")
                 .timestamp(System.currentTimeMillis())
+                .error(false)
+                .build();
+        Span span = Span.builder()
+                .serviceName("local_test_tcp")
+                .id(UUID.randomUUID().toString())
+                .traceId(UUID.randomUUID().toString())
+                .name("local_test_tcp_span_1")
+                .parentSpanId(null)
+                .root(true)
+                .localEndPoint(EndPoint.builder()
+                        .ip("127.0.0.1")
+                        .port(8080)
+                        .latency(0)
+                        .build())
+                .startTime(System.currentTimeMillis())
+                .endTime(System.currentTimeMillis())
                 .build();
         Gauge gauge = Gauge.builder()
-                .name("test_tcp")
+                .name("local_test_tcp")
                 .description("test tcp send metric")
                 .labels(new HashMap<>())
                 .value(1.0)
@@ -60,10 +79,15 @@ class TcpClientTest {
                     }
                 })
                 // 5. 连接到服务器
-                .connect("38.147.172.149", 50049)
+                .connect("8.149.132.190", 50049)
                 .sync()
                 .channel();
-        tcpChannel.writeAndFlush(mapper.writeValueAsString(log1));
-        tcpChannel.writeAndFlush(mapper.writeValueAsString(gauge));
+        StringBuilder cacheStringBuilder = new StringBuilder();
+        cacheStringBuilder.append(mapper.writeValueAsString(log1));
+        cacheStringBuilder.append("\n");
+        cacheStringBuilder.append(mapper.writeValueAsString(span));
+        cacheStringBuilder.append("\n");
+        cacheStringBuilder.append(mapper.writeValueAsString(gauge));
+        tcpChannel.writeAndFlush(cacheStringBuilder);
     }
 }

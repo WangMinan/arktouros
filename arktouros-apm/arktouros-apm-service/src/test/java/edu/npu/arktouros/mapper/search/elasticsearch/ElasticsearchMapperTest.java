@@ -193,7 +193,7 @@ public class ElasticsearchMapperTest {
                         .scrollSearch(Mockito.any(), Mockito.any()))
                 .thenReturn(new ArrayList<>());
         Assertions.assertDoesNotThrow(() -> elasticsearchMapper
-                .getSpanListByTraceId(new SpanTopologyQueryDto("123","test")));
+                .getSpanListByTraceId(new SpanTopologyQueryDto("123","test", false)));
     }
 
     @Test

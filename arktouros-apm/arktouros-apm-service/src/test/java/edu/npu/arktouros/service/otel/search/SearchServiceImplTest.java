@@ -112,7 +112,7 @@ public class SearchServiceImplTest {
     void testGetSpanTopologyByTraceId() {
         Mockito.when(searchMapper.getSpanListByTraceId(any())).thenReturn(List.of());
         Assertions.assertDoesNotThrow(() -> service
-                .getSpanTopologyByTraceId(new SpanTopologyQueryDto("123", "test")));
+                .getSpanTopologyByTraceId(new SpanTopologyQueryDto("123", "test", false)));
         // 然后用一个有数据的情况
         Span father = Span.builder()
                 .root(true)
@@ -138,7 +138,7 @@ public class SearchServiceImplTest {
         Mockito.when(searchMapper.getSpanListByTraceId(any()))
                 .thenReturn(List.of(father, child1, child2));
         Assertions.assertDoesNotThrow(() -> service
-                .getSpanTopologyByTraceId(new SpanTopologyQueryDto("123", "test")));
+                .getSpanTopologyByTraceId(new SpanTopologyQueryDto("123", "test", false)));
     }
 
     @Test
