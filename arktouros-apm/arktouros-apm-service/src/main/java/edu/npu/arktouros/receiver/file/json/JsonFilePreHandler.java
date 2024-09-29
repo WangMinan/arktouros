@@ -100,7 +100,13 @@ public class JsonFilePreHandler implements Runnable{
         log.debug("Sinking an arktouros object in json:{}", subString);
         try {
             JsonNode jsonNode = objectMapper.readTree(subString);
-            String type = jsonNode.get("type").asText().toLowerCase(Locale.ROOT);
+            String type;
+            try {
+                type = jsonNode.get("type").asText().toLowerCase(Locale.ROOT);
+            } catch (NullPointerException npe) {
+                // 历史遗留问题
+                type = jsonNode.get("sourceType").asText().toLowerCase(Locale.ROOT);
+            }
             switch (type) {
                 case "log":
                     Log log1 = objectMapper.readValue(subString, Log.class);
@@ -137,7 +143,7 @@ public class JsonFilePreHandler implements Runnable{
                     log.warn("Unknown json type:{}", subString);
             }
         } catch (RuntimeException e) {
-            log.error("Encountered an error while handling json from tcp. Trying to recover.");
+            log.error("Encountered an error while handling json from tcp:{}. Trying to recover.", subString);
             e.printStackTrace();
         }
     }

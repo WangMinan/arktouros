@@ -189,7 +189,9 @@ public class JsonLogFileReceiver extends AbstractReceiver {
                             Files.write(tmpIndex.toPath(), line,
                                     StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
                             tmpIndex.renameTo(indexFile);
-                            Files.delete(tmpIndex.toPath());
+                            if (tmpIndex.exists()) {
+                                Files.delete(tmpIndex.toPath());
+                            }
                         } catch (IOException e) {
                             throw new RuntimeException("failed while writing index file", e);
                         }
