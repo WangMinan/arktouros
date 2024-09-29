@@ -163,7 +163,13 @@ public class ArktourosTcpReceiver extends DataReceiver {
         log.debug("Sinking an object in json:{}", jsonStr);
         try {
             JsonNode jsonNode = objectMapper.readTree(jsonStr);
-            String type = jsonNode.get("type").asText().toLowerCase(Locale.ROOT);
+            String type;
+            try {
+                type = jsonNode.get("type").asText().toLowerCase(Locale.ROOT);
+            } catch (NullPointerException npe) {
+                // 历史遗留问题
+                type = jsonNode.get("sourceType").asText().toLowerCase(Locale.ROOT);
+            }
             switch (type) {
                 case "log":
                     Log log1 = objectMapper.readValue(jsonStr, Log.class);
