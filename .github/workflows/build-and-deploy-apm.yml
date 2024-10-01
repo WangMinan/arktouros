@@ -33,6 +33,9 @@ jobs:
       - name: Generate Changelog
         run: npm install -g auto-changelog && auto-changelog
 
+      - name: Tar arktouros-bigscreen
+        run: cd arktouros-bigscreen && tar -czf ../build/arktouros-bigscreen.tar.gz .
+
       - name: Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
