@@ -93,11 +93,12 @@ public class JsonFileReceiver extends DataReceiver {
     public void initParamsWithIndex() throws IOException {
         // 去logs目录下检索是否有index文件
         // 在执行rename的时候中断程序会出现问题
-        File tmpIndexFile = new File(indexFile.toPath().toString() + ".tmp");
+        File tmpIndexFile = new File(indexFile.toPath() + ".tmp");
         if (tmpIndexFile.exists()) {
             // 优先级更高 用tmpIndexFile的内容覆盖indexFile
             this.indexFile.createNewFile();
             FileUtils.copyFile(tmpIndexFile, indexFile);
+            FileUtils.delete(tmpIndexFile);
         } else if (indexFile.exists()) {
             String line;
             try {
@@ -118,6 +119,10 @@ public class JsonFileReceiver extends DataReceiver {
             currentFileCreateTime = Long.parseLong(split[0]);
             currentFile = createTimeFileMap.get(currentFileCreateTime);
             currentPos = Long.parseLong(split[1]);
+            if (currentPos != currentFile.length()) {
+                // 从头开始
+                currentPos = 0L;
+            }
         } else {
             initEmptyIndexFile();
         }
@@ -142,7 +147,7 @@ public class JsonFileReceiver extends DataReceiver {
                                     StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
                             tmpIndex.renameTo(indexFile);
                             if (tmpIndex.exists()) {
-                                Files.delete(tmpIndex.toPath());
+                                FileUtils.delete(tmpIndex);
                             }
                         } catch (IOException e) {
                             throw new ArktourosException(e, "failed while writing index file");
