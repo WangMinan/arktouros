@@ -41,7 +41,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class ElasticsearchSinkService extends SinkService {
 
-    private int spanTimeout;
+    private final int spanTimeout;
 
     private final ExecutorService createIndexThreadPool =
             Executors.newFixedThreadPool(ElasticsearchIndex.getIndexList().size(),
