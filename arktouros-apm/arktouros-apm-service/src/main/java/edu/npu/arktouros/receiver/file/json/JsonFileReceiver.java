@@ -20,6 +20,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -81,13 +83,30 @@ public class JsonFileReceiver extends DataReceiver {
                         // 获取创建时间
                         Path path = file.toPath();
                         BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class);
-                        this.createTimeFileMap.put(attributes.creationTime().toMillis(), file);
-                    } catch (IOException e) {
+                        long createTime = attributes.creationTime().toMillis();
+                        if(createTime == 0) {
+                            log.warn("Cannot get create time for file: {}, maybe you're using arktouros within docker env. Reader will use md5 instead. Please make sure you will not append this file.", file.getName());
+                            createTime = encodeToNumber(file.getName());
+                        }
+                        this.createTimeFileMap.put(createTime, file);
+                    } catch (IOException | NoSuchAlgorithmException e) {
                         throw new ArktourosException(e);
                     }
                 }
             }
         }
+    }
+
+    public static long encodeToNumber(String fileName) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("MD5"); // 或者使用 "SHA-256"
+        byte[] hashBytes = digest.digest(fileName.getBytes(StandardCharsets.UTF_8));
+
+        // 转换为长整型数字串
+        long number = 0;
+        for (int i = 0; i < 8; i++) { // 使用前8个字节生成一个long类型数字
+            number = (number << 8) | (hashBytes[i] & 0xFF);
+        }
+        return Math.abs(number); // 确保数字为正数
     }
 
     public void initParamsWithIndex() throws IOException {
