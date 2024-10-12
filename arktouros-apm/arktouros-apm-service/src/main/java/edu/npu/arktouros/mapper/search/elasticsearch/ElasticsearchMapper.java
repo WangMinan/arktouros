@@ -259,6 +259,7 @@ public class ElasticsearchMapper extends SearchMapper {
     private static void resolveHit(Hit<Span> hit, Set<EndPoint> endPointSet, List<EndPointTraceIdVo> endPointTraceIdVoList) {
         if (hit.source() != null) {
             EndPoint localEndPoint = hit.source().getLocalEndPoint();
+            EndPoint remoteEndPoint = hit.source().getRemoteEndPoint();
             if (localEndPoint != null && endPointSet.contains(localEndPoint)) {
                 // endPointTraceIdDtoList中找到对应记录 并在traceIds中做添加
                 for (EndPointTraceIdVo endPointTraceIdVo :
@@ -277,6 +278,17 @@ public class ElasticsearchMapper extends SearchMapper {
                                 new HashSet<>());
                 endPointTraceIdVo.traceIds().add(hit.source().getTraceId());
                 endPointTraceIdVoList.add(endPointTraceIdVo);
+            } else if (remoteEndPoint == null) {
+                // 全null
+                for (EndPointTraceIdVo endPointTraceIdVo :
+                        endPointTraceIdVoList) {
+                    if (endPointTraceIdVo.endPoint() == null) {
+                        endPointTraceIdVo
+                                .traceIds()
+                                .add(hit.source().getTraceId());
+                        break;
+                    }
+                }
             }
         }
     }

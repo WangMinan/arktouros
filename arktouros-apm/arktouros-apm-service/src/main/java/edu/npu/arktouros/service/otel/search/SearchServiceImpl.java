@@ -147,7 +147,10 @@ public class SearchServiceImpl implements SearchService {
 
     private Span getRootSpan(List<Span> originalSpanList) {
         Span span = originalSpanList.stream()
-                .filter(Span::isRoot).findFirst().orElse(null);
+                .filter(spanItem -> spanItem.isRoot()
+                        || spanItem.getParentSpanId() == null
+                        || spanItem.getParentSpanId().isEmpty())
+                .findFirst().orElse(null);
         if (span != null) {
             return span;
         }
