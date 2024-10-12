@@ -142,6 +142,9 @@
                 <configuration>
                     <workingDirectory>${ui.path}</workingDirectory>
                     <nodeVersion>v20.17.0</nodeVersion>
+                    <!-- 引入阿里云源 -->
+                    <nodeDownloadRoot>https://mirrors.aliyun.com/nodejs-release/</nodeDownloadRoot>
+                    <npmDownloadRoot>https://registry.npmmirror.com/npm/-/</npmDownloadRoot>
                 </configuration>
                 <executions>
                     <execution>
@@ -157,6 +160,8 @@
                         </goals>
                         <configuration>
                             <arguments>install</arguments>
+                            <!-- 引入阿里云源 -->
+                            <npmRegistryURL>https://registry.npmmirror.com/</npmRegistryURL>
                         </configuration>
                     </execution>
                     <execution>
