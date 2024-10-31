@@ -278,8 +278,8 @@ public class ElasticsearchMapper extends SearchMapper {
                                 new HashSet<>());
                 endPointTraceIdVo.traceIds().add(hit.source().getTraceId());
                 endPointTraceIdVoList.add(endPointTraceIdVo);
-            } else if (remoteEndPoint == null) {
-                // 全null
+            } else if (localEndPoint == null && remoteEndPoint == null) {
+                // all null
                 for (EndPointTraceIdVo endPointTraceIdVo :
                         endPointTraceIdVoList) {
                     if (endPointTraceIdVo.endPoint() == null) {
@@ -296,23 +296,30 @@ public class ElasticsearchMapper extends SearchMapper {
     @Override
     public List<Span> getSpanListByTraceId(SpanTopologyQueryDto spanTopologyQueryDto) {
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
-        boolQueryBuilder.must(
-                new TermQuery.Builder()
-                        .field("traceId")
-                        .value(spanTopologyQueryDto.traceId())
-                        .build()._toQuery()
-        );
         if (spanTopologyQueryDto.innerService()) {
             boolQueryBuilder.must(
+                    new TermQuery.Builder()
+                        .field("traceId")
+                        .value(spanTopologyQueryDto.traceId())
+                        .build()._toQuery(),
                     new TermQuery.Builder()
                             .field("serviceName")
                             .value(spanTopologyQueryDto.serviceName())
                             .build()._toQuery()
             );
+        } else {
+            boolQueryBuilder.must(
+                new TermQuery.Builder()
+                        .field("traceId")
+                        .value(spanTopologyQueryDto.traceId())
+                        .build()._toQuery()
+        );
         }
+        Query query = boolQueryBuilder.build()._toQuery();
+        log.debug("Bool query for get span: {}, innerService: {}", query, spanTopologyQueryDto.innerService());
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
-                .query(boolQueryBuilder.build()._toQuery());
+                .query(query);
         return ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
     }
 

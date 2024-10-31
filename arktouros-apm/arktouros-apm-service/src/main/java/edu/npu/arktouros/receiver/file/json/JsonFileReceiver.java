@@ -74,43 +74,6 @@ public class JsonFileReceiver extends DataReceiver {
                 new JsonFilePreHandler(outputCache, fileType, traceQueueService, sinkService, objectMapper));
     }
 
-    public void initCreateTimeFileMap() {
-        this.createTimeFileMap = new HashMap<>();
-        File[] files = logDirFile.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                // 需要排除索引文件
-                if (!indexFilePath.toLowerCase(Locale.ROOT).contains(file.getName())) {
-                    try {
-                        // 获取创建时间
-                        Path path = file.toPath();
-                        BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class);
-                        long createTime = attributes.creationTime().toMillis();
-                        if(createTime == 0) {
-                            log.warn("Cannot get create time for file: {}, maybe you're using arktouros within docker env. Reader will use md5 instead. Please make sure you will not append this file.", file.getName());
-                            createTime = encodeToNumber(file.getName());
-                        }
-                        this.createTimeFileMap.put(createTime, file);
-                    } catch (IOException | NoSuchAlgorithmException e) {
-                        throw new ArktourosException(e);
-                    }
-                }
-            }
-        }
-    }
-
-    public static long encodeToNumber(String fileName) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("MD5"); // 或者使用 "SHA-256"
-        byte[] hashBytes = digest.digest(fileName.getBytes(StandardCharsets.UTF_8));
-
-        // 转换为长整型数字串
-        long number = 0;
-        for (int i = 0; i < 8; i++) { // 使用前8个字节生成一个long类型数字
-            number = (number << 8) | (hashBytes[i] & 0xFF);
-        }
-        return Math.abs(number); // 确保数字为正数
-    }
-
     public void initParamsWithIndex() throws IOException {
         // 去logs目录下检索是否有index文件
         // 在执行rename的时候中断程序会出现问题
@@ -180,6 +143,36 @@ public class JsonFileReceiver extends DataReceiver {
         } catch (IOException e) {
             throw new ArktourosException(e);
         }
+    }
+
+    public void initCreateTimeFileMap() {
+        this.createTimeFileMap = new HashMap<>();
+        File[] files = logDirFile.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                // 需要排除索引文件
+                if (!indexFilePath.toLowerCase(Locale.ROOT).contains(file.getName())) {
+                    try {
+                        long createTime = encodeFileNameToNumber(file.getName());
+                        // 这个是天脉目前的授时问题 所以不得不这样来进行 原来时间戳的方案在没有授时节点的情况下是不可行的
+                        log.info("Encode file: {} to md5 number: {}", file.getName(), createTime);
+                        this.createTimeFileMap.put(createTime, file);
+                    } catch (NoSuchAlgorithmException e) {
+                        throw new ArktourosException(e);
+                    }
+                }
+            }
+        }
+    }
+
+    public long encodeFileNameToNumber(String fileName) throws NoSuchAlgorithmException{
+        MessageDigest digest = MessageDigest.getInstance("MD5");
+        byte[] hashBytes = digest.digest(fileName.getBytes(StandardCharsets.UTF_8));
+        long number = 0;
+        for (int i = 0; i < 8; i++) {
+            number = (number << 8) | (hashBytes[i] & 0xFF);
+        }
+        return Math.abs(number);
     }
 
     private void readFile() throws InterruptedException {
