@@ -47,7 +47,6 @@ public class JsonFilePreHandler implements Runnable{
     @Override
     public void run() {
         log.info("JsonFilePreHandler start working");
-        inputJsonFormatCheck();
         while (true) {
             try {
                 handle();
@@ -58,19 +57,23 @@ public class JsonFilePreHandler implements Runnable{
         }
     }
 
-    private void inputJsonFormatCheck() {
-        if (fileType.equalsIgnoreCase("sytel")) {
-            log.info("Going to process span data in sytel format.");
-        }
-    }
-
     public void handle() throws InterruptedException, IOException {
         log.debug("Formatting input from cache.");
         String input =
                 cacheStringBuilder.append(inputCache.take().trim()).toString();
+        // 如果是sytel的格式 要把前导[]和其中的内容去掉 否则直接处理JSON
+        if (fileType.equalsIgnoreCase("sytel")) {
+            fixInput(input, '[', ']');
+        }
+
         if (!input.startsWith("{")) {
             throw new IllegalArgumentException("Invalid input for json when handling: " + input);
         }
+
+        fixInput(input, '{', '}');
+    }
+
+    private void fixInput(String input, char prefix, char suffix) throws IOException {
         // 开始做大括号匹配 匹配部分扔出去 剩下的放cache里
         Stack<Character> stack = new Stack<>();
         boolean isInStrFlag = false; // 游标是否正在字符串中
@@ -80,9 +83,9 @@ public class JsonFilePreHandler implements Runnable{
             char c = input.charAt(i);
             if (c == '"') {
                 isInStrFlag = !isInStrFlag;
-            } else if (c == '{' && !isInStrFlag) {
-                stack.push('{');
-            } else if (c == '}' && !isInStrFlag) {
+            } else if (c == prefix && !isInStrFlag) {
+                stack.push(prefix);
+            } else if (c == suffix && !isInStrFlag) {
                 stack.pop();
                 if (stack.isEmpty()) {
                     currentPos = i;
@@ -100,6 +103,8 @@ public class JsonFilePreHandler implements Runnable{
             persistArktouros(substring);
         } else if (fileType.equals("otel")) {
             persistOtel(substring);
+        } else if (fileType.equals("sytel")) {
+            SytelTraceAnalyzer.handle(substring);
         } else {
             throw new IllegalArgumentException("Invalid file type: " + fileType);
         }

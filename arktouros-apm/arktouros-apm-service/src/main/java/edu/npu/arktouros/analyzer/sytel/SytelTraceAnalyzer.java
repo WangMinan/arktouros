@@ -26,7 +26,7 @@ public class SytelTraceAnalyzer extends DataAnalyzer {
 
     private final SinkService sinkService;
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public SytelTraceAnalyzer(SinkService sinkService, ObjectMapper objectMapper) {
         this.sinkService = sinkService;
