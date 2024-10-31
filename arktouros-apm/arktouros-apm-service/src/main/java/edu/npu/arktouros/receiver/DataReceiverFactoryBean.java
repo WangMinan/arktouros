@@ -80,7 +80,8 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
         switch (activeDataReceiver) {
             case "otelGrpc" -> {
                 log.info("OtelGrpc receiver is active");
-                return new OtelGrpcReceiver(logAnalyzerNumber, traceAnalyzerNumber, metricsAnalyzerNumber,
+                return new OtelGrpcReceiver(
+                        logAnalyzerNumber, traceAnalyzerNumber, metricsAnalyzerNumber,
                         logQueueService, traceQueueService,
                         metricsQueueService, sinkService, grpcPort);
             }
@@ -94,7 +95,9 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
             }
             case "jsonFile" -> {
                 log.info("OtelFile receiver is active");
-                return new JsonFileReceiver(logDir, indexFilePath, fileType, sinkService, objectMapper);
+                return new JsonFileReceiver(
+                        logDir, indexFilePath, fileType,
+                        traceQueueService, sinkService, objectMapper);
             }
             case null, default -> throw new IllegalArgumentException("can not find data receiver type from profile");
         }

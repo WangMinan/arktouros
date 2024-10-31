@@ -2,6 +2,7 @@ package edu.npu.arktouros.receiver.file.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.npu.arktouros.analyzer.sytel.SytelTraceAnalyzer;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;
@@ -9,6 +10,7 @@ import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.metric.Histogram;
 import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.trace.Span;
+import edu.npu.arktouros.service.otel.queue.TraceQueueService;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,18 +31,23 @@ public class JsonFilePreHandler implements Runnable{
     private final String fileType;
     private final SinkService sinkService;
     private final ObjectMapper objectMapper;
+    private final SytelTraceAnalyzer sytelTraceAnalyzer;
 
     public JsonFilePreHandler(ArrayBlockingQueue<String> inputCache, String fileType,
+                              TraceQueueService traceQueueService,
                               SinkService sinkService, ObjectMapper objectMapper) {
         this.inputCache = inputCache;
         this.fileType = fileType;
         this.sinkService = sinkService;
         this.objectMapper = objectMapper;
+        this.sytelTraceAnalyzer = new SytelTraceAnalyzer(sinkService, objectMapper);
+        sytelTraceAnalyzer.setQueueService(traceQueueService);
     }
 
     @Override
     public void run() {
         log.info("JsonFilePreHandler start working");
+        inputJsonFormatCheck();
         while (true) {
             try {
                 handle();
@@ -48,6 +55,12 @@ public class JsonFilePreHandler implements Runnable{
                 log.error("JsonFilePreHandler run failed", e);
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private void inputJsonFormatCheck() {
+        if (fileType.equalsIgnoreCase("sytel")) {
+            log.info("Going to process span data in sytel format.");
         }
     }
 

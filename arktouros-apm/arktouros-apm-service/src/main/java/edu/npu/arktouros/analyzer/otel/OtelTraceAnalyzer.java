@@ -48,6 +48,9 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
     @Override
     public void run() {
         super.run();
+        if (!queueService.isEmpty()) {
+            log.warn("Trace data has remained in cache. Error could occur if remained data is in shenyang format.");
+        }
         while (!isInterrupted()) {
             transform();
         }
@@ -60,9 +63,9 @@ public class OtelTraceAnalyzer extends DataAnalyzer {
     public static void handle(ResourceSpans resourceSpans) {
         try {
             String resourceSpansJson = ProtoBufJsonUtils.toJSON(resourceSpans);
-            TraceQueueItem logQueueItem = TraceQueueItem.builder()
+            TraceQueueItem traceQueueItem = TraceQueueItem.builder()
                     .data(resourceSpansJson).build();
-            queueService.put(logQueueItem);
+            queueService.put(traceQueueItem);
         } catch (IOException e) {
             log.error("Failed to convert resourceSpans:{} to json", resourceSpans, e);
             Thread.currentThread().interrupt();

@@ -3,6 +3,7 @@ package edu.npu.arktouros.receiver.file.json;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.receiver.DataReceiver;
+import edu.npu.arktouros.service.otel.queue.TraceQueueService;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class JsonFileReceiver extends DataReceiver {
     private Long currentFileCreateTime;
     private Long currentPos;
     private final String indexFilePath;
-    private File indexFile;
+    private final File indexFile;
     private static final int DEFAULT_CAPACITY = 1000;
     // 阻塞队列 不需要考虑并发问题 用synchronize或者lock画蛇添足会导致线程阻塞
     private final ArrayBlockingQueue<String> outputCache =
@@ -56,7 +57,8 @@ public class JsonFileReceiver extends DataReceiver {
     );
 
     public JsonFileReceiver(@NonNull String logDir, @NonNull String indexFilePath,
-                            String fileType, SinkService sinkService, ObjectMapper objectMapper) {
+                            String fileType, TraceQueueService traceQueueService,
+                            SinkService sinkService, ObjectMapper objectMapper) {
         this.logDirName = logDir;
         this.logDirFile = new File(logDir);
         this.indexFilePath = indexFilePath;
@@ -69,7 +71,7 @@ public class JsonFileReceiver extends DataReceiver {
         }
         // 启动JsonFilePreHandler
         jsonFilePreHandlerExecutor.submit(
-                new JsonFilePreHandler(outputCache, fileType, sinkService, objectMapper));
+                new JsonFilePreHandler(outputCache, fileType, traceQueueService, sinkService, objectMapper));
     }
 
     public void initCreateTimeFileMap() {

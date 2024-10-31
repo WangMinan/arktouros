@@ -1,9 +1,19 @@
 package edu.npu.arktouros.analyzer.sytel;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.analyzer.DataAnalyzer;
+import edu.npu.arktouros.model.exception.ArktourosException;
+import edu.npu.arktouros.model.otel.basic.Tag;
+import edu.npu.arktouros.model.otel.trace.Span;
+import edu.npu.arktouros.model.queue.TraceQueueItem;
 import edu.npu.arktouros.service.otel.queue.TraceQueueService;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @author : [wangminan]
@@ -16,8 +26,11 @@ public class SytelTraceAnalyzer extends DataAnalyzer {
 
     private final SinkService sinkService;
 
-    public SytelTraceAnalyzer(SinkService sinkService) {
+    private ObjectMapper objectMapper;
+
+    public SytelTraceAnalyzer(SinkService sinkService, ObjectMapper objectMapper) {
         this.sinkService = sinkService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -36,7 +49,45 @@ public class SytelTraceAnalyzer extends DataAnalyzer {
         SytelTraceAnalyzer.queueService = queueService;
     }
 
-    public void transform() {
+    public static void handle(String spanStr) {
+        TraceQueueItem traceQueueItem = TraceQueueItem.builder()
+                .data(spanStr)
+                .build();
+        queueService.put(traceQueueItem);
+    }
 
+    public void transform() {
+        TraceQueueItem item = queueService.get();
+        if (item != null && StringUtils.isNotEmpty(item.getData())) {
+            log.info("OtelTraceAnalyzer start to transform data");
+        } else {
+            log.warn("OtelTraceAnalyzer get null data from queue, continue for next.");
+            return;
+        }
+        try {
+            edu.npu.arktouros.model.sytel.Span sytelSpan =
+                    objectMapper.readValue(item.getData(), edu.npu.arktouros.model.sytel.Span.class);
+            Span arktourosSpan = Span.builder()
+                    .id(sytelSpan.getSpanId())
+                    .traceId(sytelSpan.getSpanContext().getTraceId())
+                    .parentSpanId(sytelSpan.getParentId())
+                    .name(sytelSpan.getSpanId()) // 我们要拿这个spanId作为调用节点的名称了
+                    .serviceName(sytelSpan.getOperationName())
+                    .startTime(sytelSpan.getStartTime())
+                    .endTime(sytelSpan.getFinishTime())
+                    .root(sytelSpan.getParentId().isEmpty())
+                    .localEndPoint(null)
+                    .remoteEndPoint(null)
+                    .tags(List.of(Tag.builder()
+                            .key("duration")
+                            .value(sytelSpan.getDuration().toString())
+                            .build()))
+                    .build();
+            sinkService.sink(arktourosSpan);
+        } catch (JsonProcessingException e) {
+            throw new ArktourosException(e, "Failed to parse json to span data");
+        } catch (IOException e) {
+            throw new ArktourosException(e, "Failed to sink span data");
+        }
     }
 }

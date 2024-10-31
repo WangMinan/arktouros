@@ -20,6 +20,6 @@ public class Span {
     private Long startTime;
     private Long finishTime;
     private Long duration;
-    private SpanState spanState;
+    private String spanState;
     private SpanContext spanContext;
 }
