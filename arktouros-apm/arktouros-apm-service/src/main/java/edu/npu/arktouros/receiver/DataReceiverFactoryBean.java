@@ -35,13 +35,16 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
     private int tcpPort;
 
     @Value("${instance.number.analyzer.otel.log}")
-    private int logAnalyzerNumber;
+    private int otelLogAnalyzerNumber;
 
     @Value("${instance.number.analyzer.otel.trace}")
-    private int traceAnalyzerNumber;
+    private int otelTraceAnalyzerNumber;
 
     @Value("${instance.number.analyzer.otel.metric}")
-    private int metricsAnalyzerNumber;
+    private int otelMetricsAnalyzerNumber;
+
+    @Value("${instance.number.analyzer.sytel.trace}")
+    private int sytelTraceAnalyzerNumber;
 
     @Value("${receiver.file.json.logDir}")
     private String logDir;
@@ -81,7 +84,7 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
             case "otelGrpc" -> {
                 log.info("OtelGrpc receiver is active");
                 return new OtelGrpcReceiver(
-                        logAnalyzerNumber, traceAnalyzerNumber, metricsAnalyzerNumber,
+                        otelLogAnalyzerNumber, otelTraceAnalyzerNumber, otelMetricsAnalyzerNumber,
                         logQueueService, traceQueueService,
                         metricsQueueService, sinkService, grpcPort);
             }
@@ -96,8 +99,8 @@ public class DataReceiverFactoryBean implements FactoryBean<DataReceiver> {
             case "jsonFile" -> {
                 log.info("OtelFile receiver is active");
                 return new JsonFileReceiver(
-                        logDir, indexFilePath, fileType,
-                        traceQueueService, sinkService, objectMapper);
+                        logDir, indexFilePath, fileType, traceQueueService,
+                        sinkService, objectMapper, sytelTraceAnalyzerNumber);
             }
             case null, default -> throw new IllegalArgumentException("can not find data receiver type from profile");
         }

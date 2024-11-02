@@ -13,35 +13,54 @@ import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.service.otel.queue.TraceQueueService;
 import edu.npu.arktouros.service.otel.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Stack;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author : [wangminan]
  * @description : Json日志预处理器
  */
 @Slf4j
-public class JsonFilePreHandler implements Runnable{
+public class JsonFilePreHandler extends Thread{
     // 阻塞队列 不需要考虑并发问题 用synchronize或者lock画蛇添足会导致线程阻塞
     private final ArrayBlockingQueue<String> inputCache;
     private final StringBuilder cacheStringBuilder = new StringBuilder();
     private final String fileType;
     private final SinkService sinkService;
     private final ObjectMapper objectMapper;
-    private final SytelTraceAnalyzer sytelTraceAnalyzer;
+    private ExecutorService traceAnalyzerThreadPool;
 
     public JsonFilePreHandler(ArrayBlockingQueue<String> inputCache, String fileType,
-                              TraceQueueService traceQueueService,
-                              SinkService sinkService, ObjectMapper objectMapper) {
+                              TraceQueueService traceQueueService, SinkService sinkService,
+                              ObjectMapper objectMapper, int sytelTraceAnalyzerNumber) {
         this.inputCache = inputCache;
         this.fileType = fileType;
         this.sinkService = sinkService;
         this.objectMapper = objectMapper;
-        this.sytelTraceAnalyzer = new SytelTraceAnalyzer(sinkService, objectMapper);
-        sytelTraceAnalyzer.setQueueService(traceQueueService);
+        if (fileType.equals("sytel")) {
+            // 启动一个线程池来处理sytel的数据
+            ThreadFactory traceAnalyzerThreadFactory = new BasicThreadFactory.Builder()
+                    .namingPattern("Trace-analyzer-%d").build();
+            traceAnalyzerThreadPool = new ThreadPoolExecutor(sytelTraceAnalyzerNumber, sytelTraceAnalyzerNumber,
+                    0L, TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<>(sytelTraceAnalyzerNumber),
+                    traceAnalyzerThreadFactory, new ThreadPoolExecutor.AbortPolicy());
+            for (int i = 0; i < sytelTraceAnalyzerNumber; i++) {
+                SytelTraceAnalyzer traceAnalyzer = new SytelTraceAnalyzer(sinkService, objectMapper);
+                SytelTraceAnalyzer.setQueueService(traceQueueService);
+                traceAnalyzer.setName("SytelTraceAnalyzer-" + i);
+                traceAnalyzer.init();
+                traceAnalyzerThreadPool.submit(traceAnalyzer);
+            }
+        }
     }
 
     @Override
@@ -59,21 +78,53 @@ public class JsonFilePreHandler implements Runnable{
 
     public void handle() throws InterruptedException, IOException {
         log.debug("Formatting input from cache.");
-        String input =
-                cacheStringBuilder.append(inputCache.take().trim()).toString();
-        // 如果是sytel的格式 要把前导[]和其中的内容去掉 否则直接处理JSON
+        String input = cacheStringBuilder.append(inputCache.take().trim()).toString();
         if (fileType.equalsIgnoreCase("sytel")) {
-            fixInput(input, '[', ']');
+            extractJsonFromSytel();
+            input = cacheStringBuilder.toString();
         }
-
         if (!input.startsWith("{")) {
             throw new IllegalArgumentException("Invalid input for json when handling: " + input);
         }
-
-        fixInput(input, '{', '}');
+        extractJson(input);
     }
 
-    private void fixInput(String input, char prefix, char suffix) throws IOException {
+    private void extractJsonFromSytel() {
+        StringBuilder result = new StringBuilder();
+        boolean insideSquareBrackets = false;
+        boolean insideCurlyBraces = false;
+
+        for (int i = 0; i < cacheStringBuilder.length(); i++) {
+            char currentChar = cacheStringBuilder.charAt(i);
+
+            if (currentChar == '[' && !insideCurlyBraces) {
+                // 进入方括号状态
+                insideSquareBrackets = true;
+            } else if (currentChar == ']' && insideSquareBrackets) {
+                // 退出方括号状态
+                insideSquareBrackets = false;
+            } else if (currentChar == '{') {
+                // 进入花括号状态
+                insideCurlyBraces = true;
+                result.append(currentChar);  // 保留花括号内容
+            } else if (currentChar == '}' && insideCurlyBraces) {
+                // 退出花括号状态
+                insideCurlyBraces = false;
+                result.append(currentChar);  // 保留花括号内容
+            } else {
+                // 如果在花括号内，保留内容；在方括号内则忽略
+                if (insideCurlyBraces || !insideSquareBrackets) {
+                    result.append(currentChar);
+                }
+            }
+        }
+
+        // 更新全局变量 input 为处理后的内容
+        cacheStringBuilder.setLength(0); // 清空原内容
+        cacheStringBuilder.append(result); // 追加处理后的内容
+    }
+
+    private void extractJson(String input) throws IOException {
         // 开始做大括号匹配 匹配部分扔出去 剩下的放cache里
         Stack<Character> stack = new Stack<>();
         boolean isInStrFlag = false; // 游标是否正在字符串中
@@ -83,9 +134,9 @@ public class JsonFilePreHandler implements Runnable{
             char c = input.charAt(i);
             if (c == '"') {
                 isInStrFlag = !isInStrFlag;
-            } else if (c == prefix && !isInStrFlag) {
-                stack.push(prefix);
-            } else if (c == suffix && !isInStrFlag) {
+            } else if (c == '{' && !isInStrFlag) {
+                stack.push('{');
+            } else if (c == '}' && !isInStrFlag) {
                 stack.pop();
                 if (stack.isEmpty()) {
                     currentPos = i;
@@ -163,6 +214,14 @@ public class JsonFilePreHandler implements Runnable{
         } catch (RuntimeException e) {
             log.error("Encountered an error while handling json from tcp:{}. Trying to recover.", subString);
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void interrupt() {
+        super.interrupt();
+        if (traceAnalyzerThreadPool != null) {
+            traceAnalyzerThreadPool.shutdown();
         }
     }
 }

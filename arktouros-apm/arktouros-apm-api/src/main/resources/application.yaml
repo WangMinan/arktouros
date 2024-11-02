@@ -34,6 +34,8 @@ instance:
         log: 1
         metric: 5
         trace: 1
+      sytel:
+        trace: 1
 
 receiver:
   grpc:

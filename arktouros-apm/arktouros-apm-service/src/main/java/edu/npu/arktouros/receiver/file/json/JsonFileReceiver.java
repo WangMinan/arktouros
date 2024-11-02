@@ -18,9 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -57,8 +55,8 @@ public class JsonFileReceiver extends DataReceiver {
     );
 
     public JsonFileReceiver(@NonNull String logDir, @NonNull String indexFilePath,
-                            String fileType, TraceQueueService traceQueueService,
-                            SinkService sinkService, ObjectMapper objectMapper) {
+                            String fileType, TraceQueueService traceQueueService, SinkService sinkService,
+                            ObjectMapper objectMapper, int sytelTraceAnalyzerNumber) {
         this.logDirName = logDir;
         this.logDirFile = new File(logDir);
         this.indexFilePath = indexFilePath;
@@ -71,7 +69,7 @@ public class JsonFileReceiver extends DataReceiver {
         }
         // 启动JsonFilePreHandler
         jsonFilePreHandlerExecutor.submit(
-                new JsonFilePreHandler(outputCache, fileType, traceQueueService, sinkService, objectMapper));
+                new JsonFilePreHandler(outputCache, fileType, traceQueueService, sinkService, objectMapper, sytelTraceAnalyzerNumber));
     }
 
     public void initParamsWithIndex() throws IOException {

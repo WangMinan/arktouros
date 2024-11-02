@@ -35,9 +35,16 @@ public class SytelTraceAnalyzer extends DataAnalyzer {
 
     @Override
     public void init() {
+        log.info("Initializing SytelTraceAnalyzer:{}, creating table APM_TRACE_QUEUE.",
+                this.getName());
+        queueService.waitTableReady();
+        log.info("OtelTraceAnalyzer is ready.");
+    }
+
+    @Override
+    public void run() {
         super.run();
         if (!queueService.isEmpty()) {
-            // 打印告警 可能有otel的数据没有处理完，如果报错需要以otel格式重启处理完之后再调用沈阳格式
             log.warn("Trace data has remained in cache. Error could occur if remained data is in otel format.");
         }
         while (!isInterrupted()) {
@@ -45,7 +52,7 @@ public class SytelTraceAnalyzer extends DataAnalyzer {
         }
     }
 
-    public void setQueueService(TraceQueueService queueService) {
+    public static void setQueueService(TraceQueueService queueService) {
         SytelTraceAnalyzer.queueService = queueService;
     }
 
@@ -59,9 +66,9 @@ public class SytelTraceAnalyzer extends DataAnalyzer {
     public void transform() {
         TraceQueueItem item = queueService.get();
         if (item != null && StringUtils.isNotEmpty(item.getData())) {
-            log.info("OtelTraceAnalyzer start to transform data");
+            log.info("SytelTraceAnalyzer start to transform data");
         } else {
-            log.warn("OtelTraceAnalyzer get null data from queue, continue for next.");
+            log.debug("SytelTraceAnalyzer get null data from queue, continue for next.");
             return;
         }
         try {
@@ -83,8 +90,10 @@ public class SytelTraceAnalyzer extends DataAnalyzer {
                             .value(sytelSpan.getDuration().toString())
                             .build()))
                     .build();
+            log.debug("Change sytel span to arktouros span: {}", arktourosSpan);
             sinkService.sink(arktourosSpan);
         } catch (JsonProcessingException e) {
+            log.error("sytelSpan:{}", item.getData());
             throw new ArktourosException(e, "Failed to parse json to span data");
         } catch (IOException e) {
             throw new ArktourosException(e, "Failed to sink span data");
