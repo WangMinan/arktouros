@@ -11,6 +11,7 @@ import edu.npu.arktouros.service.queue.TraceQueueService;
  * @description : Elasticsearch数据运维服务
  */
 public class ElasticsearchOperationService extends DataOperationService {
+
     public ElasticsearchOperationService(DataReceiver dataReceiver, LogQueueService logQueueService,
                                          TraceQueueService traceQueueService, MetricsQueueService metricsQueueService) {
         super(dataReceiver, logQueueService, traceQueueService, metricsQueueService);
