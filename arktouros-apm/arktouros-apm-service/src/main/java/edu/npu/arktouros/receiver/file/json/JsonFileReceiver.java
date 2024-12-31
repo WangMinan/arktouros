@@ -45,22 +45,34 @@ public class JsonFileReceiver extends DataReceiver {
     private Long currentPos;
     private final String indexFilePath;
     private final File indexFile;
+    private final String fileType;
+    private final TraceQueueService traceQueueService;
+    private final SinkService sinkService;
+    private final ObjectMapper objectMapper;
+    private final int sytelTraceAnalyzerNumber;
     private static final int DEFAULT_CAPACITY = 1000;
     // 阻塞队列 不需要考虑并发问题 用synchronize或者lock画蛇添足会导致线程阻塞
     private final ArrayBlockingQueue<String> outputCache =
             new ArrayBlockingQueue<>(DEFAULT_CAPACITY);
-    private final ExecutorService jsonFilePreHandlerExecutor = Executors.newSingleThreadExecutor(
+    private ExecutorService jsonFilePreHandlerExecutor = Executors.newSingleThreadExecutor(
             new BasicThreadFactory.Builder()
                     .namingPattern("Json-file-preHandler-%d").build()
     );
 
     public JsonFileReceiver(@NonNull String logDir, @NonNull String indexFilePath,
-                            String fileType, TraceQueueService traceQueueService, SinkService sinkService,
+                            String fileType, TraceQueueService traceQueueService,
+                            SinkService sinkService,
                             ObjectMapper objectMapper, int sytelTraceAnalyzerNumber) {
         this.logDirName = logDir;
         this.logDirFile = new File(logDir);
         this.indexFilePath = indexFilePath;
         this.indexFile = new File(indexFilePath);
+        this.fileType = fileType;
+        this.traceQueueService = traceQueueService;
+        this.sinkService = sinkService;
+        this.objectMapper = objectMapper;
+        this.sytelTraceAnalyzerNumber = sytelTraceAnalyzerNumber;
+
         initCreateTimeFileMap();
         try {
             initParamsWithIndex();
@@ -69,7 +81,8 @@ public class JsonFileReceiver extends DataReceiver {
         }
         // 启动JsonFilePreHandler
         jsonFilePreHandlerExecutor.submit(
-                new JsonFilePreHandler(outputCache, fileType, traceQueueService, sinkService, objectMapper, sytelTraceAnalyzerNumber));
+                new JsonFilePreHandler(outputCache, fileType, traceQueueService,
+                        sinkService, objectMapper, sytelTraceAnalyzerNumber));
     }
 
     public void initParamsWithIndex() throws IOException {
@@ -163,7 +176,7 @@ public class JsonFileReceiver extends DataReceiver {
         }
     }
 
-    public long encodeFileNameToNumber(String fileName) throws NoSuchAlgorithmException{
+    public long encodeFileNameToNumber(String fileName) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("MD5");
         byte[] hashBytes = digest.digest(fileName.getBytes(StandardCharsets.UTF_8));
         long number = 0;
@@ -234,6 +247,35 @@ public class JsonFileReceiver extends DataReceiver {
     @Override
     public void start() {
         log.info("JsonFileReceiver start reading log files");
+        while (true) {
+            try {
+                readFile();
+            } catch (InterruptedException e) {
+                log.error("JsonLogFileReceiver run failed", e);
+                throw new ArktourosException(e);
+            }
+        }
+    }
+
+    @Override
+    public void flushAndStart() {
+        log.info("JsonFileReceiver flush and start reading log files");
+        // 重新初始化环境
+        outputCache.clear();
+        jsonFilePreHandlerExecutor = Executors.newSingleThreadExecutor(
+                new BasicThreadFactory.Builder()
+                        .namingPattern("Json-file-preHandler-%d").build()
+        );
+        initCreateTimeFileMap();
+        try {
+            initParamsWithIndex();
+        } catch (IOException e) {
+            throw new ArktourosException(e);
+        }
+        // 启动JsonFilePreHandler
+        jsonFilePreHandlerExecutor.submit(
+                new JsonFilePreHandler(outputCache, fileType, traceQueueService,
+                        sinkService, objectMapper, sytelTraceAnalyzerNumber));
         while (true) {
             try {
                 readFile();

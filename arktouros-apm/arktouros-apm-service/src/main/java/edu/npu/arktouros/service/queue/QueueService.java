@@ -18,4 +18,6 @@ public abstract class QueueService <T> {
     abstract long size();
 
     abstract void waitTableReady();
+
+    abstract void clear();
 }

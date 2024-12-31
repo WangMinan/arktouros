@@ -258,7 +258,7 @@ public class ElasticsearchSinkService extends SinkService {
                             ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);
                     break;
                 default:
-                    throw new IllegalStateException("Unexpected source type value: " + source);
+                    log.warn("Unexpected source type value: {}", source);
             }
         }
     }

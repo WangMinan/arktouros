@@ -84,4 +84,9 @@ public class LogQueueService extends QueueService<LogQueueItem> {
     public void waitTableReady() {
         queueMapper.prepareTable();
     }
+
+    @Override
+    void clear() {
+        queueMapper.clear();
+    }
 }

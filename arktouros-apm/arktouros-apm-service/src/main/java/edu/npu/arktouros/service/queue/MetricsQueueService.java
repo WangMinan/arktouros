@@ -87,4 +87,9 @@ public class MetricsQueueService extends QueueService<MetricsQueueItem> {
     public void waitTableReady() {
         queueMapper.prepareTable();
     }
+
+    @Override
+    void clear() {
+        queueMapper.clear();
+    }
 }

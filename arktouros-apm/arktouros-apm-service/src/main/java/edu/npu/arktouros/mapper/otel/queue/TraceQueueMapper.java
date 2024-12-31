@@ -119,4 +119,17 @@ public class TraceQueueMapper extends QueueMapper<TraceQueueItem> {
             return false;
         }
     }
+
+    @Override
+    public void clear() {
+        String sql = "delete from PUBLIC.APM_TRACE_QUEUE;";
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            log.error("Encounter error when clear span table from dataSource: {}", e.getMessage());
+        }
+    }
 }

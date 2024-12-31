@@ -45,6 +45,12 @@ public class ArktourosGrpcReceiver extends DataReceiver {
     }
 
     @Override
+    public void flushAndStart() {
+        log.info("ArktourosGrpcReceiver start to flush and receive data, listening on port:{}", port);
+        start();
+    }
+
+    @Override
     public void stop() {
         if (server != null) {
             try {

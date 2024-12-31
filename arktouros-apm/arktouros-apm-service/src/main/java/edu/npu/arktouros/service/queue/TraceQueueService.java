@@ -86,4 +86,9 @@ public class TraceQueueService extends QueueService<TraceQueueItem> {
     public void waitTableReady() {
         queueMapper.prepareTable();
     }
+
+    @Override
+    void clear() {
+        queueMapper.clear();
+    }
 }

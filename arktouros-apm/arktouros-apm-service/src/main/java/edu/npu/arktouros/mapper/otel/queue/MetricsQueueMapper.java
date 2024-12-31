@@ -119,4 +119,17 @@ public class MetricsQueueMapper extends QueueMapper<MetricsQueueItem> {
             return false;
         }
     }
+
+    @Override
+    public void clear() {
+        String sql = "delete from PUBLIC.APM_METRICS_QUEUE;";
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            log.error("Encounter error when clear metric table in dataSource: {}", e.getMessage());
+        }
+    }
 }

@@ -36,7 +36,7 @@ public class OtelGrpcReceiver extends DataReceiver {
     private final int metricsAnalyzerNumber;
     private final SinkService sinkService;
     private final int port;
-    private final Server server;
+    private Server server;
     private ExecutorService logAnalyzerThreadPool;
     private ExecutorService traceAnalyzerThreadPool;
     private ExecutorService metricsAnalyzerThreadPool;
@@ -73,6 +73,19 @@ public class OtelGrpcReceiver extends DataReceiver {
             log.error("Grpc receiver start error", e);
             throw new ArktourosException(e, "Grpc receiver start error");
         }
+    }
+
+    @Override
+    public void flushAndStart() {
+        // stop中关掉的线程池都需要重新初始化
+        log.info("OtelGrpcReceiver flush and start.");
+        initAndStartAnalyzers();
+        server = ServerBuilder.forPort(port)
+                .addService(new OtelMetricsServiceImpl())
+                .addService(new OtelLogServiceImpl())
+                .addService(new OtelTraceServiceImpl())
+                .build();
+        start();
     }
 
     @Override

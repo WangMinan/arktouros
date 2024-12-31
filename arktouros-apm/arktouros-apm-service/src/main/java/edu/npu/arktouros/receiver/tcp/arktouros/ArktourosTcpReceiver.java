@@ -37,11 +37,11 @@ import java.util.Stack;
 public class ArktourosTcpReceiver extends DataReceiver {
 
     private final int tcpPort;
-    private final StringBuilder cacheStringBuilder;
+    private StringBuilder cacheStringBuilder;
     private final SinkService sinkService;
     private final ObjectMapper objectMapper;
-    private final NioEventLoopGroup bossGroup;
-    private final NioEventLoopGroup workerGroup;
+    private NioEventLoopGroup bossGroup;
+    private NioEventLoopGroup workerGroup;
     private ChannelFuture channelFuture;
 
     public ArktourosTcpReceiver(SinkService sinkService, int tcpPort,
@@ -125,6 +125,16 @@ public class ArktourosTcpReceiver extends DataReceiver {
             log.error("Error caught by tcp receiver when starting.");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void flushAndStart() {
+        // stop里关掉的东西要重新开起来
+        log.info("Flushing and starting tcp receiver.");
+        cacheStringBuilder = new StringBuilder();
+        bossGroup = new NioEventLoopGroup();
+        workerGroup = new NioEventLoopGroup();
+        start();
     }
 
     private void handleChannelInput() throws IOException {
