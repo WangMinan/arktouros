@@ -4,7 +4,7 @@ import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.proto.collector.v1.SpanRequest;
 import edu.npu.arktouros.proto.collector.v1.SpanResponse;
 import edu.npu.arktouros.proto.collector.v1.SpanServiceGrpc;
-import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.service.sinker.SinkService;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 

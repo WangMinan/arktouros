@@ -7,8 +7,8 @@ import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.queue.TraceQueueItem;
-import edu.npu.arktouros.service.otel.queue.TraceQueueService;
-import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.service.queue.TraceQueueService;
+import edu.npu.arktouros.service.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 

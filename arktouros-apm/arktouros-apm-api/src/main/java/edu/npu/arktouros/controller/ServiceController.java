@@ -2,7 +2,7 @@ package edu.npu.arktouros.controller;
 
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.vo.R;
-import edu.npu.arktouros.service.otel.search.SearchService;
+import edu.npu.arktouros.service.search.SearchService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

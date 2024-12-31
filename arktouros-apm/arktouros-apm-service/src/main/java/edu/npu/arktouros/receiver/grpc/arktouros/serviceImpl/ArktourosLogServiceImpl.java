@@ -4,7 +4,7 @@ import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.proto.collector.v1.LogRequest;
 import edu.npu.arktouros.proto.collector.v1.LogResponse;
 import edu.npu.arktouros.proto.collector.v1.LogServiceGrpc;
-import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.service.sinker.SinkService;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 

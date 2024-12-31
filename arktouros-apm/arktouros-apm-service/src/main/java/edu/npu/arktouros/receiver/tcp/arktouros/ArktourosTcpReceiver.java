@@ -10,7 +10,7 @@ import edu.npu.arktouros.model.otel.metric.Histogram;
 import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.receiver.DataReceiver;
-import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.service.sinker.SinkService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;

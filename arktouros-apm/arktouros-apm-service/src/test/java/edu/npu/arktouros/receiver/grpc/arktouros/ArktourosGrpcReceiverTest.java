@@ -1,6 +1,6 @@
 package edu.npu.arktouros.receiver.grpc.arktouros;
 
-import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.service.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;

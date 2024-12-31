@@ -1,8 +1,8 @@
 package edu.npu.arktouros;
 
 import edu.npu.arktouros.receiver.DataReceiver;
-import edu.npu.arktouros.service.otel.scheduled.ScheduledJob;
-import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.service.scheduled.ScheduledJob;
+import edu.npu.arktouros.service.sinker.SinkService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

@@ -2,7 +2,7 @@ package edu.npu.arktouros.controller;
 
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.vo.R;
-import edu.npu.arktouros.service.otel.search.SearchService;
+import edu.npu.arktouros.service.search.SearchService;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;

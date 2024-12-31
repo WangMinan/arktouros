@@ -1,9 +1,9 @@
 package edu.npu.arktouros.receiver.grpc.otel;
 
-import edu.npu.arktouros.service.otel.queue.LogQueueService;
-import edu.npu.arktouros.service.otel.queue.MetricsQueueService;
-import edu.npu.arktouros.service.otel.queue.TraceQueueService;
-import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.service.queue.LogQueueService;
+import edu.npu.arktouros.service.queue.MetricsQueueService;
+import edu.npu.arktouros.service.queue.TraceQueueService;
+import edu.npu.arktouros.service.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;

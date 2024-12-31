@@ -4,7 +4,7 @@
 <!-- debug=false 关闭logback自身日志输出 -->
 <configuration scan="true" scanPeriod="300 seconds" debug="false">
     <!-- 关闭logback自身日志输出 -->
-    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
 
     <!-- 自定义变量，用于配置日志输出格式，这个格式是尽量偏向 spring boot 默认的输出风格
     %date：日期，默认格式 yyyy-MM-dd hhh:mm:ss,SSS 默认使用本机时区，通过 %d{yyyy-MM-dd hhh:mm:ss,SSS} 来自定义
@@ -125,6 +125,6 @@
         <appender-ref ref="STDOUT_INFO"/>
         <appender-ref ref="STDOUT_WARN"/>
         <appender-ref ref="STDOUT_ERROR"/>
-        <!--        <appender-ref ref="ROLLING"/>-->
+        <appender-ref ref="ROLLING"/>
     </root>
 </configuration>

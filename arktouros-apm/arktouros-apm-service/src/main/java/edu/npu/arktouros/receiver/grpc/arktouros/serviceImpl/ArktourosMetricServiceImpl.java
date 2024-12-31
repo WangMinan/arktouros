@@ -7,7 +7,7 @@ import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.proto.collector.v1.MetricRequest;
 import edu.npu.arktouros.proto.collector.v1.MetricResponse;
 import edu.npu.arktouros.proto.collector.v1.MetricServiceGrpc;
-import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.service.sinker.SinkService;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 

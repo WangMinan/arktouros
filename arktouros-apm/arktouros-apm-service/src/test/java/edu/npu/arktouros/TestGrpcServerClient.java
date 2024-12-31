@@ -3,7 +3,7 @@ package edu.npu.arktouros;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.otel.trace.Span;
-import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.service.sinker.SinkService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;

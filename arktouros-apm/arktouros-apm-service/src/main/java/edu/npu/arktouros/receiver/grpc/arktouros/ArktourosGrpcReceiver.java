@@ -5,7 +5,7 @@ import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl.ArktourosLogServiceImpl;
 import edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl.ArktourosMetricServiceImpl;
 import edu.npu.arktouros.receiver.grpc.arktouros.serviceImpl.ArktourosSpanServiceImpl;
-import edu.npu.arktouros.service.otel.sinker.SinkService;
+import edu.npu.arktouros.service.sinker.SinkService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import lombok.extern.slf4j.Slf4j;
