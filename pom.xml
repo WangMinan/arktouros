@@ -55,7 +55,7 @@
         <lombok.version>1.18.34</lombok.version>
         <snakeyaml.verison>2.3</snakeyaml.verison>
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
-        <jackson.version>2.18.0</jackson.version>
+        <jackson.version>2.18.1</jackson.version>
         <elasticsearch-java.version>8.14.3</elasticsearch-java.version>
         <armeria.version>1.30.1</armeria.version>
 
@@ -67,7 +67,7 @@
 
         <!-- log4j2 -->
         <slf4j.version>2.0.16</slf4j.version>
-        <logback.version>1.5.8</logback.version>
+        <logback.version>1.5.12</logback.version>
         <!-- log4j2 -->
 
         <!-- grpc -->
@@ -79,7 +79,7 @@
         <!-- grpc -->
 
         <!-- UT -->
-        <junit-jupiter.version>5.11.2</junit-jupiter.version>
+        <junit-jupiter.version>5.11.3</junit-jupiter.version>
         <mockito.version>5.14.2</mockito.version>
         <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
         <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
