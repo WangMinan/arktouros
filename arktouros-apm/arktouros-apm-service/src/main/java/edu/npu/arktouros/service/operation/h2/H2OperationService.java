@@ -11,7 +11,16 @@ import edu.npu.arktouros.service.queue.TraceQueueService;
  * @description : H2数据运维服务
  */
 public class H2OperationService extends DataOperationService {
+
     public H2OperationService(DataReceiver dataReceiver, LogQueueService logQueueService, TraceQueueService traceQueueService, MetricsQueueService metricsQueueService) {
         super(dataReceiver, logQueueService, traceQueueService, metricsQueueService);
+    }
+
+    @Override
+    public void deleteAllLogs() {
+    }
+
+    @Override
+    public void deleteAllSpans() {
     }
 }

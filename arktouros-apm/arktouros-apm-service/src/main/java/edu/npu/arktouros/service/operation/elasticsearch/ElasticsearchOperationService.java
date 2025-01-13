@@ -16,4 +16,12 @@ public class ElasticsearchOperationService extends DataOperationService {
                                          TraceQueueService traceQueueService, MetricsQueueService metricsQueueService) {
         super(dataReceiver, logQueueService, traceQueueService, metricsQueueService);
     }
+
+    @Override
+    public void deleteAllLogs() {
+    }
+
+    @Override
+    public void deleteAllSpans() {
+    }
 }
