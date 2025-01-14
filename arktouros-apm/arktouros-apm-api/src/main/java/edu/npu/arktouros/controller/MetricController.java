@@ -2,9 +2,11 @@ package edu.npu.arktouros.controller;
 
 import edu.npu.arktouros.model.dto.MetricQueryDto;
 import edu.npu.arktouros.model.vo.R;
+import edu.npu.arktouros.service.operation.DataOperationService;
 import edu.npu.arktouros.service.search.SearchService;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +22,17 @@ public class MetricController {
     @Resource
     private SearchService searchService;
 
+    @Resource
+    private DataOperationService dataOperationService;
+
     @GetMapping
     public R getMetrics(@Validated MetricQueryDto metricQueryDto) {
         return searchService.getMetrics(metricQueryDto);
+    }
+
+    @DeleteMapping
+    public R deleteAllMetrics() {
+        dataOperationService.deleteAllMetrics();
+        return R.ok();
     }
 }

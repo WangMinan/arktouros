@@ -2,9 +2,11 @@ package edu.npu.arktouros.controller;
 
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.vo.R;
+import edu.npu.arktouros.service.operation.DataOperationService;
 import edu.npu.arktouros.service.search.SearchService;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +21,9 @@ public class LogController {
     @Resource
     private SearchService searchService;
 
+    @Resource
+    private DataOperationService dataOperationService;
+
     @GetMapping("/logs")
     public R getLogList(@Validated LogQueryDto logQueryDto) {
         return searchService.getLogList(logQueryDto);
@@ -27,5 +32,11 @@ public class LogController {
     @GetMapping("/log/levels")
     public R getAllLogLevels(@RequestParam(value = "query", required = false) String query) {
         return searchService.getAllLogLevels(query);
+    }
+
+    @DeleteMapping("/logs")
+    public R deleteAllLogs() {
+        dataOperationService.deleteAllLogs();
+        return R.ok();
     }
 }
