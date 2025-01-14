@@ -2,9 +2,6 @@ package edu.npu.arktouros.service.operation.elasticsearch;
 
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.operation.DataOperationService;
-import edu.npu.arktouros.service.queue.LogQueueService;
-import edu.npu.arktouros.service.queue.MetricsQueueService;
-import edu.npu.arktouros.service.queue.TraceQueueService;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 
 import java.util.List;
