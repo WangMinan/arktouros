@@ -24,21 +24,12 @@ public class DataOperationServiceFactoryBean implements FactoryBean<DataOperatio
     private String activeDataOperation;
 
     private final DataReceiver dataReceiver;
-    private final LogQueueService logQueueService;
-    private final TraceQueueService traceQueueService;
-    private final MetricsQueueService metricsQueueService;
 
     private DataOperationService dataOperationService;
 
     @Lazy
-    public DataOperationServiceFactoryBean(DataReceiver dataReceiver,
-                                           LogQueueService logQueueService,
-                                           TraceQueueService traceQueueService,
-                                           MetricsQueueService metricsQueueService) {
+    public DataOperationServiceFactoryBean(DataReceiver dataReceiver) {
         this.dataReceiver = dataReceiver;
-        this.logQueueService = logQueueService;
-        this.traceQueueService = traceQueueService;
-        this.metricsQueueService = metricsQueueService;
     }
 
     @Override
@@ -46,9 +37,9 @@ public class DataOperationServiceFactoryBean implements FactoryBean<DataOperatio
         log.info("DataOperationServiceFactory init, current dataOperation:{}", activeDataOperation);
         if (dataOperationService == null) {
             if (activeDataOperation.equals("elasticsearch")) {
-                dataOperationService = new ElasticsearchOperationService(dataReceiver, logQueueService, traceQueueService, metricsQueueService);
+                dataOperationService = new ElasticsearchOperationService(dataReceiver);
             } else if (activeDataOperation.equals("h2")) {
-                dataOperationService = new H2OperationService(dataReceiver, logQueueService, traceQueueService, metricsQueueService);
+                dataOperationService = new H2OperationService(dataReceiver);
             } else {
                 throw new IllegalArgumentException("Invalid data operation type: " + activeDataOperation);
             }

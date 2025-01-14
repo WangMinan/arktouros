@@ -12,20 +12,28 @@ import edu.npu.arktouros.service.queue.TraceQueueService;
  */
 public class H2OperationService extends DataOperationService {
 
-    public H2OperationService(DataReceiver dataReceiver, LogQueueService logQueueService, TraceQueueService traceQueueService, MetricsQueueService metricsQueueService) {
-        super(dataReceiver, logQueueService, traceQueueService, metricsQueueService);
+    public H2OperationService(DataReceiver dataReceiver) {
+        super(dataReceiver);
+    }
+
+    @Override
+    public void deleteAllData() {
+        throw new UnsupportedOperationException("H2 does not support delete all data");
     }
 
     @Override
     public void deleteAllLogs() {
+        throw new UnsupportedOperationException("H2 does not support delete all logs");
     }
 
     @Override
     public void deleteAllSpans() {
+        throw new UnsupportedOperationException("H2 does not support delete all spans");
     }
 
     @Override
     public void deleteAllMetrics() {
+        throw new UnsupportedOperationException("H2 does not support delete all metrics");
 
     }
 }

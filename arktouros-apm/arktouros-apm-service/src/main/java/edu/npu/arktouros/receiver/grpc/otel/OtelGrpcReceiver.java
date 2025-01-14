@@ -39,12 +39,12 @@ public class OtelGrpcReceiver extends DataReceiver {
     private final SinkService sinkService;
     private final int port;
     private Server server;
-    private List<OtelLogAnalyzer> logAnalyzers;
-    private List<OtelTraceAnalyzer> traceAnalyzers;
-    private List<OtelMetricsAnalyzer> metricsAnalyzers;
     private ExecutorService logAnalyzerThreadPool;
     private ExecutorService traceAnalyzerThreadPool;
     private ExecutorService metricsAnalyzerThreadPool;
+    private List<OtelLogAnalyzer> logAnalyzers;
+    private List<OtelTraceAnalyzer> traceAnalyzers;
+    private List<OtelMetricsAnalyzer> metricsAnalyzers;
 
     public OtelGrpcReceiver(int logAnalyzerNumber,
                             int traceAnalyzerNumber,
@@ -58,9 +58,6 @@ public class OtelGrpcReceiver extends DataReceiver {
         this.metricsAnalyzerNumber = metricsAnalyzerNumber;
         this.sinkService = sinkService;
         this.port = grpcPort;
-        this.logAnalyzers = new ArrayList<>();
-        this.traceAnalyzers = new ArrayList<>();
-        this.metricsAnalyzers = new ArrayList<>();
         OtelMetricsAnalyzer.setQueueService(metricsQueueService);
         OtelLogAnalyzer.setQueueService(logQueueService);
         OtelTraceAnalyzer.setQueueService(traceQueueService);
@@ -87,9 +84,6 @@ public class OtelGrpcReceiver extends DataReceiver {
     public void flushAndStart() {
         // stop中关掉的线程池都需要重新初始化
         log.info("OtelGrpcReceiver flush and start.");
-        this.logAnalyzers = new ArrayList<>();
-        this.traceAnalyzers = new ArrayList<>();
-        this.metricsAnalyzers = new ArrayList<>();
         initAndStartAnalyzers();
         server = ServerBuilder.forPort(port)
                 .addService(new OtelMetricsServiceImpl())
@@ -105,6 +99,7 @@ public class OtelGrpcReceiver extends DataReceiver {
             try {
                 log.info("Grpc server is shutting down.");
                 server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
+                // 涉及analyzer 线程池关闭时触发analyzer的各个thread的interrupt
                 logAnalyzerThreadPool.shutdown();
                 traceAnalyzerThreadPool.shutdown();
                 metricsAnalyzerThreadPool.shutdown();
@@ -117,7 +112,34 @@ public class OtelGrpcReceiver extends DataReceiver {
         }
     }
 
+    @Override
+    public void stopAndClean() {
+        this.logAnalyzers.forEach(logAnalyzer -> {
+            logAnalyzer.setNeedCleanWhileShutdown(true);
+        });
+        this.traceAnalyzers.forEach(traceAnalyzer -> {
+            traceAnalyzer.setNeedCleanWhileShutdown(true);
+        });
+        this.metricsAnalyzers.forEach(metricsAnalyzer -> {
+            metricsAnalyzer.setNeedCleanWhileShutdown(true);
+        });
+        super.stopAndClean();
+        // 恢复现场
+        this.logAnalyzers.forEach(logAnalyzer -> {
+            logAnalyzer.setNeedCleanWhileShutdown(false);
+        });
+        this.traceAnalyzers.forEach(traceAnalyzer -> {
+            traceAnalyzer.setNeedCleanWhileShutdown(false);
+        });
+        this.metricsAnalyzers.forEach(metricsAnalyzer -> {
+            metricsAnalyzer.setNeedCleanWhileShutdown(false);
+        });
+    }
+
     private void initAndStartAnalyzers() {
+        this.logAnalyzers = new ArrayList<>();
+        this.traceAnalyzers = new ArrayList<>();
+        this.metricsAnalyzers = new ArrayList<>();
         ThreadFactory logAnalyzerThreadFactory = new BasicThreadFactory.Builder()
                 .namingPattern("Log-analyzer-%d").build();
         ThreadFactory traceAnalyzerThreadFactory = new BasicThreadFactory.Builder()

@@ -55,6 +55,7 @@ public class ArktourosGrpcReceiver extends DataReceiver {
         if (server != null) {
             try {
                 log.info("Grpc server is shutting down.");
+                // 不涉及analyzer
                 server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
                 log.info("Grpc receiver stopped");
             } catch (InterruptedException e) {

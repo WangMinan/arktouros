@@ -2,7 +2,9 @@ package edu.npu.arktouros.util.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.Time;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
 import co.elastic.clients.elasticsearch.cat.IndicesResponse;
+import co.elastic.clients.elasticsearch.core.DeleteByQueryRequest;
 import co.elastic.clients.elasticsearch.core.DeleteRequest;
 import co.elastic.clients.elasticsearch.core.DeleteResponse;
 import co.elastic.clients.elasticsearch.core.ScrollRequest;
@@ -138,7 +140,7 @@ public class ElasticsearchUtil {
      * 获取所有实际索引 名称形式应当为虚拟索引+日期+序列号
      * @return 一个包含所有实际索引的列表
      */
-    public static List<String> getAllActualIndexes () {
+    public static List<String> getAllArktourosIndexes() {
         List<String> indexes = new ArrayList<>();
         ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
         try {
@@ -146,7 +148,7 @@ public class ElasticsearchUtil {
             indicesResponse.valueBody().stream().filter(
                     indicesRecord -> {
                         if (StringUtils.isNotEmpty(indicesRecord.index())) {
-                            return indicesRecord.index().startsWith("arktouros");
+                            return indicesRecord.index().startsWith("arktouros-");
                         }
                         return false;
                     }
@@ -159,5 +161,25 @@ public class ElasticsearchUtil {
             ElasticsearchClientPool.returnClient(esClient);
         }
         return indexes;
+    }
+
+    /**
+     * 删除指定索引
+     * @param indexes 索引名称
+     */
+    public static void truncateIndexes(List<String> indexes) {
+        DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest.Builder()
+                .index(indexes)
+                .query(new MatchAllQuery.Builder().build()._toQuery())
+                .build();
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+        try {
+            esClient.deleteByQuery(deleteByQueryRequest);
+        } catch (IOException e) {
+            log.error("Failed to truncate index: {}", e.getMessage());
+            throw new ArktourosException(e, "Failed to truncate index");
+        } finally {
+            ElasticsearchClientPool.returnClient(esClient);
+        }
     }
 }

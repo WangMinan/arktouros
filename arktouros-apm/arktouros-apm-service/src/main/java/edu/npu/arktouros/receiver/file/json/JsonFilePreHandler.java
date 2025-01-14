@@ -12,10 +12,13 @@ import edu.npu.arktouros.model.otel.metric.Summary;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.service.queue.TraceQueueService;
 import edu.npu.arktouros.service.sinker.SinkService;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -29,14 +32,18 @@ import java.util.concurrent.TimeUnit;
  * @description : Json日志预处理器
  */
 @Slf4j
-public class JsonFilePreHandler extends Thread{
+public class JsonFilePreHandler extends Thread {
     // 阻塞队列 不需要考虑并发问题 用synchronize或者lock画蛇添足会导致线程阻塞
     private final ArrayBlockingQueue<String> inputCache;
     private final StringBuilder cacheStringBuilder = new StringBuilder();
     private final String fileType;
     private final SinkService sinkService;
     private final ObjectMapper objectMapper;
+    private final TraceQueueService traceQueueService;
+    private final int sytelTraceAnalyzerNumber;
+    private List<SytelTraceAnalyzer> traceAnalyzers;
     private ExecutorService traceAnalyzerThreadPool;
+    protected static boolean needCleanWhileShutdown = false;
 
     public JsonFilePreHandler(ArrayBlockingQueue<String> inputCache, String fileType,
                               TraceQueueService traceQueueService, SinkService sinkService,
@@ -45,6 +52,12 @@ public class JsonFilePreHandler extends Thread{
         this.fileType = fileType;
         this.sinkService = sinkService;
         this.objectMapper = objectMapper;
+        this.traceQueueService = traceQueueService;
+        this.sytelTraceAnalyzerNumber = sytelTraceAnalyzerNumber;
+    }
+
+    private void initSytelAnalyzers() {
+        this.traceAnalyzers = new ArrayList<>();
         if (fileType.equals("sytel")) {
             // 启动一个线程池来处理sytel的数据
             ThreadFactory traceAnalyzerThreadFactory = new BasicThreadFactory.Builder()
@@ -55,6 +68,8 @@ public class JsonFilePreHandler extends Thread{
                     traceAnalyzerThreadFactory, new ThreadPoolExecutor.AbortPolicy());
             for (int i = 0; i < sytelTraceAnalyzerNumber; i++) {
                 SytelTraceAnalyzer traceAnalyzer = new SytelTraceAnalyzer(sinkService, objectMapper);
+                traceAnalyzers.add(traceAnalyzer);
+                traceAnalyzer.setNeedCleanWhileShutdown(needCleanWhileShutdown);
                 SytelTraceAnalyzer.setQueueService(traceQueueService);
                 traceAnalyzer.setName("SytelTraceAnalyzer-" + i);
                 traceAnalyzer.init();
@@ -66,6 +81,7 @@ public class JsonFilePreHandler extends Thread{
     @Override
     public void run() {
         log.info("JsonFilePreHandler start working");
+        initSytelAnalyzers();
         while (true) {
             try {
                 handle();
@@ -219,9 +235,14 @@ public class JsonFilePreHandler extends Thread{
 
     @Override
     public void interrupt() {
-        super.interrupt();
+        if (needCleanWhileShutdown) {
+            traceAnalyzers.forEach(traceAnalyzer -> {
+                traceAnalyzer.setNeedCleanWhileShutdown(true);
+            });
+        }
         if (traceAnalyzerThreadPool != null) {
             traceAnalyzerThreadPool.shutdown();
         }
+        super.interrupt();
     }
 }

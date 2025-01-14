@@ -224,6 +224,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
     @Override
     public void stop() {
         log.info("Tcp receiver shutdown. All unreceived data will be lost. Waiting for worker groups shutting down.");
+        // 不涉及analyzer的关闭
         channelFuture.channel().close();
     }
 }

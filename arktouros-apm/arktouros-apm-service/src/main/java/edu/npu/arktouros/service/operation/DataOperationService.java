@@ -13,24 +13,12 @@ import edu.npu.arktouros.service.queue.TraceQueueService;
 public abstract class DataOperationService {
 
     protected DataReceiver dataReceiver;
-    protected LogQueueService logQueueService;
-    protected TraceQueueService traceQueueService;
-    protected MetricsQueueService metricsQueueService;
 
-    public DataOperationService(DataReceiver dataReceiver, LogQueueService logQueueService,
-                                TraceQueueService traceQueueService,
-                                MetricsQueueService metricsQueueService) {
+    public DataOperationService(DataReceiver dataReceiver) {
         this.dataReceiver = dataReceiver;
-        this.logQueueService = logQueueService;
-        this.traceQueueService = traceQueueService;
-        this.metricsQueueService = metricsQueueService;
     }
 
-    public void deleteAllData() {
-        deleteAllLogs();
-        deleteAllSpans();
-        deleteAllMetrics();
-    }
+    public abstract void deleteAllData();
 
     public abstract void deleteAllLogs();
     public abstract void deleteAllSpans();

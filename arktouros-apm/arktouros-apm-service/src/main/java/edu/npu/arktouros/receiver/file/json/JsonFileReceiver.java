@@ -289,6 +289,15 @@ public class JsonFileReceiver extends DataReceiver {
     @Override
     public void stop() {
         log.info("JsonFileReceiver stop reading log files");
+        // JsonFilePreHandler调用了sytel的TraceAnalyzer线程池 需要关闭
         jsonFilePreHandlerExecutor.shutdown();
+    }
+
+    @Override
+    public void stopAndClean() {
+        JsonFilePreHandler.needCleanWhileShutdown = true;
+        super.stopAndClean();
+        // 恢复现场
+        JsonFilePreHandler.needCleanWhileShutdown = false;
     }
 }

@@ -110,10 +110,10 @@ public class OtelMetricsAnalyzer extends DataAnalyzer {
     @Override
     public void interrupt() {
         log.info("OtelMetricsAnalyzer is shutting down.");
-        if (!queueService.isEmpty()) {
+        if (!queueService.isEmpty() &&  needCleanWhileShutdown) {
             log.warn("Otel metric data has remained in cache. Some data will be lost.");
+            queueService.clear();
         }
-        queueService.clear();
         super.interrupt();
     }
 

@@ -9,7 +9,7 @@ public abstract class DataReceiver {
 
     public abstract void stop();
 
-    public void stopGracefully() {
+    public void stopAndClean() {
         stop();
     }
 }
