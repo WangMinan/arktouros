@@ -7,17 +7,17 @@ public abstract class QueueService <T> {
 
     protected String name;
 
-    abstract void put(T t);
+    public abstract void put(T t);
 
-    abstract T get();
+    public abstract T get();
 
-    abstract T get(boolean removeAtSameTime);
+    public abstract T get(boolean removeAtSameTime);
 
-    abstract boolean isEmpty();
+    public abstract boolean isEmpty();
 
-    abstract long size();
+    public abstract long size();
 
-    abstract void waitTableReady();
+    public abstract void waitTableReady();
 
-    abstract void clear();
+    public abstract void clear();
 }

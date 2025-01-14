@@ -2,6 +2,7 @@ package edu.npu.arktouros.util.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.Time;
+import co.elastic.clients.elasticsearch.cat.IndicesResponse;
 import co.elastic.clients.elasticsearch.core.DeleteRequest;
 import co.elastic.clients.elasticsearch.core.DeleteResponse;
 import co.elastic.clients.elasticsearch.core.ScrollRequest;
@@ -16,6 +17,7 @@ import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -130,5 +132,32 @@ public class ElasticsearchUtil {
             ElasticsearchClientPool.returnClient(esClient);
         }
         return deleteResponse.result() != null;
+    }
+
+    /**
+     * 获取所有实际索引 名称形式应当为虚拟索引+日期+序列号
+     * @return 一个包含所有实际索引的列表
+     */
+    public static List<String> getAllActualIndexes () {
+        List<String> indexes = new ArrayList<>();
+        ElasticsearchClient esClient = ElasticsearchClientPool.getClient();
+        try {
+            IndicesResponse indicesResponse = esClient.cat().indices();
+            indicesResponse.valueBody().stream().filter(
+                    indicesRecord -> {
+                        if (StringUtils.isNotEmpty(indicesRecord.index())) {
+                            return indicesRecord.index().startsWith("arktouros");
+                        }
+                        return false;
+                    }
+            ).forEach(indicesRecord -> indexes.add(indicesRecord.index()));
+            log.debug("All actual indexes: {}", indexes);
+        } catch (IOException e) {
+            log.error("Failed to get all actual indexes: {}", e.getMessage());
+            throw new ArktourosException(e);
+        } finally {
+            ElasticsearchClientPool.returnClient(esClient);
+        }
+        return indexes;
     }
 }

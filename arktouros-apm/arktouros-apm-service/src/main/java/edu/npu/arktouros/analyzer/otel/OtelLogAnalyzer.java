@@ -64,6 +64,10 @@ public class OtelLogAnalyzer extends DataAnalyzer {
     @Override
     public void interrupt() {
         log.info("OtelLogAnalyzer is shutting down.");
+        if (!queueService.isEmpty()) {
+            log.warn("Otel log data has remained in cache. Some data will be lost.");
+        }
+        queueService.clear();
         super.interrupt();
     }
 

@@ -89,7 +89,7 @@ public class MetricsQueueService extends QueueService<MetricsQueueItem> {
     }
 
     @Override
-    void clear() {
+    public void clear() {
         queueMapper.clear();
     }
 }

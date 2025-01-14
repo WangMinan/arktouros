@@ -278,7 +278,7 @@ public class ElasticsearchMapper extends SearchMapper {
                                 new HashSet<>());
                 endPointTraceIdVo.traceIds().add(hit.source().getTraceId());
                 endPointTraceIdVoList.add(endPointTraceIdVo);
-            } else if (localEndPoint == null && remoteEndPoint == null) {
+            } else if (remoteEndPoint == null) {
                 // all null
                 for (EndPointTraceIdVo endPointTraceIdVo :
                         endPointTraceIdVoList) {

@@ -15,4 +15,9 @@ public abstract class DataAnalyzer extends Thread {
     public void run() {
         log.info("DataAnalyzer start.");
     }
+
+    @Override
+    public void interrupt() {
+        super.interrupt();
+    }
 }

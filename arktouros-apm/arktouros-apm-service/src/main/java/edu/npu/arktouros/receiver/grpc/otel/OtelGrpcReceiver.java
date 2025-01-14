@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -37,6 +39,9 @@ public class OtelGrpcReceiver extends DataReceiver {
     private final SinkService sinkService;
     private final int port;
     private Server server;
+    private List<OtelLogAnalyzer> logAnalyzers;
+    private List<OtelTraceAnalyzer> traceAnalyzers;
+    private List<OtelMetricsAnalyzer> metricsAnalyzers;
     private ExecutorService logAnalyzerThreadPool;
     private ExecutorService traceAnalyzerThreadPool;
     private ExecutorService metricsAnalyzerThreadPool;
@@ -53,6 +58,9 @@ public class OtelGrpcReceiver extends DataReceiver {
         this.metricsAnalyzerNumber = metricsAnalyzerNumber;
         this.sinkService = sinkService;
         this.port = grpcPort;
+        this.logAnalyzers = new ArrayList<>();
+        this.traceAnalyzers = new ArrayList<>();
+        this.metricsAnalyzers = new ArrayList<>();
         OtelMetricsAnalyzer.setQueueService(metricsQueueService);
         OtelLogAnalyzer.setQueueService(logQueueService);
         OtelTraceAnalyzer.setQueueService(traceQueueService);
@@ -79,6 +87,9 @@ public class OtelGrpcReceiver extends DataReceiver {
     public void flushAndStart() {
         // stop中关掉的线程池都需要重新初始化
         log.info("OtelGrpcReceiver flush and start.");
+        this.logAnalyzers = new ArrayList<>();
+        this.traceAnalyzers = new ArrayList<>();
+        this.metricsAnalyzers = new ArrayList<>();
         initAndStartAnalyzers();
         server = ServerBuilder.forPort(port)
                 .addService(new OtelMetricsServiceImpl())
@@ -127,18 +138,21 @@ public class OtelGrpcReceiver extends DataReceiver {
                 metricsAnalyzerThreadFactory, new ThreadPoolExecutor.AbortPolicy());
         for (int i = 0; i < logAnalyzerNumber; i++) {
             OtelLogAnalyzer logAnalyzer = new OtelLogAnalyzer(sinkService);
+            logAnalyzers.add(logAnalyzer);
             logAnalyzer.setName("OtelLogAnalyzer-" + i);
             logAnalyzer.init();
             logAnalyzerThreadPool.submit(logAnalyzer);
         }
         for (int i = 0; i < traceAnalyzerNumber; i++) {
             OtelTraceAnalyzer traceAnalyzer = new OtelTraceAnalyzer(sinkService);
+            traceAnalyzers.add(traceAnalyzer);
             traceAnalyzer.setName("OtelTraceAnalyzer-" + i);
             traceAnalyzer.init();
             traceAnalyzerThreadPool.submit(traceAnalyzer);
         }
         for (int i = 0; i < metricsAnalyzerNumber; i++) {
             OtelMetricsAnalyzer metricsAnalyzer = new OtelMetricsAnalyzer(sinkService);
+            metricsAnalyzers.add(metricsAnalyzer);
             metricsAnalyzer.setName("OtelMetricsAnalyzer-" + i);
             metricsAnalyzer.init();
             metricsAnalyzerThreadPool.submit(metricsAnalyzer);

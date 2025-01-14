@@ -29,8 +29,10 @@ public abstract class DataOperationService {
     public void deleteAllData() {
         deleteAllLogs();
         deleteAllSpans();
+        deleteAllMetrics();
     }
 
     public abstract void deleteAllLogs();
     public abstract void deleteAllSpans();
+    public abstract void deleteAllMetrics();
 }

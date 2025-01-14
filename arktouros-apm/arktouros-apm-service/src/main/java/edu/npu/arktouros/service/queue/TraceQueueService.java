@@ -88,7 +88,7 @@ public class TraceQueueService extends QueueService<TraceQueueItem> {
     }
 
     @Override
-    void clear() {
+    public void clear() {
         queueMapper.clear();
     }
 }

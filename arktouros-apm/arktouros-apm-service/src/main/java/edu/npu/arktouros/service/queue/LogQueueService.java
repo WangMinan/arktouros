@@ -86,7 +86,7 @@ public class LogQueueService extends QueueService<LogQueueItem> {
     }
 
     @Override
-    void clear() {
+    public void clear() {
         queueMapper.clear();
     }
 }

@@ -23,4 +23,9 @@ public class H2OperationService extends DataOperationService {
     @Override
     public void deleteAllSpans() {
     }
+
+    @Override
+    public void deleteAllMetrics() {
+
+    }
 }

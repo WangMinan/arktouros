@@ -52,6 +52,16 @@ public class SytelTraceAnalyzer extends DataAnalyzer {
         }
     }
 
+    @Override
+    public void interrupt() {
+        log.info("Interrupting SytelTraceAnalyzer:{}", this.getName());
+        if (!queueService.isEmpty()) {
+            log.warn("Sytel trace data has remained in cache. Some data will be lost.");
+        }
+        queueService.clear();
+        super.interrupt();
+    }
+
     public static void setQueueService(TraceQueueService queueService) {
         SytelTraceAnalyzer.queueService = queueService;
     }
