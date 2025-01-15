@@ -26,6 +26,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.retry.annotation.Retryable;
 
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static edu.npu.arktouros.service.sinker.elasticsearch.ElasticsearchSinkService.getMappings;
@@ -51,7 +53,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     }
 
     @Override
-    public void startJobs() {
+    public void start() {
         log.info("Starting all scheduled jobs.");
         // 获取所有service
         List<Service> services = searchService.getAllServices();
@@ -97,7 +99,16 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
 //                        "elasticsearch.schedule.metric",
 //                        "5")),
 //                TimeUnit.MINUTES);
+    }
 
+    @Override
+    public void stop() {
+        log.info("Stopping all scheduled jobs.");
+        rolloverThreadPool.shutdown();
+        calculateThroughputThreadPool.shutdown();
+        calculateResponseTimeThreadPool.shutdown();
+        calculateErrorRateThreadPool.shutdown();
+        simulateMetricThreadPool.shutdown();
     }
 
     @Override

@@ -21,8 +21,13 @@ public class H2ScheduledJob extends ScheduledJob {
     }
 
     @Override
-    public void startJobs() {
+    public void start() {
         log.warn("Start jobs has not been implemented yet.");
+    }
+
+    @Override
+    public void stop() {
+        log.warn("Stop has not been implemented yet.");
     }
 
     @Override

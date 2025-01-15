@@ -45,7 +45,7 @@ public class ApmMain implements CommandLineRunner {
         // 拉起数据接收器 接收器会自动调用analyzer analyzer会自动调用sinker
         dataReceiver.start();
         // 拉起所有定时任务
-        scheduledJob.startJobs();
+        scheduledJob.start();
         Thread thread = new Thread(() -> {
             // 停止数据接收器
             dataReceiver.stop();

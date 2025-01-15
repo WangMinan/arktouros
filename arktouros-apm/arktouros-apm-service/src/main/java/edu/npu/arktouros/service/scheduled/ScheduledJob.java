@@ -20,42 +20,59 @@ public abstract class ScheduledJob {
     protected SinkService sinkService;
 
     // Elasticsearch主用 负责调用rollover api
-    protected final ScheduledExecutorService rolloverThreadPool =
-            Executors.newScheduledThreadPool(10,
-                    new BasicThreadFactory.Builder()
-                            .namingPattern("Roll-over-%d").build());
+    protected ScheduledExecutorService rolloverThreadPool;
 
     // 计算吞吐量
-    protected final ScheduledExecutorService calculateThroughputThreadPool =
-            Executors.newScheduledThreadPool(10,
-                    new BasicThreadFactory.Builder()
-                            .namingPattern("Calculate-throughput-%d").build());
+    protected ScheduledExecutorService calculateThroughputThreadPool;
 
     // 计算响应时间
-    protected final ScheduledExecutorService calculateResponseTimeThreadPool =
-            Executors.newScheduledThreadPool(10,
-                    new BasicThreadFactory.Builder()
-                            .namingPattern("Calculate-response-time-%d").build());
+    protected ScheduledExecutorService calculateResponseTimeThreadPool;
 
     // 计算错误率
-    protected final ScheduledExecutorService calculateErrorRateThreadPool =
-            Executors.newScheduledThreadPool(10,
-                    new BasicThreadFactory.Builder()
-                            .namingPattern("Calculate-error-rate-%d").build());
+    protected ScheduledExecutorService calculateErrorRateThreadPool;
 
     // 模拟数值数据
-    protected final ScheduledExecutorService simulateMetricThreadPool =
-            Executors.newScheduledThreadPool(10,
-                    new BasicThreadFactory.Builder()
-                            .namingPattern("Simulate-metrics-%d").build());
+    protected ScheduledExecutorService simulateMetricThreadPool;
 
     public ScheduledJob(SearchService searchService, SinkService sinkService) {
         log.info("All scheduledJob init.");
         this.searchService = searchService;
         this.sinkService = sinkService;
+        initThreadPools();
     }
 
-    public abstract void startJobs();
+    public abstract void start();
+
+    public abstract void stop();
+
+    public void flushAndStart() {
+        log.info("Flush and start scheduled job.");
+        initThreadPools();
+        start();
+    }
+
+    protected void initThreadPools() {
+        rolloverThreadPool =
+                Executors.newScheduledThreadPool(10,
+                        new BasicThreadFactory.Builder()
+                                .namingPattern("Roll-over-%d").build());
+        calculateThroughputThreadPool =
+                Executors.newScheduledThreadPool(10,
+                        new BasicThreadFactory.Builder()
+                                .namingPattern("Calculate-throughput-%d").build());
+        calculateResponseTimeThreadPool =
+                Executors.newScheduledThreadPool(10,
+                        new BasicThreadFactory.Builder()
+                                .namingPattern("Calculate-response-time-%d").build());
+        calculateErrorRateThreadPool =
+                Executors.newScheduledThreadPool(10,
+                        new BasicThreadFactory.Builder()
+                                .namingPattern("Calculate-error-rate-%d").build());
+        simulateMetricThreadPool =
+                Executors.newScheduledThreadPool(10,
+                        new BasicThreadFactory.Builder()
+                                .namingPattern("Simulate-metric-%d").build());
+    }
 
     protected abstract void rollover();
 

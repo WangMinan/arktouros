@@ -1,6 +1,7 @@
 package edu.npu.arktouros.service.operation;
 
 import edu.npu.arktouros.receiver.DataReceiver;
+import edu.npu.arktouros.service.scheduled.ScheduledJob;
 
 /**
  * @author : [wangminan]
@@ -10,9 +11,11 @@ import edu.npu.arktouros.receiver.DataReceiver;
 public abstract class DataOperationService {
 
     protected DataReceiver dataReceiver;
+    protected ScheduledJob scheduledJob;
 
-    public DataOperationService(DataReceiver dataReceiver) {
+    public DataOperationService(DataReceiver dataReceiver, ScheduledJob scheduledJob) {
         this.dataReceiver = dataReceiver;
+        this.scheduledJob = scheduledJob;
     }
 
     public abstract void deleteAllData();

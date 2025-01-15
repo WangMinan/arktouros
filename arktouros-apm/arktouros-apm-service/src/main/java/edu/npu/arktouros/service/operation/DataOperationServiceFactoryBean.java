@@ -3,6 +3,7 @@ package edu.npu.arktouros.service.operation;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.operation.elasticsearch.ElasticsearchOperationService;
 import edu.npu.arktouros.service.operation.h2.H2OperationService;
+import edu.npu.arktouros.service.scheduled.ScheduledJob;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,12 +22,15 @@ public class DataOperationServiceFactoryBean implements FactoryBean<DataOperatio
     private String activeDataOperation;
 
     private final DataReceiver dataReceiver;
+    private final ScheduledJob scheduledJob;
 
     private DataOperationService dataOperationService;
 
     @Lazy
-    public DataOperationServiceFactoryBean(DataReceiver dataReceiver) {
+    public DataOperationServiceFactoryBean(DataReceiver dataReceiver,
+                                           ScheduledJob scheduledJob) {
         this.dataReceiver = dataReceiver;
+        this.scheduledJob = scheduledJob;
     }
 
     @Override
@@ -34,9 +38,9 @@ public class DataOperationServiceFactoryBean implements FactoryBean<DataOperatio
         log.info("DataOperationServiceFactory init, current dataOperation:{}", activeDataOperation);
         if (dataOperationService == null) {
             if (activeDataOperation.equals("elasticsearch")) {
-                dataOperationService = new ElasticsearchOperationService(dataReceiver);
+                dataOperationService = new ElasticsearchOperationService(dataReceiver, scheduledJob);
             } else if (activeDataOperation.equals("h2")) {
-                dataOperationService = new H2OperationService(dataReceiver);
+                dataOperationService = new H2OperationService(dataReceiver, scheduledJob);
             } else {
                 throw new IllegalArgumentException("Invalid data operation type: " + activeDataOperation);
             }

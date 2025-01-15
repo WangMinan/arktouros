@@ -2,6 +2,7 @@ package edu.npu.arktouros.service.operation.h2;
 
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.operation.DataOperationService;
+import edu.npu.arktouros.service.scheduled.ScheduledJob;
 
 /**
  * @author : [wangminan]
@@ -9,8 +10,8 @@ import edu.npu.arktouros.service.operation.DataOperationService;
  */
 public class H2OperationService extends DataOperationService {
 
-    public H2OperationService(DataReceiver dataReceiver) {
-        super(dataReceiver);
+    public H2OperationService(DataReceiver dataReceiver, ScheduledJob scheduledJob) {
+        super(dataReceiver, scheduledJob);
     }
 
     @Override
