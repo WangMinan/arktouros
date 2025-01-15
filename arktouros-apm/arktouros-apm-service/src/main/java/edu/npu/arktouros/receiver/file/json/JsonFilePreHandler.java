@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  * @description : Json日志预处理器
  */
 @Slf4j
+@SuppressWarnings("CallToPrintStackTrace")
 public class JsonFilePreHandler extends Thread {
     // 阻塞队列 不需要考虑并发问题 用synchronize或者lock画蛇添足会导致线程阻塞
     private final ArrayBlockingQueue<String> inputCache;
