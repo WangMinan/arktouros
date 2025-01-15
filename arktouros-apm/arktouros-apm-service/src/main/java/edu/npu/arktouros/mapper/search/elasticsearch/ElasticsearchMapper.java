@@ -149,7 +149,7 @@ public class ElasticsearchMapper extends SearchMapper {
     public R getLogListByQuery(LogQueryDto logQueryDto) {
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
-        log.info(logQueryDto.toString());
+        log.debug(logQueryDto.toString());
         SortOptions sort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()
                         .field(TIMESTAMP)

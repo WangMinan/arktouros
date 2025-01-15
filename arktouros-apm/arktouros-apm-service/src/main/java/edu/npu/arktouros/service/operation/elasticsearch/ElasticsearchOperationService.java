@@ -3,6 +3,7 @@ package edu.npu.arktouros.service.operation.elasticsearch;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.operation.DataOperationService;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import static edu.npu.arktouros.model.common.ElasticsearchIndex.SUMMARY_INDEX;
  * @author : [wangminan]
  * @description : Elasticsearch数据运维服务
  */
+@Slf4j
 public class ElasticsearchOperationService extends DataOperationService {
 
     public ElasticsearchOperationService(DataReceiver dataReceiver) {
@@ -25,34 +27,41 @@ public class ElasticsearchOperationService extends DataOperationService {
 
     @Override
     public void deleteAllData() {
+        log.info("Delete all data");
         dataReceiver.stopAndClean();
         List<String> allIndexes = ElasticsearchUtil.getAllArktourosIndexes();
         ElasticsearchUtil.truncateIndexes(allIndexes);
         dataReceiver.flushAndStart();
+        log.info("Delete all data successfully");
     }
 
     @Override
     public void deleteAllLogs() {
+        log.info("Delete all logs");
         dataReceiver.stopAndClean();
         List<String> allLogIndexes = ElasticsearchUtil.getAllArktourosIndexes().stream().filter(
                 index -> index.startsWith(LOG_INDEX.getIndexName())
         ).toList();
         ElasticsearchUtil.truncateIndexes(allLogIndexes);
         dataReceiver.flushAndStart();
+        log.info("Delete all logs successfully");
     }
 
     @Override
     public void deleteAllSpans() {
+        log.info("Delete all spans");
         dataReceiver.stopAndClean();
         List<String> allSpanIndexes = ElasticsearchUtil.getAllArktourosIndexes().stream().filter(
                 index -> index.startsWith(SPAN_INDEX.getIndexName())
         ).toList();
         ElasticsearchUtil.truncateIndexes(allSpanIndexes);
         dataReceiver.flushAndStart();
+        log.info("Delete all spans successfully");
     }
 
     @Override
     public void deleteAllMetrics() {
+        log.info("Delete all metrics");
         dataReceiver.stopAndClean();
         List<String> allMetricIndexes = ElasticsearchUtil.getAllArktourosIndexes().stream().filter(
                 index -> index.startsWith(GAUGE_INDEX.getIndexName())||
@@ -62,5 +71,6 @@ public class ElasticsearchOperationService extends DataOperationService {
         ).toList();
         ElasticsearchUtil.truncateIndexes(allMetricIndexes);
         dataReceiver.flushAndStart();
+        log.info("Delete all metrics successfully");
     }
 }

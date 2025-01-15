@@ -303,6 +303,7 @@ public class JsonFileReceiver extends DataReceiver {
     public void stopAndClean() {
         JsonFilePreHandler.needCleanWhileShutdown = true;
         super.stopAndClean();
+        stop();
         // 恢复现场
         JsonFilePreHandler.needCleanWhileShutdown = false;
     }

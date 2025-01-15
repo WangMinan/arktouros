@@ -13,6 +13,7 @@ public abstract class DataReceiver {
 
     // 先清理环境 然后启动 用于删除数据后启动
     public void flushAndStart() {
+        log.info("Flush and start data receiver");
         start();
     }
 

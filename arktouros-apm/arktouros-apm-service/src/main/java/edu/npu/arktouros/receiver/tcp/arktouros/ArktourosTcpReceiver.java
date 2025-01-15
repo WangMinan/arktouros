@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Stack;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author : [wangminan]
@@ -43,6 +44,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
     private ChannelFuture channelFuture;
+    private CountDownLatch eventLoopGroupLatch = new CountDownLatch(2);
 
     public ArktourosTcpReceiver(SinkService sinkService, int tcpPort,
                                 ObjectMapper objectMapper) {
@@ -113,6 +115,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
                     } else {
                         log.error("Error shutting down boss group.");
                     }
+                    eventLoopGroupLatch.countDown();
                 });
                 workerGroup.shutdownGracefully().addListener(future -> {
                     if (future.isSuccess()) {
@@ -120,6 +123,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
                     } else {
                         log.error("Error shutting down worker group.");
                     }
+                    eventLoopGroupLatch.countDown();
                 });
             });
         } catch (Exception e) {
@@ -135,6 +139,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
         cacheStringBuilder = new StringBuilder();
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
+        eventLoopGroupLatch = new CountDownLatch(2);
         super.flushAndStart();
     }
 
@@ -228,5 +233,13 @@ public class ArktourosTcpReceiver extends DataReceiver {
         super.stop();
         // 不涉及analyzer的关闭
         channelFuture.channel().close();
+        // 用eventLoopGroupLatch阻塞 直到两个eventLoopGroup都关闭了放走
+        try {
+            eventLoopGroupLatch.await();
+        } catch (InterruptedException e) {
+            log.warn("Interrupted while waiting for event loop group to shutdown. Error may occur while starting again.");
+            e.printStackTrace();
+        }
+        log.info("Arktouros tcp receiver stopped.");
     }
 }
