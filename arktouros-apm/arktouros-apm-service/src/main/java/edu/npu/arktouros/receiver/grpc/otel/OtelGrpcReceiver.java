@@ -71,6 +71,7 @@ public class OtelGrpcReceiver extends DataReceiver {
 
     @Override
     public void start() {
+        super.start();
         try {
             server.start();
             log.info("OtelGrpcReceiver start to receive data, listening on port:{}", port);
@@ -82,6 +83,7 @@ public class OtelGrpcReceiver extends DataReceiver {
 
     @Override
     public void flushAndStart() {
+        super.flushAndStart();
         // stop中关掉的线程池都需要重新初始化
         log.info("OtelGrpcReceiver flush and start.");
         initAndStartAnalyzers();
@@ -90,11 +92,12 @@ public class OtelGrpcReceiver extends DataReceiver {
                 .addService(new OtelLogServiceImpl())
                 .addService(new OtelTraceServiceImpl())
                 .build();
-        start();
+        super.flushAndStart();
     }
 
     @Override
     public void stop() {
+        super.stop();
         if (server != null) {
             try {
                 log.info("Grpc server is shutting down.");

@@ -56,6 +56,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
 
     @Override
     public void start() {
+        super.start();
         try {
             log.info("Starting arktouros tcp receiver on port: {}", tcpPort);
             ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -134,7 +135,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
         cacheStringBuilder = new StringBuilder();
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
-        start();
+        super.flushAndStart();
     }
 
     private void handleChannelInput() throws IOException {
@@ -224,6 +225,7 @@ public class ArktourosTcpReceiver extends DataReceiver {
     @Override
     public void stop() {
         log.info("Tcp receiver shutdown. All unreceived data will be lost. Waiting for worker groups shutting down.");
+        super.stop();
         // 不涉及analyzer的关闭
         channelFuture.channel().close();
     }

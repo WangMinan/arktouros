@@ -35,6 +35,7 @@ public class ArktourosGrpcReceiver extends DataReceiver {
 
     @Override
     public void start() {
+        super.start();
         try {
             server.start();
             log.info("ArktourosGrpcReceiver start to receive data, listening on port:{}", port);
@@ -47,11 +48,12 @@ public class ArktourosGrpcReceiver extends DataReceiver {
     @Override
     public void flushAndStart() {
         log.info("ArktourosGrpcReceiver start to flush and receive data, listening on port:{}", port);
-        start();
+        super.flushAndStart();
     }
 
     @Override
     public void stop() {
+        super.stop();
         if (server != null) {
             try {
                 log.info("Grpc server is shutting down.");
@@ -59,10 +61,9 @@ public class ArktourosGrpcReceiver extends DataReceiver {
                 server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
                 log.info("Grpc receiver stopped");
             } catch (InterruptedException e) {
-                log.error("Grpc receiver failed to shutdown.");
+                log.warn("Grpc receiver failed to shutdown.");
                 // 遇到InterruptedException异常，重新设置中断标志位
                 Thread.currentThread().interrupt();
-                throw new ArktourosException(e, "Grpc receiver failed to shutdown.");
             }
         }
     }

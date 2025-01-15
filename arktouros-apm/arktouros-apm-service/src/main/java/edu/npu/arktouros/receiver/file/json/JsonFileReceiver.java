@@ -81,8 +81,9 @@ public class JsonFileReceiver extends DataReceiver {
         }
         // 启动JsonFilePreHandler
         jsonFilePreHandlerExecutor.submit(
-                new JsonFilePreHandler(outputCache, fileType, traceQueueService,
-                        sinkService, objectMapper, sytelTraceAnalyzerNumber));
+                new JsonFilePreHandler(outputCache, fileType, logDirFile,
+                        traceQueueService, sinkService, objectMapper,
+                        sytelTraceAnalyzerNumber));
     }
 
     public void initParamsWithIndex() throws IOException {
@@ -123,10 +124,15 @@ public class JsonFileReceiver extends DataReceiver {
         }
     }
 
+    /**
+     * 不存在索引文件 初始化一个空的索引文件 写入字典序 最小的文件名md5:0
+     */
     private void initEmptyIndexFile() {
-        // 初始化索引文件与变量
         try {
-            indexFile.createNewFile();
+            boolean newFile = indexFile.createNewFile();
+            if (!newFile) {
+                log.warn("Index file already exists");
+            }
             createTimeFileMap.entrySet()
                     .stream()
                     .min(Map.Entry.comparingByKey())
@@ -187,12 +193,12 @@ public class JsonFileReceiver extends DataReceiver {
     }
 
     private void readFile() throws InterruptedException {
-        log.info("continuing reading log: {}, current position: {}", currentFile.getName(), currentPos);
+        log.info("Continuing reading log: {}, current position: {}", currentFile.getName(), currentPos);
         // 存在逐步写入情况 使用buffer读
         readCurrentFileWithChannel();
         // 如果当前文件读完 尝试切换
         if (currentPos == currentFile.length()) {
-            log.info("read complete, start switching, current file: {}, current position: {}",
+            log.info("Read complete, start switching, current file: {}, current position: {}",
                     currentFile.getName(), currentPos);
             // 重置映射关系
             initCreateTimeFileMap();
@@ -217,7 +223,7 @@ public class JsonFileReceiver extends DataReceiver {
                 log.info("All files have been read. Waiting for new input.");
                 Thread.sleep(2000);
             } else {
-                log.info("switch to file: {}, current position: {}", currentFile.getName(), currentPos);
+                log.info("Switch to file: {}, current position: {}", currentFile.getName(), currentPos);
             }
         }
     }
@@ -246,15 +252,9 @@ public class JsonFileReceiver extends DataReceiver {
 
     @Override
     public void start() {
+        super.start();
         log.info("JsonFileReceiver start reading log files");
-        while (true) {
-            try {
-                readFile();
-            } catch (InterruptedException e) {
-                log.error("JsonLogFileReceiver run failed", e);
-                throw new ArktourosException(e);
-            }
-        }
+        startReadFile();
     }
 
     @Override
@@ -274,14 +274,19 @@ public class JsonFileReceiver extends DataReceiver {
         }
         // 启动JsonFilePreHandler
         jsonFilePreHandlerExecutor.submit(
-                new JsonFilePreHandler(outputCache, fileType, traceQueueService,
-                        sinkService, objectMapper, sytelTraceAnalyzerNumber));
-        while (true) {
+                new JsonFilePreHandler(outputCache, fileType, logDirFile,
+                        traceQueueService, sinkService,
+                        objectMapper, sytelTraceAnalyzerNumber));
+        startReadFile();
+    }
+
+    private void startReadFile() {
+        while (isRunning) {
             try {
                 readFile();
             } catch (InterruptedException e) {
-                log.error("JsonLogFileReceiver run failed", e);
-                throw new ArktourosException(e);
+                log.warn("JsonLogFileReceiver is interrupted", e);
+                break;
             }
         }
     }
@@ -289,6 +294,7 @@ public class JsonFileReceiver extends DataReceiver {
     @Override
     public void stop() {
         log.info("JsonFileReceiver stop reading log files");
+        super.stop();
         // JsonFilePreHandler调用了sytel的TraceAnalyzer线程池 需要关闭
         jsonFilePreHandlerExecutor.shutdown();
     }
