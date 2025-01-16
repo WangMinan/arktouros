@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * @author : [wangminan]
  * @description : 全局异常处理器
  */
-@SuppressWarnings("CallToPrintStackTrace")
 @RestControllerAdvice
 @Slf4j
+@SuppressWarnings("CallToPrintStackTrace")
 public class ArktourosExceptionHandler {
 
     @ExceptionHandler(ArktourosException.class)

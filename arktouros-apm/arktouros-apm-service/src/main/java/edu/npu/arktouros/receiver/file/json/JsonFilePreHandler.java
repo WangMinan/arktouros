@@ -38,7 +38,6 @@ public class JsonFilePreHandler extends Thread {
     private final ArrayBlockingQueue<String> inputCache;
     private final StringBuilder cacheStringBuilder = new StringBuilder();
     private final String fileType;
-    private final File logDirFile;
     private final SinkService sinkService;
     private final ObjectMapper objectMapper;
     private final TraceQueueService traceQueueService;
@@ -48,12 +47,11 @@ public class JsonFilePreHandler extends Thread {
     protected static boolean needCleanWhileShutdown = false;
 
     public JsonFilePreHandler(ArrayBlockingQueue<String> inputCache, String fileType,
-                              File logDirFile, TraceQueueService traceQueueService,
+                              TraceQueueService traceQueueService,
                               SinkService sinkService, ObjectMapper objectMapper,
                               int sytelTraceAnalyzerNumber) {
         this.inputCache = inputCache;
         this.fileType = fileType;
-        this.logDirFile = logDirFile;
         this.sinkService = sinkService;
         this.objectMapper = objectMapper;
         this.traceQueueService = traceQueueService;
@@ -245,18 +243,7 @@ public class JsonFilePreHandler extends Thread {
             traceAnalyzers.forEach(traceAnalyzer -> {
                 traceAnalyzer.setNeedCleanWhileShutdown(true);
             });
-            // 删除日志文件夹里的所有文件
-            if (logDirFile.exists()) {
-                File[] files = logDirFile.listFiles();
-                if (files != null) {
-                    for (File file : files) {
-                        if (!file.delete()) {
-                            log.warn("Failed to delete file:{} from logdir:{}",
-                                    file.getName(), logDirFile);
-                        }
-                    }
-                }
-            }
+            // 日志文件夹中文件不删除
         }
         if (traceAnalyzerThreadPool != null) {
             traceAnalyzerThreadPool.shutdown();
