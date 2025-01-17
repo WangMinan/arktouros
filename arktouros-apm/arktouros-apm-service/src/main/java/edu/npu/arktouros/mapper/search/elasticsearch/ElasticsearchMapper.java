@@ -237,13 +237,20 @@ public class ElasticsearchMapper extends SearchMapper {
 
     @Override
     public List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto) {
+        // serviceName
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
         termQueryBuilder
                 .field(SERVICE_NAME)
                 .value(endPointQueryDto.serviceName());
+        boolQueryBuilder.must(termQueryBuilder.build()._toQuery());
+
+        // 时间范围
+        setSpanBoolQueryWithTimeLimit(boolQueryBuilder, endPointQueryDto.startTimestamp(), endPointQueryDto.endTimestamp());
+
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
-                .query(termQueryBuilder.build()._toQuery())
+                .query(boolQueryBuilder.build()._toQuery())
                 .from(endPointQueryDto.pageSize() * (endPointQueryDto.pageNum() - 1))
                 .size(endPointQueryDto.pageSize());
         SearchResponse<Span> searchResponse =
@@ -254,6 +261,20 @@ public class ElasticsearchMapper extends SearchMapper {
 
         hits.forEach(hit -> resolveHit(hit, endPointSet, endPointTraceIdVoList));
         return endPointTraceIdVoList;
+    }
+
+    private void setSpanBoolQueryWithTimeLimit(BoolQuery.Builder boolQueryBuilder, Long startTime, Long endTime) {
+        RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
+        if (startTime != null) {
+            rangeQueryBuilder.field("startTime").gte(JsonData.of(startTime));
+        }
+        if (endTime != null) {
+            rangeQueryBuilder.field("endTime").lte(JsonData.of(endTime));
+        }
+
+        if (startTime != null || endTime != null) {
+            boolQueryBuilder.must(rangeQueryBuilder.build()._toQuery());
+        }
     }
 
     private static void resolveHit(Hit<Span> hit, Set<EndPoint> endPointSet, List<EndPointTraceIdVo> endPointTraceIdVoList) {
@@ -293,6 +314,11 @@ public class ElasticsearchMapper extends SearchMapper {
         }
     }
 
+    /**
+     * 根据traceId获取span列表
+     * @param spanTopologyQueryDto 对应的Span拓扑查询Dto
+     * @return 符合条件的span列表
+     */
     @Override
     public List<Span> getSpanListByTraceId(SpanTopologyQueryDto spanTopologyQueryDto) {
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
@@ -313,8 +339,11 @@ public class ElasticsearchMapper extends SearchMapper {
                         .field("traceId")
                         .value(spanTopologyQueryDto.traceId())
                         .build()._toQuery()
-        );
+            );
         }
+        // 判断时间
+        setSpanBoolQueryWithTimeLimit(boolQueryBuilder, spanTopologyQueryDto.startTimestamp(), spanTopologyQueryDto.endTimestamp());
+
         Query query = boolQueryBuilder.build()._toQuery();
         log.debug("Bool query for get span: {}, innerService: {}", query, spanTopologyQueryDto.innerService());
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()

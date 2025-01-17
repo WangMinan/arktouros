@@ -2,6 +2,7 @@ package edu.npu.arktouros;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.model.common.PersistentDataConstants;
+import edu.npu.arktouros.model.config.PropertiesProvider;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Gauge;
 import edu.npu.arktouros.model.otel.structure.EndPoint;

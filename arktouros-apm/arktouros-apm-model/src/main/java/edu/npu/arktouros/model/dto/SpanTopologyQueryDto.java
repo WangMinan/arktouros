@@ -10,6 +10,8 @@ public record SpanTopologyQueryDto(
         String serviceName,
         // 是否只展示服务内span
         @NotNull(message = "innerService should not be empty")
-        boolean innerService
+        boolean innerService,
+        Long startTimestamp,
+        Long endTimestamp
 ) {
 }

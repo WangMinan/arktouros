@@ -14,6 +14,8 @@ public record EndPointQueryDto(
         int pageNum,
         @NotNull(message = "pageSize should not be null")
         @Positive(message = "pageSize should be positive")
-        int pageSize
+        int pageSize,
+        Long startTimestamp,
+        Long endTimestamp
 ) {
 }

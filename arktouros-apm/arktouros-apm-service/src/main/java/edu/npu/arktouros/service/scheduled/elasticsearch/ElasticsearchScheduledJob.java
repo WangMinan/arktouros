@@ -210,7 +210,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         log.info("Calculate response time start for service:{}.", service.getName());
         // 重走一遍span树
         List<EndPointTraceIdVo> traceIdVos = searchService.getEndPointTraceIdVos(
-                new EndPointQueryDto(service.getName(), 1, ElasticsearchConstants.MAX_PAGE_SIZE));
+                new EndPointQueryDto(service.getName(), 1, ElasticsearchConstants.MAX_PAGE_SIZE, 0L, Long.MAX_VALUE));
         List<String> traceIds = new ArrayList<>();
         traceIdVos.stream()
                 .map(EndPointTraceIdVo::traceIds)
