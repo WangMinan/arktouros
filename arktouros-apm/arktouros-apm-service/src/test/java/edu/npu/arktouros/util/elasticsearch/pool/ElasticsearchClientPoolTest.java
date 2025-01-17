@@ -1,7 +1,6 @@
 package edu.npu.arktouros.util.elasticsearch.pool;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.PooledObject;

@@ -7,7 +7,7 @@ import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import edu.npu.arktouros.config.LocalDateTimeDeserializer;
-import edu.npu.arktouros.config.PropertiesProvider;
+import edu.npu.arktouros.model.config.PropertiesProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.PooledObject;

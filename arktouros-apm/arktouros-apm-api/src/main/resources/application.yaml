@@ -27,7 +27,7 @@ var:
 instance:
   active:
     # 选择数据接收器
-    dataReceiver: arktourosTcp # otelGrpc/arktourosGrpc/arktourosTcp(在线)/jsonFile(离线)
+    dataReceiver: jsonFile # otelGrpc/arktourosGrpc/arktourosTcp(在线)/jsonFile(离线)
     sinker: elasticsearch # elasticsearch/h2
     searchMapper: elasticsearch # elasticsearch/h2
     scheduledJob: elasticsearch # elasticsearch/h2
@@ -52,9 +52,11 @@ receiver:
   # 文件导入器端口 用于离线接入
   file:
     json:
-      type: arktouros # otel/arktouros/sytel
-      logDir: /usr/local/arktouros-apm-api/input_logs # 使用该配置文件来指定输入的文件夹路径 所有日志文件都应该保存在该文件夹下 使用离线模式时请确保该文件夹不空 然后再启动
-      indexFilePath: /usr/local/arktouros-apm-api/input_logs/index.txt # apm 将在这个文件的URL上创建一个索引文件
+      type: sytel # otel/arktouros/sytel
+      # logDir: /usr/local/arktouros-apm-api/input_logs # 使用该配置文件来指定输入的文件夹路径 所有日志文件都应该保存在该文件夹下 使用离线模式时请确保该文件夹不空 然后再启动
+      logDir: D:\code\arktouros-main\sytel-logs
+      # indexFilePath: /usr/local/arktouros-apm-api/input_logs/index.txt # apm 将在这个文件的URL上创建一个索引文件
+      indexFilePath: D:\code\arktouros-main\sytel-logs\index.txt
 
 sinker:
   span:

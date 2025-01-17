@@ -361,7 +361,7 @@ const drawServiceTopology = (nodes, calls) => {
 }
 
 function formatService(service) {
-	const status = service.status ? '正常' : '异常或离线'
+	const status = service.status ? '正常' : '超时异常或离线'
 	const tagsStr = service.tags.length === 0 ? '[]' : JSON.stringify(service.tags)
 
 	return `<div>
@@ -551,7 +551,7 @@ const // 时间戳：1637244864707
 	}
 
 function formatSpan(span) {
-	const status = span.endTime === '-1' ? '异常或离线' : '正常'
+	const status = span.endTime === '-1' ? '超时异常或离线' : '正常'
 	const startTime = timestampToJsTimeStr(span.startTime)
 	const endTime = span.endTime === '-1' ? '该Span异常' : timestampToJsTimeStr(span.endTime)
 	const localIp = span.localEndPoint.ip === '' ? 'null' : span.localEndPoint.ip

@@ -1,5 +1,6 @@
 package edu.npu.arktouros;
 
+import edu.npu.arktouros.model.config.PropertiesProvider;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.scheduled.ScheduledJob;
 import edu.npu.arktouros.service.sinker.SinkService;
@@ -35,15 +36,12 @@ public class ApmMain implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("APM starting, adding shutdown hook.");
-        edu.npu.arktouros.model.config.PropertiesProvider.init();
-        edu.npu.arktouros.config.PropertiesProvider.init();
+        PropertiesProvider.init();
         sinkService.init();
         if (!sinkService.isReady()) {
             log.error("APM sink service is not ready, shutting down.");
             return;
         }
-        // 拉起数据接收器 接收器会自动调用analyzer analyzer会自动调用sinker
-        dataReceiver.start();
         // 拉起所有定时任务
         scheduledJob.start();
         Thread thread = new Thread(() -> {
@@ -53,6 +51,9 @@ public class ApmMain implements CommandLineRunner {
         });
         thread.setName("APM-shutdown-thread");
         Runtime.getRuntime().addShutdownHook(thread);
+        // 最后 拉起数据接收器 接收过程可能会阻塞主线程
+        // 接收器会自动调用analyzer analyzer会自动调用sinker
+        dataReceiver.start();
     }
 
     public static void main(String[] args) {

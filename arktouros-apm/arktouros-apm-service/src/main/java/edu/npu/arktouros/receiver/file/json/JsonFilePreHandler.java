@@ -15,7 +15,6 @@ import edu.npu.arktouros.service.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author : [wangminan]
- * @description : Json日志预处理器
+ * @description : Json日志预处理器 这个类主要关注的是日志处理 例如JSON括号匹配与解析 不关心读取
  */
 @Slf4j
 @SuppressWarnings("CallToPrintStackTrace")

@@ -18,7 +18,7 @@ import java.util.List;
 public class SpanTreeNodeVo {
     private String name;
     private boolean collapsed = false;
-    private List<SpanTreeNodeVo> children = new ArrayList<>();
+    private List<SpanTreeNodeVo> children;
     private ItemStyle itemStyle;
     // 我要加这个字段 不然前端看不出来span的实时状态
     private Span span;

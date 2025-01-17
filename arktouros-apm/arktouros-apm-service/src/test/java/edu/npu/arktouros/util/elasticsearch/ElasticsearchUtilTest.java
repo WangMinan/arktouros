@@ -7,7 +7,6 @@ import co.elastic.clients.elasticsearch.core.ScrollRequest;
 import co.elastic.clients.elasticsearch.core.ScrollResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
-import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;

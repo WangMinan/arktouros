@@ -14,7 +14,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import co.elastic.clients.elasticsearch.core.UpdateResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import edu.npu.arktouros.config.PropertiesProvider;
+import edu.npu.arktouros.model.config.PropertiesProvider;
 import edu.npu.arktouros.model.exception.ArktourosException;
 import edu.npu.arktouros.model.otel.Source;
 import edu.npu.arktouros.util.elasticsearch.pool.ElasticsearchClientPool;

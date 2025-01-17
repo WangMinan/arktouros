@@ -1,12 +1,10 @@
 package edu.npu.arktouros.service.scheduled;
 
-import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.service.search.SearchService;
 import edu.npu.arktouros.service.sinker.SinkService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -76,11 +74,11 @@ public abstract class ScheduledJob {
 
     protected abstract void rollover();
 
-    protected abstract void simulateMetrics(List<Service> services);
+    protected abstract void simulateMetrics();
 
-    protected abstract void calculateThroughput(List<Service> services);
+    protected abstract void calculateThroughput();
 
-    protected abstract void calculateResponseTime(List<Service> services);
+    protected abstract void calculateResponseTime();
 
-    protected abstract void calculateErrorRate(List<Service> services);
+    protected abstract void calculateErrorRate();
 }

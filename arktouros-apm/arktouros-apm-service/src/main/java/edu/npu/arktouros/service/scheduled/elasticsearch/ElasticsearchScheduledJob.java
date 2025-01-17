@@ -6,7 +6,7 @@ import co.elastic.clients.elasticsearch.core.DeleteRequest;
 import co.elastic.clients.elasticsearch.indices.RolloverRequest;
 import co.elastic.clients.elasticsearch.indices.RolloverResponse;
 import co.elastic.clients.elasticsearch.indices.rollover.RolloverConditions;
-import edu.npu.arktouros.config.PropertiesProvider;
+import edu.npu.arktouros.model.config.PropertiesProvider;
 import edu.npu.arktouros.model.common.ElasticsearchConstants;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.common.PersistentDataConstants;
@@ -26,7 +26,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.retry.annotation.Retryable;
 
@@ -35,7 +34,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static edu.npu.arktouros.service.sinker.elasticsearch.ElasticsearchSinkService.getMappings;
@@ -55,8 +53,6 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     @Override
     public void start() {
         log.info("Starting all scheduled jobs.");
-        // 获取所有service
-        List<Service> services = searchService.getAllServices();
         // 启动所有定时任务
         rolloverThreadPool.scheduleAtFixedRate(
                 this::rollover,
@@ -67,7 +63,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                         "1")),
                 TimeUnit.HOURS);
         calculateThroughputThreadPool.scheduleAtFixedRate(
-                () -> calculateThroughput(services),
+                this::calculateThroughput,
                 // 随机0-10分钟
                 (long) (Math.random() * 10),
                 Integer.parseInt(
@@ -76,7 +72,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                                 "5")),
                 TimeUnit.MINUTES);
         calculateResponseTimeThreadPool.scheduleAtFixedRate(
-                () -> calculateResponseTime(services),
+                this::calculateResponseTime,
                 // 随机0-10分钟
                 (long) (Math.random() * 10),
                 Integer.parseInt(PropertiesProvider.getProperty(
@@ -84,7 +80,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                         "5")),
                 TimeUnit.MINUTES);
         calculateErrorRateThreadPool.scheduleAtFixedRate(
-                () -> calculateErrorRate(services),
+                this::calculateErrorRate,
                 // 随机0-10分钟
                 (long) (Math.random() * 10),
                 Integer.parseInt(PropertiesProvider.getProperty(
@@ -127,7 +123,9 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     }
 
     @Override
-    protected void simulateMetrics(List<Service> services) {
+    protected void simulateMetrics() {
+        // 获取所有service
+        List<Service> services = searchService.getAllServices();
         services.forEach(service -> {
             // 开始制造数据
             log.info("Stimulate metrics start.");
@@ -166,7 +164,9 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     }
 
     @Override
-    protected void calculateThroughput(List<Service> services) {
+    protected void calculateThroughput() {
+        // 获取所有service
+        List<Service> services = searchService.getAllServices();
         services.forEach(service -> {
             log.info("Calculate throughput start for service:{}.", service.getName());
             // 开始时间 头五分钟
@@ -195,7 +195,9 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     }
 
     @Override
-    protected void calculateResponseTime(List<Service> services) {
+    protected void calculateResponseTime() {
+        // 获取所有service
+        List<Service> services = searchService.getAllServices();
         services.forEach(service -> {
             UpdateServiceGauge updateServiceGauge = sinkResponseTime(service);
             if (updateServiceGauge.isShouldUpdate()) {
@@ -251,7 +253,9 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     }
 
     @Override
-    protected void calculateErrorRate(List<Service> services) {
+    protected void calculateErrorRate() {
+        // 获取所有service
+        List<Service> services = searchService.getAllServices();
         services.forEach(service -> {
             UpdateServiceGauge updateServiceGauge = sinkErrorRate(service);
             if (updateServiceGauge.isShouldUpdate() &&

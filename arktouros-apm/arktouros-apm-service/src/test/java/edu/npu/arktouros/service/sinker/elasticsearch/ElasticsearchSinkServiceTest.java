@@ -5,7 +5,6 @@ import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.elasticsearch.indices.ElasticsearchIndicesClient;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
-import edu.npu.arktouros.config.PropertiesProvider;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;

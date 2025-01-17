@@ -13,8 +13,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -33,7 +37,7 @@ import java.util.concurrent.Executors;
 
 /**
  * @author : [wangminan]
- * @description : Json文件接收器
+ * @description : Json文件接收器 这个类负责顺序读取JSON日志 不关心读取内容的处理
  */
 @Slf4j
 public class JsonFileReceiver extends DataReceiver {
@@ -128,7 +132,7 @@ public class JsonFileReceiver extends DataReceiver {
             currentFile = md5FileMap.get(currentFileNameMd5);
             currentPos = Long.parseLong(split[1]);
             if (currentPos != currentFile.getFile().length()) {
-                // 从头开始
+                // 如果没读完 从头开始
                 currentPos = 0L;
             }
         } else {
@@ -167,6 +171,11 @@ public class JsonFileReceiver extends DataReceiver {
                     }, () -> {
                         // 如果没有log文件
                         log.info("No log file found, just create empty index file, waiting for new input.");
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            log.warn("JsonFileReceiver is interrupted", e);
+                        }
                     });
         } catch (IOException e) {
             throw new ArktourosException(e);
@@ -174,7 +183,9 @@ public class JsonFileReceiver extends DataReceiver {
     }
 
     public void initMd5FileMap() {
-        this.md5FileMap = new HashMap<>();
+        if (md5FileMap == null) {
+            md5FileMap = new HashMap<>();
+        }
         File[] files = logDirFile.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -186,10 +197,9 @@ public class JsonFileReceiver extends DataReceiver {
                         // 原来时间戳的方案在没有授时节点的情况下是不可行的
                         log.debug("Encode file: {} to md5 number: {}", file.getName(), fileNameMd5);
                         if (!md5FileMap.containsKey(fileNameMd5)) {
+                            // 如果出现新文件 写入md5FileMap
                             // 全局唯一写入md5FileMap的位置
                             md5FileMap.put(fileNameMd5, new JsonFile(file));
-                        } else {
-                            throw new IllegalArgumentException("Duplicate file name md5: " + fileNameMd5);
                         }
                     } catch (NoSuchAlgorithmException e) {
                         throw new ArktourosException(e);
@@ -215,6 +225,7 @@ public class JsonFileReceiver extends DataReceiver {
             // 重置映射关系
             initMd5FileMap();
             initParamsWithEmptyIndexFile();
+            return;
         }
         // 如果当前文件读完 尝试切换
         if (currentPos == currentFile.getFile().length()) {
@@ -300,6 +311,7 @@ public class JsonFileReceiver extends DataReceiver {
                 new JsonFilePreHandler(outputCache, fileType,
                         traceQueueService, sinkService,
                         objectMapper, sytelTraceAnalyzerNumber));
+        // 下面的操作会阻塞主线程
         startReadFile();
     }
 
