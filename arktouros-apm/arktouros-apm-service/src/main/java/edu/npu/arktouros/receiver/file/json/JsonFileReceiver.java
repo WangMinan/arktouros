@@ -162,7 +162,7 @@ public class JsonFileReceiver extends DataReceiver {
                         log.info("Init index file complete");
                     }, () -> {
                         // 如果没有log文件
-                        log.info("No log file found, just create empty index file, waiting for new input.");
+                        log.info("Former log file not found, just create empty index file, waiting for new input.");
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
