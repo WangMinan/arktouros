@@ -13,8 +13,6 @@ function init_config() {
 		url: 'config.json',  // 指定 config.json 文件路径
 		dataType: 'json',  // 指定返回的数据类型为 JSON
 		success: function(config) {
-			console.log("backendUrl:", config.backendUrl);  // 输出配置内容
-			console.log("arktourosUiIp:", config.arktourosUiIp);
 			backendUrl = config.backendUrl;
 			arktourosUiIp = config.arktourosUiIp;
 			startBigScreen();
