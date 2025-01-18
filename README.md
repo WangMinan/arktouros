@@ -29,7 +29,7 @@ mvn -Dmaven.test.skip=true clean package
 mvn -Dmaven.test.skip=true clean package -Pnative
 ```
 
-编译产出工件将在${project.basedir}/build/下生成，分别是arktouros-collector与arktouros-apm-api的tar包。
+编译产出工件将在${project.basedir}/build/下生成，分别是arktouros-collector，arktouros-webapp与arktouros-apm-api的tar包。
 
 解压后的运行命令，您需要在本地运行与elasticsearch-java这一新client版本对应的elasticsearch，建议使用elasticsearch8.7.0及以上版本，使用较低版本的elasticsearch会出现连接问题。
 ```shell
