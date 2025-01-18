@@ -57,6 +57,8 @@ public class JsonFileReceiver extends DataReceiver {
     private final int sytelTraceAnalyzerNumber;
     private static final int DEFAULT_CAPACITY = 1000;
     private static final int DEFAULT_CHANNEL_SIZE = 8 * 1024 * 1024;
+    private static final String ALREADY_READ_FILE_PREFIX = "ARKTOUROS-READ-";
+
     // 阻塞队列 不需要考虑并发问题 用synchronize或者lock画蛇添足会导致线程阻塞
     private final ArrayBlockingQueue<String> outputCache =
             new ArrayBlockingQueue<>(DEFAULT_CAPACITY);
@@ -94,17 +96,7 @@ public class JsonFileReceiver extends DataReceiver {
     public void initParamsWithIndexFile() throws IOException {
         // 去logs目录下检索是否有index文件
         // 在执行rename的时候中断程序会出现问题
-        File tmpIndexFile = new File(indexFile.toPath() + ".tmp");
-        if (tmpIndexFile.exists()) {
-            // 优先级更高 用tmpIndexFile的内容覆盖indexFile
-            indexFile.deleteOnExit();
-            boolean newFile = indexFile.createNewFile();
-            if (!newFile) {
-                log.warn("Index file already exists, tmp index may fail to cover the original index file.");
-            }
-            FileUtils.copyFile(tmpIndexFile, indexFile);
-            FileUtils.delete(tmpIndexFile);
-        } else if (indexFile.exists()) {
+        if (indexFile.exists()) {
             // 没有tmpIndex，但是有indexFile 则读取indexFile
             String line;
             try {
@@ -190,7 +182,10 @@ public class JsonFileReceiver extends DataReceiver {
         if (files != null) {
             for (File file : files) {
                 // 需要排除索引文件
-                if (!indexFilePath.toLowerCase(Locale.ROOT).contains(file.getName())) {
+                if (
+                        !indexFilePath.toLowerCase(Locale.ROOT).contains(file.getName()) &&
+                                !file.getName().startsWith(ALREADY_READ_FILE_PREFIX)
+                ) {
                     try {
                         long fileNameMd5 = encodeFileNameToNumber(file.getName());
                         // 这个是天脉目前的授时问题 所以不得不这样来进行
@@ -232,6 +227,15 @@ public class JsonFileReceiver extends DataReceiver {
             currentFile.setStatus(FileStatus.READ);
             log.info("Read complete, start switching, current file: {}, current position: {}",
                     currentFile.getFile().getName(), currentPos);
+            if (!currentFile.getFile().getName().startsWith(ALREADY_READ_FILE_PREFIX)) {
+                boolean rename = currentFile.getFile().renameTo(new File(logDirFile,
+                        ALREADY_READ_FILE_PREFIX + currentFile.getFile().getName()));
+                if (!rename) {
+                    log.error("Failed to rename file: {}", currentFile.getFile().getName());
+                    throw new ArktourosException("Failed to rename file: " + currentFile.getFile().getName());
+                }
+                currentFile.setFile(new File(logDirFile, ALREADY_READ_FILE_PREFIX + currentFile.getFile().getName()));
+            }
             // 重置映射关系
             initMd5FileMap();
             // 基于md5整段重写打擂逻辑 现在只需要找到当前未读取的文件 然后从中找出md5最小的 读这个就可以了
