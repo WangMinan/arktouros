@@ -172,6 +172,9 @@ public class SearchServiceImpl implements SearchService {
                 SpanTreeNode spanTreeNode = otherBuilder.build();
                 currentLayerSpans.add(otherSpan);
                 currentLayerNodes.add(spanTreeNode);
+                if (!(formerSpan.getChildren() instanceof ArrayList<SpanTreeNode>)) {
+                    formerSpan.setChildren(new ArrayList<>(formerSpan.getChildren()));
+                }
                 formerSpan.getChildren().add(spanTreeNode);
             }
         }));
