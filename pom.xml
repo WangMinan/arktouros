@@ -65,10 +65,10 @@
         <commons-pool2.version>2.12.0</commons-pool2.version>
         <!-- commons -->
 
-        <!-- log4j2 -->
+        <!-- logback -->
         <slf4j.version>2.0.16</slf4j.version>
         <logback.version>1.5.16</logback.version>
-        <!-- log4j2 -->
+        <!-- logback -->
 
         <!-- grpc -->
         <grpc.version>1.62.2</grpc.version>
@@ -262,6 +262,7 @@
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>${maven-assembly-plugin.version}</version>
                 </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
