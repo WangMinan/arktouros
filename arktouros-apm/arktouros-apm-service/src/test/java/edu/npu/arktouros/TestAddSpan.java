@@ -27,12 +27,13 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author : [wangminan]
- * @description : 为测试类提供springboot环境
+ * @description : 向数据库中添加Span以供页面测试
  */
 @SpringBootTest
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
@@ -50,6 +51,27 @@ public class TestAddSpan {
     @Value("${receiver.file.json.logDir}")
     private String logDir;
 
+    private static final String traceIdA = UUID.randomUUID().toString();
+    private static final String traceIdB = UUID.randomUUID().toString();
+    private static final String traceIdF = UUID.randomUUID().toString();
+
+    private static final EndPoint endPointA1 = EndPoint.builder()
+            .ip("127.0.0.1").port(11000).serviceName("service_a").build();
+    private static final EndPoint endPointA2 = EndPoint.builder()
+            .ip("127.0.0.1").port(12000).serviceName("service_a").build();
+    private static final EndPoint endPointB = EndPoint.builder()
+            .ip("127.0.0.1").port(11001).serviceName("service_b").build();
+    private static final EndPoint endPointC = EndPoint.builder()
+            .ip("127.0.0.1").port(11002).serviceName("service_c").build();
+    private static final EndPoint endPointD = EndPoint.builder()
+            .ip("127.0.0.1").port(11003).serviceName("service_d").build();
+    private static final EndPoint endPointE = EndPoint.builder()
+            .ip("127.0.0.1").port(11004).serviceName("service_e").build();
+    private static final EndPoint endPointF = EndPoint.builder()
+            .ip("127.0.0.1").port(11005).serviceName("service_f").build();
+    private static final EndPoint endPointF2 = EndPoint.builder()
+            .ip("127.0.0.1").port(11006).serviceName("service_f").build();
+
     @Test
     void testMain() throws IOException {
         log.info("This is the main springboot class for test environment.");
@@ -60,7 +82,8 @@ public class TestAddSpan {
             return;
         }
 //        addTrace();
-        addSpan();
+//        addTreeSpan();
+        addDuplicateCallBetweenTwoServices();
     }
 
     @Test
@@ -107,28 +130,6 @@ public class TestAddSpan {
                     StandardOpenOption.APPEND);
         }
     }
-
-
-    private static final String traceIdA = UUID.randomUUID().toString();
-    private static final String traceIdB = UUID.randomUUID().toString();
-    private static final String traceIdF = UUID.randomUUID().toString();
-
-    private static final EndPoint endPointA1 = EndPoint.builder()
-            .ip("127.0.0.1").port(11000).serviceName("service_a").build();
-    private static final EndPoint endPointA2 = EndPoint.builder()
-            .ip("127.0.0.1").port(12000).serviceName("service_a").build();
-    private static final EndPoint endPointB = EndPoint.builder()
-            .ip("127.0.0.1").port(11001).serviceName("service_b").build();
-    private static final EndPoint endPointC = EndPoint.builder()
-            .ip("127.0.0.1").port(11002).serviceName("service_c").build();
-    private static final EndPoint endPointD = EndPoint.builder()
-            .ip("127.0.0.1").port(11003).serviceName("service_d").build();
-    private static final EndPoint endPointE = EndPoint.builder()
-            .ip("127.0.0.1").port(11004).serviceName("service_e").build();
-    private static final EndPoint endPointF = EndPoint.builder()
-            .ip("127.0.0.1").port(11005).serviceName("service_f").build();
-    private static final EndPoint endPointF2 = EndPoint.builder()
-            .ip("127.0.0.1").port(11006).serviceName("service_f").build();
 
     /**
      * 我现在要构造一个从
@@ -263,8 +264,11 @@ public class TestAddSpan {
                 .build());
     }
 
-    private void addSpan() throws IOException {
-        // 这里只针对一个服务加复杂的树状Span
+    /**
+     * 这里只针对一个服务加复杂的树状Span
+     * 对serviceF做一个随机的五层的span树
+     */
+    private void addTreeSpan() throws IOException {
         AtomicInteger spanCounter = new AtomicInteger(2);
         String currentSpanId = UUID.randomUUID().toString();
         sinkService.sink(Span.builder()
@@ -324,5 +328,61 @@ public class TestAddSpan {
                 }
             });
         }
+    }
+
+    private static final Random random = new Random();
+
+    /**
+     * 添加两个服务之间的反复调用
+     * 为调用时间统计看板提供基础数据
+    */
+    private void addDuplicateCallBetweenTwoServices() {
+        for (int i = 1; i < 100; i++) {
+            String traceId = UUID.randomUUID().toString();
+            String currentSpanId = UUID.randomUUID().toString();
+            String spanName = "test_duplicate_call";
+            long startTime = System.currentTimeMillis();
+
+            Span currentSpan = Span.builder()
+                    .id(currentSpanId)
+                    // 我们默认在调用关系相同的时候span的名称也是相同的
+                    .name(spanName)
+                    .serviceName("service_a_duplicate")
+                    .traceId(traceId)
+                    .root(true)
+                    .startTime(startTime)
+                    .localEndPoint(endPointA1)
+                    // 回调在 50-250ms 之间 均值 150ms 标准差 20ms
+                    .endTime(startTime + (long) generateNormalRandom(
+                                    50,
+                                    200,
+                                    150,
+                                    20))
+                    .build();
+            try {
+                sinkService.sink(currentSpan);
+            } catch (IOException e) {
+                log.error("Failed to sink span:{}", currentSpan);
+            }
+        }
+    }
+
+    /**
+     * 在指定范围内生成一个正态分布的随机数
+     * @param min 最小值
+     * @param max 最大值
+     * @param mean 均值
+     * @param stdDev 标准差
+     * @return 生成的随机数
+     */
+    public static double generateNormalRandom(double min,
+                                              double max,
+                                              double mean,
+                                              double stdDev) {
+        double value;
+        do {
+            value = mean + stdDev * random.nextGaussian();
+        } while (value < min || value > max);
+        return value;
     }
 }

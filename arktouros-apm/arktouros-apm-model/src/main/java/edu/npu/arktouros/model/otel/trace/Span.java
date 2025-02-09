@@ -33,6 +33,7 @@ import java.util.Map;
 @EqualsAndHashCode(of = "id")
 @ToString(callSuper = true)
 public class Span implements Source {
+    // 我们认定在同样的调用关系下，根据埋点机制对应的span都是使用同一个名称的
     private String name;
     private String id;
     private String serviceName;
