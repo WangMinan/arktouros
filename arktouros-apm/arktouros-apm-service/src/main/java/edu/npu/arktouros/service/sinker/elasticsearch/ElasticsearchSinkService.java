@@ -41,15 +41,12 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class ElasticsearchSinkService extends SinkService {
 
-    private final int spanTimeout;
-
     private final ExecutorService createIndexThreadPool =
             Executors.newFixedThreadPool(ElasticsearchIndex.getIndexList().size(),
                     new BasicThreadFactory.Builder()
                             .namingPattern("ElasticSearch-init-%d").build());
 
-    public ElasticsearchSinkService(int spanTimeout) {
-        this.spanTimeout = spanTimeout;
+    public ElasticsearchSinkService() {
     }
 
     @Override
@@ -226,13 +223,7 @@ public class ElasticsearchSinkService extends SinkService {
                     break;
                 case Span sourceSpan:
                     try {
-                        boolean spanStatus = true;
-                        if (sourceSpan.getEndTime() ==
-                                PersistentDataConstants.ERROR_SPAN_END_TIME) {
-                            spanStatus = false;
-                        } else if (sourceSpan.getEndTime() - sourceSpan.getStartTime() > spanTimeout) {
-                            spanStatus = false;
-                        }
+                        boolean spanStatus = sourceSpan.getEndTime() != PersistentDataConstants.ERROR_SPAN_END_TIME;
                         Service service = Service.builder()
                                 .name(sourceSpan.getServiceName())
                                 .status(spanStatus)

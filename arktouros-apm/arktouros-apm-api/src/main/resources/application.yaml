@@ -58,10 +58,6 @@ receiver:
       # indexFilePath: /usr/local/arktouros-apm-api/input_logs/index.txt # apm 将在这个文件的URL上创建一个索引文件
       indexFilePath: D:\code\arktouros-main\sytel-logs\index.txt
 
-sinker:
-  span:
-    timeout: 30000 # span超时时间配置 单位毫秒 int
-
 # 数据存储模块-外部扩展存储 的有关配置
 elasticsearch:
   serverUrl: https://localhost:9200 # 不要动这个URL 除非你修改了Elasticsearch的配置或者打算用别的Elasticsearch
