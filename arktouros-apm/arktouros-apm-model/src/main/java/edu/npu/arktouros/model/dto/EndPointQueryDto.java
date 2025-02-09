@@ -1,5 +1,6 @@
 package edu.npu.arktouros.model.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.Positive;
  * @description : 端点搜索
  */
 public record EndPointQueryDto(
+        @NotBlank(message = "serviceName should not be empty")
         String serviceName,
         @NotNull(message = "pageNum should not be null")
         @Positive(message = "pageNum should be positive")

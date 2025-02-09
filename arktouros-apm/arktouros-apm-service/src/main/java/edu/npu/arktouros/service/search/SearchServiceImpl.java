@@ -5,6 +5,7 @@ import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.MetricQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
+import edu.npu.arktouros.model.dto.SpanNamesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
@@ -261,5 +262,10 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto) {
         return searchMapper.getEndPointTraceIdVos(endPointQueryDto);
+    }
+
+    @Override
+    public R getSpanNamesByServiceName(SpanNamesQueryDto spanNamesQueryDto) {
+        return searchMapper.getSpanNamesByServiceName(spanNamesQueryDto);
     }
 }

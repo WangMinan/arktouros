@@ -32,6 +32,7 @@ import edu.npu.arktouros.model.common.ResponseCodeEnum;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
+import edu.npu.arktouros.model.dto.SpanNamesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;
@@ -263,6 +264,36 @@ public class ElasticsearchMapper extends SearchMapper {
         return endPointTraceIdVoList;
     }
 
+    @Override
+    public R getSpanNamesByServiceName(SpanNamesQueryDto spanNamesQueryDto) {
+        // 先构建搜索条件
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
+        termQueryBuilder
+                .field(SERVICE_NAME)
+                .value(spanNamesQueryDto.serviceName());
+        boolQueryBuilder.must(termQueryBuilder.build()._toQuery());
+        setSpanBoolQueryWithTimeLimit(boolQueryBuilder, spanNamesQueryDto.startTimestamp(), spanNamesQueryDto.endTimestamp());
+        // 再聚合
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
+                .query(boolQueryBuilder.build()._toQuery())
+                .aggregations("nameAgg",
+                        agg -> agg.terms(term -> term.field("name")));
+        searchRequestBuilder.size(ElasticsearchConstants.MAX_PAGE_SIZE);
+        // 分析聚合结果
+        SearchResponse<Span> searchResponse =
+                ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
+        Aggregate nameAgg = searchResponse.aggregations().get("nameAgg");
+        // 组织一个List送出去
+        List<String> spanNames = nameAgg.sterms().buckets().array().stream()
+                .map(bucket -> bucket.key().stringValue())
+                .toList();
+        R r = new R();
+        r.put(RESULT, spanNames);
+        return r;
+    }
+
     private void setSpanBoolQueryWithTimeLimit(BoolQuery.Builder boolQueryBuilder, Long startTime, Long endTime) {
         RangeQuery.Builder rangeQueryBuilder = new RangeQuery.Builder();
         if (startTime != null) {
@@ -316,6 +347,7 @@ public class ElasticsearchMapper extends SearchMapper {
 
     /**
      * 根据traceId获取span列表
+     *
      * @param spanTopologyQueryDto 对应的Span拓扑查询Dto
      * @return 符合条件的span列表
      */
@@ -325,9 +357,9 @@ public class ElasticsearchMapper extends SearchMapper {
         if (spanTopologyQueryDto.innerService()) {
             boolQueryBuilder.must(
                     new TermQuery.Builder()
-                        .field("traceId")
-                        .value(spanTopologyQueryDto.traceId())
-                        .build()._toQuery(),
+                            .field("traceId")
+                            .value(spanTopologyQueryDto.traceId())
+                            .build()._toQuery(),
                     new TermQuery.Builder()
                             .field("serviceName")
                             .value(spanTopologyQueryDto.serviceName())
@@ -335,10 +367,10 @@ public class ElasticsearchMapper extends SearchMapper {
             );
         } else {
             boolQueryBuilder.must(
-                new TermQuery.Builder()
-                        .field("traceId")
-                        .value(spanTopologyQueryDto.traceId())
-                        .build()._toQuery()
+                    new TermQuery.Builder()
+                            .field("traceId")
+                            .value(spanTopologyQueryDto.traceId())
+                            .build()._toQuery()
             );
         }
         // 判断时间

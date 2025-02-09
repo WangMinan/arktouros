@@ -27,7 +27,7 @@ var:
 instance:
   active:
     # 选择数据接收器
-    dataReceiver: jsonFile # otelGrpc/arktourosGrpc/arktourosTcp(在线)/jsonFile(离线)
+    dataReceiver: arktourosTcp # otelGrpc/arktourosGrpc/arktourosTcp(在线)/jsonFile(离线)
     sinker: elasticsearch # elasticsearch/h2
     searchMapper: elasticsearch # elasticsearch/h2
     scheduledJob: elasticsearch # elasticsearch/h2

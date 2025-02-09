@@ -3,6 +3,7 @@ package edu.npu.arktouros.mapper.search;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
+import edu.npu.arktouros.model.dto.SpanNamesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
@@ -49,4 +50,6 @@ public abstract class SearchMapper {
     public abstract List<Span> getAllSpans(Service service, long startTime);
 
     public abstract List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto);
+
+    public abstract R getSpanNamesByServiceName(SpanNamesQueryDto spanNamesQueryDto);
 }
