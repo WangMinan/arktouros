@@ -42,7 +42,7 @@ public class TraceController {
         return searchService.getSpanNamesByServiceName(spanNamesQueryDto);
     }
 
-    @GetMapping("/times")
+    @GetMapping("/spanTimes")
     public R getSpanTimesBySpanName(@Validated SpanTimesQueryDto spanTimesQueryDto) {
         return searchService.getSpanTimesBySpanName(spanTimesQueryDto);
     }
