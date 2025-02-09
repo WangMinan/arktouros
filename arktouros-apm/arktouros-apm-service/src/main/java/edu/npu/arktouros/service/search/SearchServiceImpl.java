@@ -8,6 +8,7 @@ import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.dto.SpanNamesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTimesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
+import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.topology.service.Topology;
@@ -139,6 +140,11 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private SpanTreeNode generateSpanTree(Span rootSpan, List<Span> originalSpanList) {
+        // 对当前Span做均方差统计
+        List<Span> spansWithSameName = searchMapper.getSpanListBySpanNameAndServiceName(
+                new SpanTimesQueryDto(rootSpan.getName(), rootSpan.getServiceName(), null, null)
+        );
+        markLongDurationSpans(rootSpan, spansWithSameName);
         SpanTreeNode.SpanTreeNodeBuilder rootBuilder = SpanTreeNode.builder();
         rootBuilder.span(rootSpan);
         SpanTreeNode rootTreeNode = rootBuilder.build();
@@ -146,6 +152,45 @@ public class SearchServiceImpl implements SearchService {
         buildTraceTree(List.of(rootTreeNode),
                 originalSpanList.stream().filter(span -> !span.equals(rootSpan)).toList());
         return rootTreeNode;
+    }
+
+    /**
+     * 使用均方差统计标记长时间跨度的span
+     *
+     * @param rootSpan 根span
+     * @param spans    符合spanName一致条件的所有span
+     */
+    private void markLongDurationSpans(Span rootSpan, List<Span> spans) {
+        if (spans.isEmpty()) {
+            return;
+        }
+
+        // Step 1: Compute mean duration
+        double sum = 0;
+        for (Span span : spans) {
+            sum += span.getEndTime() - span.getStartTime();
+        }
+        double mean = sum / spans.size();
+
+        // Step 2: Compute standard deviation
+        double varianceSum = 0;
+        for (Span span : spans) {
+            double diff = span.getEndTime() - span.getStartTime() - mean;
+            varianceSum += diff * diff;
+        }
+        double standardDeviation = Math.sqrt(varianceSum / spans.size());
+
+        // Step 3: Mark spans that deviate significantly (e.g., > mean + 2 * stddev)
+        if (rootSpan.getTags() == null) {
+            rootSpan.setTags(new ArrayList<>());
+        }
+        double duration = rootSpan.getEndTime() - rootSpan.getStartTime();
+        if (duration > mean + 2 * standardDeviation) {
+            rootSpan.getTags().add(new Tag(
+                    Span.SpanTagKey.LONG_DURATION.getKey(),
+                    Span.SpanTagValue.TRUE.getValue()
+            ));
+        }
     }
 
     private Span getRootSpan(List<Span> originalSpanList) {
@@ -273,7 +318,7 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public R getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
-        SpanTimesVo spanTimesVoList = searchMapper.getSpanTimesBySpanName(spanTimesQueryDto);
+        SpanTimesVo spanTimesVoList = searchMapper.getSpanTimesVoBySpanName(spanTimesQueryDto);
         return R.ok().put(RESULT, spanTimesVoList);
     }
 }

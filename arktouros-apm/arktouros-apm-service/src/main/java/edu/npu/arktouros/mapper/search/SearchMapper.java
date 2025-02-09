@@ -32,6 +32,8 @@ public abstract class SearchMapper {
 
     public abstract R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto);
 
+    public abstract List<Span> getSpanListBySpanNameAndServiceName(SpanTimesQueryDto spanTimesQueryDto);
+
     public abstract List<Span> getSpanListByTraceId(SpanTopologyQueryDto spanTopologyQueryDto);
 
     public abstract List<String> getMetricsNames(String serviceName, Integer metricNameLimit);
@@ -55,5 +57,5 @@ public abstract class SearchMapper {
 
     public abstract R getSpanNamesByServiceName(SpanNamesQueryDto spanNamesQueryDto);
 
-    public abstract SpanTimesVo getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto);
+    public abstract SpanTimesVo getSpanTimesVoBySpanName(SpanTimesQueryDto spanTimesQueryDto);
 }

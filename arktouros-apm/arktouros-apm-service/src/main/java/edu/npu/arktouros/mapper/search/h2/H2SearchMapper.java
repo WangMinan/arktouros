@@ -52,6 +52,11 @@ public class H2SearchMapper extends SearchMapper {
     }
 
     @Override
+    public List<Span> getSpanListBySpanNameAndServiceName(SpanTimesQueryDto spanTimesQueryDto) {
+        return List.of();
+    }
+
+    @Override
     public List<Span> getSpanListByTraceId(SpanTopologyQueryDto spanTopologyQueryDto) {
         return List.of();
     }
@@ -107,7 +112,7 @@ public class H2SearchMapper extends SearchMapper {
     }
 
     @Override
-    public SpanTimesVo getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
+    public SpanTimesVo getSpanTimesVoBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

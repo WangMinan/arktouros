@@ -52,7 +52,6 @@ import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -298,7 +297,15 @@ public class ElasticsearchMapper extends SearchMapper {
     }
 
     @Override
-    public SpanTimesVo getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
+    public SpanTimesVo getSpanTimesVoBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
+        List<Span> spanList = getSpanListBySpanNameAndServiceName(spanTimesQueryDto);
+        SpanTimesVo spanTimesVo = new SpanTimesVo();
+        spanList.forEach(spanTimesVo::addSpan);
+        return spanTimesVo;
+    }
+
+    @Override
+    public List<Span> getSpanListBySpanNameAndServiceName(SpanTimesQueryDto spanTimesQueryDto) {
         // 获取符合条件的Span列表
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
@@ -310,11 +317,7 @@ public class ElasticsearchMapper extends SearchMapper {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(boolQueryBuilder.build()._toQuery());
-        List<Span> spanList =
-                ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
-        SpanTimesVo spanTimesVo = new SpanTimesVo();
-        spanList.forEach(spanTimesVo::addSpan);
-        return spanTimesVo;
+        return ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
     }
 
     private void setSpanBoolQueryWithTimeLimit(BoolQuery.Builder boolQueryBuilder, Long startTime, Long endTime) {

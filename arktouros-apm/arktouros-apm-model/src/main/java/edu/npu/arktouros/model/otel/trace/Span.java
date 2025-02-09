@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.ToString;
@@ -114,5 +115,28 @@ public class Span implements Source {
         documentMap.put("tags", Property.of(property ->
                 property.nested(nested -> nested.properties(Tag.documentMap))
         ));
+    }
+
+    @Getter
+    public enum SpanTagKey {
+        LONG_DURATION("long_duration");
+
+        private final String key;
+
+        SpanTagKey(String key) {
+            this.key = key;
+        }
+    }
+
+    @Getter
+    public enum SpanTagValue {
+        TRUE("true"),
+        FALSE("false");
+
+        private final String value;
+
+        SpanTagValue(String value) {
+            this.value = value;
+        }
     }
 }
