@@ -5,6 +5,7 @@ import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.MetricQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.dto.SpanNamesQueryDto;
+import edu.npu.arktouros.model.dto.SpanTimesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.topology.span.SpanTreeNode;
@@ -42,4 +43,6 @@ public interface SearchService {
     List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto);
 
     R getSpanNamesByServiceName(SpanNamesQueryDto spanNamesQueryDto);
+
+    R getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto);
 }

@@ -4,12 +4,14 @@ import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.dto.SpanNamesQueryDto;
+import edu.npu.arktouros.model.dto.SpanTimesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.R;
+import edu.npu.arktouros.model.vo.SpanTimesVo;
 
 import java.util.List;
 
@@ -52,4 +54,6 @@ public abstract class SearchMapper {
     public abstract List<EndPointTraceIdVo> getEndPointTraceIdVos(EndPointQueryDto endPointQueryDto);
 
     public abstract R getSpanNamesByServiceName(SpanNamesQueryDto spanNamesQueryDto);
+
+    public abstract SpanTimesVo getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto);
 }

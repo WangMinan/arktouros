@@ -5,12 +5,14 @@ import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.dto.SpanNamesQueryDto;
+import edu.npu.arktouros.model.dto.SpanTimesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.R;
+import edu.npu.arktouros.model.vo.SpanTimesVo;
 
 import java.util.List;
 
@@ -101,6 +103,11 @@ public class H2SearchMapper extends SearchMapper {
 
     @Override
     public R getSpanNamesByServiceName(SpanNamesQueryDto spanNamesQueryDto) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public SpanTimesVo getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

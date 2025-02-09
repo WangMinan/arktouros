@@ -33,6 +33,7 @@ import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.dto.SpanNamesQueryDto;
+import edu.npu.arktouros.model.dto.SpanTimesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.log.Log;
 import edu.npu.arktouros.model.otel.metric.Counter;
@@ -46,10 +47,12 @@ import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.PageResultVo;
 import edu.npu.arktouros.model.vo.R;
+import edu.npu.arktouros.model.vo.SpanTimesVo;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -279,8 +282,8 @@ public class ElasticsearchMapper extends SearchMapper {
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(boolQueryBuilder.build()._toQuery())
                 .aggregations("nameAgg",
-                        agg -> agg.terms(term -> term.field("name")));
-        searchRequestBuilder.size(ElasticsearchConstants.MAX_PAGE_SIZE);
+                        agg -> agg.terms(term -> term.field("name")))
+                .size(ElasticsearchConstants.MAX_PAGE_SIZE);
         // 分析聚合结果
         SearchResponse<Span> searchResponse =
                 ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
@@ -292,6 +295,26 @@ public class ElasticsearchMapper extends SearchMapper {
         R r = new R();
         r.put(RESULT, spanNames);
         return r;
+    }
+
+    @Override
+    public SpanTimesVo getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
+        // 获取符合条件的Span列表
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
+        termQueryBuilder
+                .field("name")
+                .value(spanTimesQueryDto.spanName());
+        boolQueryBuilder.must(termQueryBuilder.build()._toQuery());
+        setSpanBoolQueryWithTimeLimit(boolQueryBuilder, spanTimesQueryDto.startTimestamp(), spanTimesQueryDto.endTimestamp());
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
+                .query(boolQueryBuilder.build()._toQuery());
+        List<Span> spanList =
+                ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
+        SpanTimesVo spanTimesVo = new SpanTimesVo();
+        spanList.forEach(spanTimesVo::addSpan);
+        return spanTimesVo;
     }
 
     private void setSpanBoolQueryWithTimeLimit(BoolQuery.Builder boolQueryBuilder, Long startTime, Long endTime) {

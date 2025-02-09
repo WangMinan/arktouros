@@ -2,6 +2,7 @@ package edu.npu.arktouros.controller;
 
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.SpanNamesQueryDto;
+import edu.npu.arktouros.model.dto.SpanTimesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.service.operation.DataOperationService;
@@ -39,6 +40,11 @@ public class TraceController {
     @GetMapping("/spanNames")
     public R getSpanNamesByServiceName(@Validated SpanNamesQueryDto spanNamesQueryDto) {
         return searchService.getSpanNamesByServiceName(spanNamesQueryDto);
+    }
+
+    @GetMapping("/times")
+    public R getSpanTimesBySpanName(@Validated SpanTimesQueryDto spanTimesQueryDto) {
+        return searchService.getSpanTimesBySpanName(spanTimesQueryDto);
     }
 
     @DeleteMapping("/spans")

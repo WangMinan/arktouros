@@ -6,6 +6,7 @@ import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.MetricQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
 import edu.npu.arktouros.model.dto.SpanNamesQueryDto;
+import edu.npu.arktouros.model.dto.SpanTimesQueryDto;
 import edu.npu.arktouros.model.dto.SpanTopologyQueryDto;
 import edu.npu.arktouros.model.otel.metric.Metric;
 import edu.npu.arktouros.model.otel.structure.Service;
@@ -17,6 +18,7 @@ import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
 import edu.npu.arktouros.model.vo.MetricVo;
 import edu.npu.arktouros.model.vo.R;
+import edu.npu.arktouros.model.vo.SpanTimesVo;
 import edu.npu.arktouros.model.vo.SpanTreeNodeVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -267,5 +269,11 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public R getSpanNamesByServiceName(SpanNamesQueryDto spanNamesQueryDto) {
         return searchMapper.getSpanNamesByServiceName(spanNamesQueryDto);
+    }
+
+    @Override
+    public R getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
+        SpanTimesVo spanTimesVoList = searchMapper.getSpanTimesBySpanName(spanTimesQueryDto);
+        return R.ok().put(RESULT, spanTimesVoList);
     }
 }
