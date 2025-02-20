@@ -50,7 +50,7 @@
         <front-end-maven-plugin.version>1.15.1</front-end-maven-plugin.version>
         <!-- maven plugin -->
 
-        <springboot.version>3.4.1</springboot.version>
+        <springboot.version>3.4.2</springboot.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <lombok.version>1.18.36</lombok.version>
         <snakeyaml.verison>2.4</snakeyaml.verison>
