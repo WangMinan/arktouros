@@ -38,11 +38,13 @@ RUN shasum -a 512 -c elasticsearch-8.15.5-x86_64.rpm.sha512
 # 从输出中拿到elasticsearch的密码 存到变量ELASTIC_PASSWORD
 RUN ELASTIC_PASSWORD=$(rpm --install elasticsearch-8.15.5-x86_64.rpm | grep "The generated password for the elastic built-in superuser is" | awk '{print $11}')
 RUN systemctl enable elasticsearch
-# 修改 /etc/passwd最后一行的最末尾的/sbin/nologin为/bin/bash
-RUN sed -i '$s|/sbin/nologin|/bin/bash|' /etc/passwd
-RUN su elasticsearch
+# 创建非root用户
+RUN useradd -ms /bin/bash es
+RUN chown -R es:es /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch
+# 切换到非root用户
+USER es
 RUN /usr/share/elasticsearch/bin/elasticsearch -d -p /tmp/elasticsearch.pid
-RUN exit
+USER root
 # 通过接口修改密码
 RUN curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELASTIC_PASSWORD -X POST "https://localhost:9200/_security/user/elastic/_password" -H "Content-Type: application/json" -d '{"password":"elasticsearch@631"}'
 # 删除.rpm和.sha文件
@@ -58,6 +60,10 @@ COPY arktouros-image/arktouros.service /usr/lib/systemd/system/arktouros.service
 RUN systemctl stop nginx
 # 通过jps关闭elasticsearch
 RUN jps | grep Elasticsearch | awk '{print $1}' | xargs kill -12
+
+# 把权限还给elasticsearch用户并删除用户es
+RUN chown -R elasticsearch:elasticsearch /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch
+RUN userdel -r es
 
 # --------image配置 包括文件映射 entrypoint--------
 EXPOSE 50049 50050 50051 50052 50053
