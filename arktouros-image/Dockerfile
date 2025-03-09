@@ -36,14 +36,20 @@ RUN wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.15
 RUN shasum -a 512 -c elasticsearch-8.15.5-x86_64.rpm.sha512
 # 使用 rpm --install elasticsearch-8.15.5-x86_64.rpm
 # 会输出类似于 The generated password for the elastic built-in superuser is : HC6=QDjDIy-nffDdNaqK
-# 从输出中拿到elasticsearch的密码 存到变量ELASTIC_PASSWORD
-RUN ELASTIC_PASSWORD=$(rpm --install elasticsearch-8.15.5-x86_64.rpm | grep "The generated password for the elastic built-in superuser is" | awk '{print $11}')
-RUN echo $ELASTIC_PASSWORD
+RUN rpm --install elasticsearch-8.15.5-x86_64.rpm
 RUN systemctl enable elasticsearch
 # 修改 /etc/passwd最后一行的最末尾的/sbin/nologin为/bin/bash
 RUN sed -i '$s|/sbin/nologin|/bin/bash|' /etc/passwd
+
 USER elasticsearch
+# 启动elasticsearch
 RUN /usr/share/elasticsearch/bin/elasticsearch -d -p /tmp/elasticsearch.pid
+# 获取elasticsearch密码
+RUN ELASTIC_PASSWORD=$(cat /tmp/elasticsearch.pid | xargs -I {} grep "The generated password for the elastic built-in superuser is" /var/log/elasticsearch/elasticsearch.log | awk '{print $11}')
+RUN echo $ELASTIC_PASSWORD
+# 通过接口修改密码
+RUN curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELASTIC_PASSWORD -X POST "https://localhost:9200/_security/user/elastic/_password" -H "Content-Type: application/json" -d '{"password":"elasticsearch@631"}'
+
 USER root
 RUN sleep 10 && jps
 # 通过接口修改密码
