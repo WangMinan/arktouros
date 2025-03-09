@@ -1,0 +1,16 @@
+[Unit]
+Description=Arktouros Apm Service
+After=network.target elasticsearch.service
+
+[Service]
+WorkingDirectory=/usr/local/arktouros-apm-api
+ExecStartPre=/bin/bash -c 'until curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:elasticsearch@631 https://localhost:9200/_cluster/health | grep -q "green\|yellow"; do sleep 5; done'
+# Java 启动命令
+ExecStart=/usr/local/jdk-21/bin/java -Dfile.encoding=UTF-8 -jar -Dloader.path=/usr/local/arktouros-apm-api/lib -jar /usr/local/arktouros-apm-api/arktouros-apm-api-0.0.1.jar
+ExecStop=/bin/kill -s SIGTERM $MAINPID  # 优雅停止
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
