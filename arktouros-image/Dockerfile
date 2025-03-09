@@ -3,7 +3,7 @@ LABEL authors="wangminan"
 ENV TZ Asia/Shanghai
 
 # --------安装基础工具--------
-RUN dnf install -y vim mlocate net-tools perl-Digest-SHA
+RUN dnf install -y vim mlocate net-tools perl-Digest-SHA wget tar procps
 
 # --------安装nginx arktouros-ui arktouros-bigscreen--------
 RUN dnf install -y nginx
@@ -19,7 +19,6 @@ COPY arktouros-ui/dist /etc/nginx/html/arktouros-ui
 COPY arktouros-image/nginx.conf /etc/nginx/nginx.conf
 
 # --------配置java--------
-RUN dnf install -y wget tar
 WORKDIR /usr/local
 RUN wget https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz
 RUN tar -zxvf graalvm-jdk-21_linux-x64_bin.tar.gz
@@ -39,7 +38,11 @@ RUN shasum -a 512 -c elasticsearch-8.15.5-x86_64.rpm.sha512
 # 从输出中拿到elasticsearch的密码 存到变量ELASTIC_PASSWORD
 RUN ELASTIC_PASSWORD=$(rpm --install elasticsearch-8.15.5-x86_64.rpm | grep "The generated password for the elastic built-in superuser is" | awk '{print $11}')
 RUN systemctl enable elasticsearch
-RUN systemctl start elasticsearch
+# 修改 /etc/passwd最后一行的最末尾的/sbin/nologin为/bin/bash
+RUN sed -i '$s|/sbin/nologin|/bin/bash|' /etc/passwd
+RUN su elasticsearch
+RUN /usr/share/elasticsearch/bin/elasticsearch -d -p /tmp/elasticsearch.pid
+RUN exit
 # 通过接口修改密码
 RUN curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELASTIC_PASSWORD -X POST "https://localhost:9200/_security/user/elastic/_password" -H "Content-Type: application/json" -d '{"password":"elasticsearch@631"}'
 # 删除.rpm和.sha文件
@@ -52,9 +55,9 @@ RUN tar -zxvf arktouros-apm-api-leaves.tar.gz
 COPY arktouros-image/arktouros.service /usr/lib/systemd/system/arktouros.service
 
 # --------都搞好了 关闭所有服务--------
-RUN systemctl stop elasticsearch
 RUN systemctl stop nginx
-RUN systemctl stop arktouros
+# 通过jps关闭elasticsearch
+RUN jps | grep Elasticsearch | awk '{print $1}' | xargs kill -12
 
 # --------image配置 包括文件映射 entrypoint--------
 EXPOSE 50049 50050 50051 50052 50053
