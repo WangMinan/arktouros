@@ -16,7 +16,7 @@ RUN mkdir -p /etc/nginx/html/arktouros-ui
 # 把arktouros-ui的dist文件夹下的东西拷贝到/etc/nginx/html/arktouros-ui
 COPY arktouros-ui/dist /etc/nginx/html/arktouros-ui
 # 拷贝当前目录下nginx.conf到/etc/nginx/nginx.conf
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY arktouros-image/nginx.conf /etc/nginx/nginx.conf
 RUN nginx -s reload
 
 # --------配置java--------
@@ -49,7 +49,7 @@ RUN curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELASTIC_PASSW
 WORKDIR /usr/local
 COPY build/arktouros-apm-api-leaves.tar.gz /usr/local/arktouros-apm-api-leaves.tar.gz
 RUN tar -zxvf arktouros-apm-api-leaves.tar.gz
-COPY arktouros.service /usr/lib/systemd/system/arktouros.service
+COPY arktouros-image/arktouros.service /usr/lib/systemd/system/arktouros.service
 RUN systemctl daemon-reload
 
 # --------都搞好了 关闭所有服务--------
