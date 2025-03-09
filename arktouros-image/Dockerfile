@@ -2,6 +2,8 @@ FROM almalinux:9
 LABEL authors="wangminan"
 ENV TZ Asia/Shanghai
 
+# 在Dockerfile中使用shell一定要注意 上下文变量不互通 和github actions一样
+
 # --------安装基础工具--------
 RUN dnf install -y vim mlocate net-tools perl-Digest-SHA wget tar procps
 
@@ -34,21 +36,18 @@ RUN rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
 RUN wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.15.5-x86_64.rpm
 RUN wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.15.5-x86_64.rpm.sha512
 RUN shasum -a 512 -c elasticsearch-8.15.5-x86_64.rpm.sha512
-# 使用 rpm --install elasticsearch-8.15.5-x86_64.rpm
-# 会输出类似于 The generated password for the elastic built-in superuser is : HC6=QDjDIy-nffDdNaqK
-RUN export ELASTIC_PASSWORD=$(rpm --install elasticsearch-8.15.5-x86_64.rpm | grep "The generated password for the elastic built-in superuser is" | awk '{print $11}')
-ENV ELASTIC_PASSWORD=$ELASTIC_PASSWORD
-RUN echo $ELASTIC_PASSWORD
+# 使用 rpm --install elasticsearch-8.15.5-x86_64.rpm 会输出类似于 The generated password for the elastic built-in superuser is : HC6=QDjDIy-nffDdNaqK 写入文件 /tmp/elastic_password
+# 安装elasticsearch并提取生成的密码
+RUN ELASTIC_PASSWORD=$(rpm --install elasticsearch-8.15.5-x86_64.rpm | grep "The generated password for the elastic built-in superuser is" | awk '{print $11}') && \
+    echo $ELASTIC_PASSWORD > /tmp/elastic_password
 RUN systemctl enable elasticsearch
 # 修改 /etc/passwd最后一行的最末尾的/sbin/nologin为/bin/bash
 RUN sed -i '$s|/sbin/nologin|/bin/bash|' /etc/passwd
 
 USER elasticsearch
-# 启动elasticsearch
-RUN /usr/share/elasticsearch/bin/elasticsearch -d -p /tmp/elasticsearch.pid
-RUN echo $ELASTIC_PASSWORD
-# 通过接口修改密码
-RUN curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELASTIC_PASSWORD -X POST "https://localhost:9200/_security/user/elastic/_password" -H "Content-Type: application/json" -d '{"password":"elasticsearch@631"}'
+# 启动elasticsearch 从/tmp/elastic_password读取初始密码，然后通过接口修改密码
+RUN /usr/share/elasticsearch/bin/elasticsearch -d -p /tmp/elasticsearch.pid && \
+    curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$(cat /tmp/elastic_password) -X POST "https://localhost:9200/_security/user/elastic/_password" -H "Content-Type: application/json" -d '{"password":"elasticsearch@631"}'
 
 USER root
 # 删除.rpm和.sha文件
@@ -59,11 +58,6 @@ WORKDIR /usr/local
 COPY build/arktouros-apm-api-leaves.tar.gz /usr/local/arktouros-apm-api-leaves.tar.gz
 RUN tar -zxvf arktouros-apm-api-leaves.tar.gz
 COPY arktouros-image/arktouros.service /usr/lib/systemd/system/arktouros.service
-
-# --------都搞好了 关闭所有服务--------
-RUN systemctl stop nginx
-# 通过pidfile关闭elasticsearch
-RUN kill -12 $(cat /tmp/elasticsearch.pid)
 
 # --------image配置 包括文件映射 entrypoint--------
 EXPOSE 50049 50050 50051 50052 50053
