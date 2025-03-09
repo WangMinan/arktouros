@@ -38,18 +38,18 @@ RUN shasum -a 512 -c elasticsearch-8.15.5-x86_64.rpm.sha512
 # 会输出类似于 The generated password for the elastic built-in superuser is : HC6=QDjDIy-nffDdNaqK
 # 从输出中拿到elasticsearch的密码 存到变量ELASTIC_PASSWORD
 RUN ELASTIC_PASSWORD=$(rpm --install elasticsearch-8.15.5-x86_64.rpm | grep "The generated password for the elastic built-in superuser is" | awk '{print $11}')
-RUN systemctl daemon-reload
 RUN systemctl enable elasticsearch
 RUN systemctl start elasticsearch
 # 通过接口修改密码
 RUN curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELASTIC_PASSWORD -X POST "https://localhost:9200/_security/user/elastic/_password" -H "Content-Type: application/json" -d '{"password":"elasticsearch@631"}'
+# 删除.rpm和.sha文件
+RUN rm -rf elasticsearch-8.15.5-x86_64.rpm elasticsearch-8.15.5-x86_64.rpm.sha512
 
 # --------安装arktouros--------
 WORKDIR /usr/local
 COPY build/arktouros-apm-api-leaves.tar.gz /usr/local/arktouros-apm-api-leaves.tar.gz
 RUN tar -zxvf arktouros-apm-api-leaves.tar.gz
 COPY arktouros-image/arktouros.service /usr/lib/systemd/system/arktouros.service
-RUN systemctl daemon-reload
 
 # --------都搞好了 关闭所有服务--------
 RUN systemctl stop elasticsearch
@@ -57,15 +57,6 @@ RUN systemctl stop nginx
 RUN systemctl stop arktouros
 
 # --------image配置 包括文件映射 entrypoint--------
-# tcp receive port
-EXPOSE 50049
-# http server port
-EXPOSE 50050
-# grpc receive port
-EXPOSE 50051
-# http server port
-EXPOSE 50052
-# http server port
-EXPOSE 50053
+EXPOSE 50049 50050 50051 50052 50053
 
 ENTRYPOINT /usr/sbin/init
