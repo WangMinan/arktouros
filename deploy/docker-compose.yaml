@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   arktouros-apm-server:
     image: wangminan/arktouros-apm-server:latest

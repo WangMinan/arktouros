@@ -1,0 +1,46 @@
+services:
+  arktouros-all-in-one:
+    image: wangminan/arktouros-all-in-one:latest
+    container_name: arktouros-all-in-one
+    command: /usr/sbin/init # 自定义启动命令 需要用到systemd守护进程 因此使用 /usr/sbin/init 来启动
+    post_start:
+      - command: systemctl start arktouros
+        user: root
+    ports:
+      # - 80:80 # nginx 默认运行端口
+      # - 9200:9200   # Elasticsearch Restful API 默认暴露端口
+      # - 9300:9300   # Elasticsearch 集群内部通信端口
+      - "50049:50049" # tcp receiver 默认运行端口
+      - "50050:50050" # apm 服务器默认运行端口
+      - "50051:50051" # grpc receiver 默认运行端口
+      - "50052:50052" # ui 默认运行端口
+      - "50053:50053" # 可视化大屏默认运行端口
+    volumes:
+      # apm 配置文件目录映射进去
+      - ./arktouros-apm-api/config:/usr/local/arktouros-apm-api/config
+      # apm 日志目录映射出来
+      - ./arktouros-apm-api/logs:/usr/local/arktouros-apm-api/logs
+      # 离线时从该文件夹读取 JSON 格式的日志文件
+      - ./arktouros-apm-api/input_logs:/usr/local/arktouros-apm-api/input_logs
+      # ui 配置文件映射进去
+      - ./arktouros-ui/arktourosUiConfig.js:/etc/nginx/html/arktouros-ui/arktourosUiConfig.js
+      # 大屏配置文件映射进去
+      - ./arktouros-bigscreen/config.json:/etc/nginx/html/arktouros-bigscreen/config.json
+      # ---------- 以下配置在不清楚原理的情况下均不要开启 ----------
+      # nginx 日志文件映射进去 因为上面端口要跟着变 建议是 docker exec 进入容器查看
+      # - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      # nginx 日志文件映射出来
+      # - ./nginx/logs:/var/log/nginx
+      # Elasticsearch的配置文件映射进去(下面这仨先别开了可能导致镜像起不起来)
+      # - ./elasticsearch/config/elasticsearch.yml:/etc/elasticsearch/elasticsearch.yml
+      # Elasticsearch的jvm配置文件映射进去 这个可以根据本机情况做修正之后映射
+      # - ./elasticsearch/config/jvm.options:/etc/elasticsearch/jvm.options
+      # Elasticsearch的日志文件映射出来
+      # - ./elasticsearch/logs:/var/log/elasticsearch
+    privileged: true
+    restart: on-failure
+    # 限制内存到16G
+    deploy:
+      resources:
+        limits:
+          memory: 16G
