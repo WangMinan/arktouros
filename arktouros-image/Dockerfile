@@ -46,7 +46,7 @@ RUN sed -i '$s|/sbin/nologin|/bin/bash|' /etc/passwd
 USER elasticsearch
 RUN /usr/share/elasticsearch/bin/elasticsearch -d -p /tmp/elasticsearch.pid
 USER root
-RUN sleep 10
+RUN sleep 10 && jps
 # 通过接口修改密码
 RUN curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELASTIC_PASSWORD -X POST "https://localhost:9200/_security/user/elastic/_password" -H "Content-Type: application/json" -d '{"password":"elasticsearch@631"}'
 # 删除.rpm和.sha文件
