@@ -11,10 +11,10 @@ RUN dnf install -y nginx
 RUN systemctl enable nginx
 # 拷贝bigscreen项目
 RUN mkdir -p /etc/nginx/html/arktouros-bigscreen
-COPY ../arktouros-bigscreen /etc/nginx/html/arktouros-bigscreen
+COPY arktouros-bigscreen /etc/nginx/html/arktouros-bigscreen
 RUN mkdir -p /etc/nginx/html/arktouros-ui
 # 把arktouros-ui的dist文件夹下的东西拷贝到/etc/nginx/html/arktouros-ui
-COPY ../arktouros-ui/dist /etc/nginx/html/arktouros-ui
+COPY arktouros-ui/dist /etc/nginx/html/arktouros-ui
 # 拷贝当前目录下nginx.conf到/etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/nginx.conf
 RUN nginx -s reload
@@ -47,7 +47,7 @@ RUN curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELASTIC_PASSW
 
 # --------安装arktouros--------
 WORKDIR /usr/local
-COPY ../build/arktouros-apm-api-leaves.tar.gz /usr/local/arktouros-apm-api-leaves.tar.gz
+COPY build/arktouros-apm-api-leaves.tar.gz /usr/local/arktouros-apm-api-leaves.tar.gz
 RUN tar -zxvf arktouros-apm-api-leaves.tar.gz
 COPY arktouros.service /usr/lib/systemd/system/arktouros.service
 RUN systemctl daemon-reload

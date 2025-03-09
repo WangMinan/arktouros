@@ -53,31 +53,29 @@ jobs:
       - name: Set up Docker BuildX
         uses: docker/setup-buildx-action@v3
 
-#      - name: Build and push Apm
-#        id: docker_build_apm
-#        uses: docker/build-push-action@v6
-#        with:
-#          context: .
-#          file: ./Dockerfile-apm
-#          push: true
-#          platforms: linux/amd64,linux/arm64
-#          tags: |
-#            ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:${{ steps.vars.outputs.tag }}
-#            ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:latest
+      - name: Build and push Apm
+        id: docker_build_apm
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile-apm
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:${{ steps.vars.outputs.tag }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-apm-server:latest
 
       - name: Build and push arktouros-all-in-one
         id: docker_build_all_in_one
         uses: docker/build-push-action@v6
         with:
-          context: ./arktouros-image
+          context: .
           file: ./arktouros-image/Dockerfile
           push: true
           platforms: linux/amd64
           tags: |
               ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-all-in-one:${{ steps.vars.outputs.tag }}
               ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-all-in-one:latest
-            
-
 
 #  deploy-on-remote:
 #    runs-on: ubuntu-latest

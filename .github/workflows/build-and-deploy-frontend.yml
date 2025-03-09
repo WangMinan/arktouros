@@ -23,7 +23,7 @@ jobs:
         with:
           java-version: '21'      # See 'Options' section below for all supported versions
           distribution: 'graalvm' # See 'Options' section below for all available distributions
-          version: '21.0.4'
+          version: '21.0.6'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
 
@@ -54,58 +54,58 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-ui:${{ steps.vars.outputs.tag }}
             ${{ secrets.DOCKERHUB_USERNAME }}/arktouros-ui:latest
 
-  deploy-on-remote:
-    runs-on: ubuntu-latest
-    needs: build-and-push-image
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-
-      - name: 传输docker-compose到服务器
-        run: >
-          sshpass -p ${{secrets.REMOTE_PWD}} 
-          scp -r -o StrictHostKeyChecking=no deploy/docker-compose.yaml 
-          root@${{secrets.REMOTE_IP}}:/root/arktouros
-
-      - name: 传输部署脚本到服务器
-        run: >
-          sshpass -p ${{secrets.REMOTE_PWD}} 
-          scp -r -o StrictHostKeyChecking=no deploy/run-frontend.sh 
-          root@${{secrets.REMOTE_IP}}:/root/arktouros
-
-      - name: 授权并执行部署脚本
-        run: >
-          sshpass -p ${{secrets.REMOTE_PWD}} 
-          ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP}} 
-          "chmod +x /root/arktouros/run-frontend.sh && /root/arktouros/run-frontend.sh"
-
-  deploy-on-another-remote:
-    runs-on: ubuntu-latest
-    needs: build-and-push-image
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-
-      - name: 写pem到临时文件
-        run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem && chmod 600 private_key.pem
-
-      - name: 传输docker-compose到服务器
-        run: >
-          scp -i private_key.pem -r -o StrictHostKeyChecking=no 
-          deploy/docker-compose.yaml 
-          root@${{secrets.REMOTE_IP_1}}:/root/arktouros
-
-      - name: 传输部署脚本到服务器
-        run: >
-          scp -i private_key.pem -r -o StrictHostKeyChecking=no
-          deploy/run-frontend.sh 
-          root@${{secrets.REMOTE_IP_1}}:/root/arktouros
-
-      - name: 授权并执行部署脚本
-        run: >
-          ssh -i private_key.pem -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP_1}} 
-          "chmod +x /root/arktouros/run-frontend.sh && /root/arktouros/run-frontend.sh"
+#  deploy-on-remote:
+#    runs-on: ubuntu-latest
+#    needs: build-and-push-image
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#        with:
+#          submodules: 'recursive'
+#
+#      - name: 传输docker-compose到服务器
+#        run: >
+#          sshpass -p ${{secrets.REMOTE_PWD}}
+#          scp -r -o StrictHostKeyChecking=no deploy/docker-compose.yaml
+#          root@${{secrets.REMOTE_IP}}:/root/arktouros
+#
+#      - name: 传输部署脚本到服务器
+#        run: >
+#          sshpass -p ${{secrets.REMOTE_PWD}}
+#          scp -r -o StrictHostKeyChecking=no deploy/run-frontend.sh
+#          root@${{secrets.REMOTE_IP}}:/root/arktouros
+#
+#      - name: 授权并执行部署脚本
+#        run: >
+#          sshpass -p ${{secrets.REMOTE_PWD}}
+#          ssh -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP}}
+#          "chmod +x /root/arktouros/run-frontend.sh && /root/arktouros/run-frontend.sh"
+#
+#  deploy-on-another-remote:
+#    runs-on: ubuntu-latest
+#    needs: build-and-push-image
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#        with:
+#          submodules: 'recursive'
+#
+#      - name: 写pem到临时文件
+#        run: echo "${{secrets.REMOTE_KEY}}" > private_key.pem && chmod 600 private_key.pem
+#
+#      - name: 传输docker-compose到服务器
+#        run: >
+#          scp -i private_key.pem -r -o StrictHostKeyChecking=no
+#          deploy/docker-compose.yaml
+#          root@${{secrets.REMOTE_IP_1}}:/root/arktouros
+#
+#      - name: 传输部署脚本到服务器
+#        run: >
+#          scp -i private_key.pem -r -o StrictHostKeyChecking=no
+#          deploy/run-frontend.sh
+#          root@${{secrets.REMOTE_IP_1}}:/root/arktouros
+#
+#      - name: 授权并执行部署脚本
+#        run: >
+#          ssh -i private_key.pem -o StrictHostKeyChecking=no root@${{secrets.REMOTE_IP_1}}
+#          "chmod +x /root/arktouros/run-frontend.sh && /root/arktouros/run-frontend.sh"
