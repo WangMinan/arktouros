@@ -17,7 +17,6 @@ RUN mkdir -p /etc/nginx/html/arktouros-ui
 COPY arktouros-ui/dist /etc/nginx/html/arktouros-ui
 # 拷贝当前目录下nginx.conf到/etc/nginx/nginx.conf
 COPY arktouros-image/nginx.conf /etc/nginx/nginx.conf
-RUN nginx -s reload
 
 # --------配置java--------
 RUN dnf install -y wget tar
@@ -55,6 +54,7 @@ RUN systemctl daemon-reload
 # --------都搞好了 关闭所有服务--------
 RUN systemctl stop elasticsearch
 RUN systemctl stop nginx
+RUN systemctl stop arktouros
 
 # --------image配置 包括文件映射 entrypoint--------
 # tcp receive port
