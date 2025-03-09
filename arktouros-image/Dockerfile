@@ -3,7 +3,6 @@ LABEL authors="wangminan"
 ENV TZ Asia/Shanghai
 
 # --------安装基础工具--------
-RUN dnf install -y vim mlocate net-tools perl-Digest-SHA
 RUN dnf install -y vim mlocate net-tools perl-Digest-SHA wget tar procps
 
 # --------安装nginx arktouros-ui arktouros-bigscreen--------
