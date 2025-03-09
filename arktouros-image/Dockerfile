@@ -3,6 +3,7 @@ LABEL authors="wangminan"
 ENV TZ Asia/Shanghai
 
 # --------安装基础工具--------
+RUN dnf install -y vim mlocate net-tools perl-Digest-SHA
 RUN dnf install -y vim mlocate net-tools perl-Digest-SHA wget tar procps
 
 # --------安装nginx arktouros-ui arktouros-bigscreen--------
@@ -19,6 +20,7 @@ COPY arktouros-ui/dist /etc/nginx/html/arktouros-ui
 COPY arktouros-image/nginx.conf /etc/nginx/nginx.conf
 
 # --------配置java--------
+RUN dnf install -y wget tar
 WORKDIR /usr/local
 RUN wget https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz
 RUN tar -zxvf graalvm-jdk-21_linux-x64_bin.tar.gz
@@ -38,11 +40,10 @@ RUN shasum -a 512 -c elasticsearch-8.15.5-x86_64.rpm.sha512
 # 从输出中拿到elasticsearch的密码 存到变量ELASTIC_PASSWORD
 RUN ELASTIC_PASSWORD=$(rpm --install elasticsearch-8.15.5-x86_64.rpm | grep "The generated password for the elastic built-in superuser is" | awk '{print $11}')
 RUN systemctl enable elasticsearch
-# 创建非root用户
-RUN useradd -ms /bin/bash es
-RUN chown -R es:es /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch
-# 切换到非root用户
-USER es
+RUN systemctl start elasticsearch
+# 修改 /etc/passwd最后一行的最末尾的/sbin/nologin为/bin/bash
+RUN sed -i '$s|/sbin/nologin|/bin/bash|' /etc/passwd
+USER elasticsearch
 RUN /usr/share/elasticsearch/bin/elasticsearch -d -p /tmp/elasticsearch.pid
 USER root
 # 通过接口修改密码
@@ -60,10 +61,6 @@ COPY arktouros-image/arktouros.service /usr/lib/systemd/system/arktouros.service
 RUN systemctl stop nginx
 # 通过jps关闭elasticsearch
 RUN jps | grep Elasticsearch | awk '{print $1}' | xargs kill -12
-
-# 把权限还给elasticsearch用户并删除用户es
-RUN chown -R elasticsearch:elasticsearch /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch
-RUN userdel -r es
 
 # --------image配置 包括文件映射 entrypoint--------
 EXPOSE 50049 50050 50051 50052 50053

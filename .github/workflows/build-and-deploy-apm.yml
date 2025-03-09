@@ -28,7 +28,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -Dmaven.test.skip=true -T 2C clean package
+        run: mvn -Dmaven.test.skip=true -T 4C clean package
 
       - name: Generate Changelog
         run: npm install -g auto-changelog && auto-changelog
