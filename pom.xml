@@ -40,7 +40,7 @@
 
         <!-- maven plugin -->
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-        <native-maven-plugin.version>0.10.5</native-maven-plugin.version>
+        <native-maven-plugin.version>0.10.6</native-maven-plugin.version>
         <!-- assembly-plugin用最新的3.7.0会报空指针问题 -->
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
