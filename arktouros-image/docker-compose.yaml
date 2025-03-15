@@ -6,7 +6,7 @@ services:
     post_start:
       - command: systemctl start arktouros
         user: root
-    post_stop:
+    pre_stop:
       - command: ./post_stop.sh
         user: root
     ports:
