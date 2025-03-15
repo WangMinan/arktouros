@@ -6,6 +6,9 @@ services:
     post_start:
       - command: systemctl start arktouros
         user: root
+    post_stop:
+      - command: ./post_stop.sh
+        user: root
     ports:
       # - 80:80 # nginx 默认运行端口
       # - 9200:9200   # Elasticsearch Restful API 默认暴露端口
