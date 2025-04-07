@@ -1,0 +1,89 @@
+# 切记 修改本文件中所有端口时都需要到 docker-compose 文件中修正
+spring:
+  application:
+    name: arktouros-apm
+  # datasource 仅用于 数据存储模块-宿主端机临时缓存
+  datasource:
+    driver-class-name: org.h2.Driver
+    # 一定要持久化，这玩意是用来做apm缓存的 如果用内存型的话要丢数据 仅限测试环境用
+    url: jdbc:h2:./db/apm;DB_CLOSE_DELAY=-1;MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: sa
+  # 不要寄希望于自启动执行SQL，已经靠编码实现了 这个H2已经给我整吐了
+  h2:
+    console:
+      enabled: true
+
+server:
+  servlet:
+    context-path: /api/${var.api.version}
+  port: 50050
+
+var:
+  api:
+    version: v0
+
+# 对象选择，目前只完善了elasticsearch全链路,h2暂不可选
+instance:
+  active:
+    # 选择数据接收器
+    dataReceiver: arktourosTcp # otelGrpc/arktourosGrpc/arktourosTcp(在线)/jsonFile(离线)
+    sinker: elasticsearch # elasticsearch/h2
+    searchMapper: elasticsearch # elasticsearch/h2
+    scheduledJob: elasticsearch # elasticsearch/h2
+    operation: elasticsearch # elasticsearch/h2
+  # 数据分析器的对象数量 仅在接收 otel 数据时生效 自有数据不需要
+  number:
+    analyzer:
+      otel:
+        log: 1
+        metric: 5
+        trace: 1
+      sytel:
+        trace: 1
+
+receiver:
+  # grpc 数据接收器端口 目前目标端机不支持 grpc 导出，因此本功能仅为后续更新暂留
+  grpc:
+    port: 50051
+  # tcp 数据接收器端口 使用netty
+  tcp:
+    port: 50049
+  # 文件导入器端口 用于离线接入
+  file:
+    json:
+      type: sytel # otel/arktouros/sytel
+      logDir: /usr/local/arktouros-apm-api/input_logs # 使用该配置文件来指定输入的文件夹路径 所有日志文件都应该保存在该文件夹下 使用离线模式时请确保该文件夹不空 然后再启动
+      # logDir: D:\code\arktouros-main\sytel-logs
+      indexFilePath: /usr/local/arktouros-apm-api/input_logs/index.txt # apm 将在这个文件的URL上创建一个索引文件
+      # indexFilePath: D:\code\arktouros-main\sytel-logs\index.txt
+
+# 数据存储模块-外部扩展存储 的有关配置
+elasticsearch:
+  serverUrl: https://localhost:9200 # 不要动这个URL 除非你修改了Elasticsearch的配置或者打算用别的Elasticsearch
+  # 暂不支持apiKey模式
+  username: elastic # 不要懂这个用户名
+  password: elasticsearch@631 # 不要动这个密码 除非你手动重新配置了镜像里带的Elasticsearch的密码 或者打算用别的Elasticsearch
+  ca: /etc/elasticsearch/certs/http_ca.crt # 证书位置 留空或文件不存在则不开启SSL 默认情况下不要动它 除非你改动了https证书的位置
+  # ca: D:\code\arktouros-main\docs\http_ca.crt
+  pool:
+    # 连接池给大一点，给小了会炸
+    maxTotal: 50
+    minIdle: 5
+    maxWait: 2000
+  # scrollApi配置
+  scroll:
+    # 对于每一次scroll 等待回调结果的最长时间
+    maxWait: 5000
+  # rolloverApi configuration部分配置
+  rollover:
+    maxDocs: 100000
+    maxAge: 1w # 这玩意应该适当调大一点 或者去调大es的最大分片数
+    maxSize: 5gb
+  # 定时任务有关配置 主要是配置间隔时间
+  schedule:
+    rollover: 168 # rollover 任务，更新虚拟索引到实际索引的链接，单位小时
+    throughput: 10 # 计算吞吐量任务，单位分钟
+    responseTime: 10 # 计算响应时间任务，单位分钟
+    errorRate: 10 # 计算错误率任务，单位分钟
+    metric: 10 # 测试用，已屏蔽，无实际作用，但需要保留配置，否则无法启动，单位分钟

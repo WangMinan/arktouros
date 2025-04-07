@@ -1,0 +1,52 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+    <id>leaves</id>
+    <formats>
+        <!--压缩文件形式 可选 zip tar.gz等 -->
+        <format>tar.gz</format>
+    </formats>
+
+    <includeBaseDirectory>true</includeBaseDirectory>
+
+    <!-- Adds dependencies to tar.gz package under lib directory -->
+
+    <!-- 依赖jar文件处理 全部放入lib目录 -->
+    <dependencySets>
+        <dependencySet>
+            <!-- 本项目所生成的jar包不放入lib文件夹中 -->
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>lib</outputDirectory>
+            <!-- <unpack>false</unpack> -->
+        </dependencySet>
+    </dependencySets>
+
+
+    <!-- 项目文件处理 -->
+    <fileSets>
+        <!-- 配置文件放到config文件夹内 -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <!-- <excludes>
+                <exclude>assembly.xml</exclude>
+            </excludes> -->
+            <filtered>true</filtered>
+            <!--配置文件输出位置 根目录config文件夹下-->
+            <outputDirectory>${file.separator}config</outputDirectory>
+        </fileSet>
+
+        <!-- 自己写的项目代码生成的jar文件 放在根目录  -->
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <outputDirectory>${file.separator}</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+                <!-- native编译的windows可执行文件 -->
+                <include>*.exe</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>
