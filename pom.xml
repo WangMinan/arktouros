@@ -82,7 +82,7 @@
         <mockito.version>5.16.1</mockito.version>
         <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
-        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <testFailureIgnore>true</testFailureIgnore>
         <skipUTs>false</skipUTs>
         <!--        <jacoco.dataFile>${project.build.directory}/jacoco.exec</jacoco.dataFile>-->
