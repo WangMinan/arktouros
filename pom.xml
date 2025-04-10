@@ -51,7 +51,7 @@
 
         <springboot.version>3.4.4</springboot.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
-        <lombok.version>1.18.36</lombok.version>
+        <lombok.version>1.18.38</lombok.version>
         <snakeyaml.verison>2.4</snakeyaml.verison>
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
         <jackson.version>2.18.3</jackson.version>
@@ -79,10 +79,10 @@
 
         <!-- UT -->
         <junit-jupiter.version>5.12.1</junit-jupiter.version>
-        <mockito.version>5.16.1</mockito.version>
+        <mockito.version>5.17.0</mockito.version>
         <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
-        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <testFailureIgnore>true</testFailureIgnore>
         <skipUTs>false</skipUTs>
         <!--        <jacoco.dataFile>${project.build.directory}/jacoco.exec</jacoco.dataFile>-->
