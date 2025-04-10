@@ -1,5 +1,6 @@
 package edu.npu.arktouros.controller;
 
+import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.service.operation.DataOperationService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,7 +16,8 @@ public class CommonController {
     private DataOperationService dataOperationService;
 
     @DeleteMapping("/all")
-    public void deleteAllData() {
+    public R deleteAllData() {
         dataOperationService.deleteAllData();
+        return R.ok();
     }
 }

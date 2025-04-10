@@ -132,6 +132,7 @@ public class JsonFileReceiver extends DataReceiver {
      * 不存在索引文件 初始化一个空的索引文件 写入字典序 最小的文件名md5:0
      */
     private void initParamsWithEmptyIndexFile() {
+        log.info("Initializing params with empty index file.");
         try {
             // 在该场景下需要确保indexFile是空的
             boolean newFile = indexFile.createNewFile();
@@ -171,9 +172,9 @@ public class JsonFileReceiver extends DataReceiver {
     }
 
     public void initMd5FileMap() {
-        if (md5FileMap == null) {
-            md5FileMap = new HashMap<>();
-        }
+        log.info("Flushing md5FileMap.");
+        // 每次都要刷新本地缓存 防止读不到新文件
+        md5FileMap = new HashMap<>();
         File[] files = logDirFile.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -296,6 +297,10 @@ public class JsonFileReceiver extends DataReceiver {
         log.info("JsonFileReceiver flush and start reading log files");
         // 重新初始化环境
         outputCache.clear();
+        this.currentFile = null;
+        this.currentPos = null;
+        this.currentFileNameMd5 = null;
+        this.md5FileMap = new HashMap<>();
         jsonFilePreHandlerExecutor = Executors.newSingleThreadExecutor(
                 new BasicThreadFactory.Builder()
                         .namingPattern("Json-file-preHandler-%d").build()
@@ -307,10 +312,13 @@ public class JsonFileReceiver extends DataReceiver {
             throw new ArktourosException(e);
         }
         // 启动JsonFilePreHandler
-        jsonFilePreHandlerExecutor.submit(
-                new JsonFilePreHandler(outputCache, fileType,
-                        traceQueueService, sinkService,
-                        objectMapper, sytelTraceAnalyzerNumber));
+        new Thread(() -> {
+            jsonFilePreHandlerExecutor.submit(
+                    new JsonFilePreHandler(outputCache, fileType,
+                            traceQueueService, sinkService,
+                            objectMapper, sytelTraceAnalyzerNumber));
+        }).start();
+        isRunning = true;
         // 下面的操作会阻塞主线程
         startReadFile();
     }
@@ -318,6 +326,7 @@ public class JsonFileReceiver extends DataReceiver {
     private void startReadFile() {
         while (isRunning) {
             try {
+                log.info("Reading file: {}", currentFile.getFile().getName());
                 readFile();
             } catch (InterruptedException | IOException e) {
                 log.warn("JsonLogFileReceiver is interrupted", e);
