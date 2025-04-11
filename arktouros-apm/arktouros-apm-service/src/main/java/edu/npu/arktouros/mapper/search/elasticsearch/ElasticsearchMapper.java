@@ -17,6 +17,7 @@ import co.elastic.clients.elasticsearch._types.aggregations.TopHitsAggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.ExistsQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
@@ -180,10 +181,22 @@ public class ElasticsearchMapper extends SearchMapper {
                     .value(logQueryDto.traceId())
                     .build()._toQuery());
         }
+        /*
+            ES 会自动对输入的关键字进行分词。在你展示的代码片段中，使用的是 MatchQuery，Elasticsearch 在处理这种查询时会对查询字符串进行分析（包括分词）。
+            当你输入一串以空格分隔的多个关键字（如 "hello world elasticsearch"）时，ES 会：
+                将查询文本分解为单独的词元（tokens）："hello", "world", "elasticsearch"
+                对这些词元应用与索引时相同的分析器（如果没有特别指定的话）
+                查询包含任一这些词元的文档（默认为 OR 逻辑）
+            这种行为是 match 查询的默认特性。如果你希望更精确地控制多个关键词之间的关系，可以考虑：
+                设置 operator 为 "AND"，要求文档必须包含所有关键词
+                使用 match_phrase 查询，要求关键词必须按顺序出现
+                使用 query_string 查询以支持更复杂的查询表达式
+         */
         if (StringUtils.isNotEmpty(logQueryDto.keyword())) {
             boolQueryBuilder.must(new MatchQuery.Builder()
                     .field("content")
                     .query(logQueryDto.keyword())
+                    .operator(Operator.And)
                     .build()._toQuery());
         }
         if (StringUtils.isNotEmpty(logQueryDto.keywordNotIncluded())) {
