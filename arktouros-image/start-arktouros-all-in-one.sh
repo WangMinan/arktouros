@@ -280,8 +280,8 @@ function set_docker() {
     else
         echo "未安装 docker-compose，也不支持 docker compose 插件。您可以使用如下命令手动启动："
         echo "docker load -i arktouros-all-in-one.tar"
-        echo "docker run -d --name arktouros-all-in-one --privileged --restart on-failure -p 50049:50049 -p 50050:50050 -p 50051:50051 -p 50052:50052 -p 50053:50053 -v \$(pwd)/arktouros-apm-api/config:/usr/local/arktouros-apm-api/config -v \$(pwd)/arktouros-apm-api/logs:/usr/local/arktouros-apm-api/logs -v \$(pwd)/arktouros-apm-api/input_logs:/usr/local/arktouros-apm-api/input_logs -v \$(pwd)/arktouros-ui/arktourosUiConfig.js:/etc/nginx/html/arktouros-ui/arktourosUiConfig.js -v \$(pwd)/arktouros-bigscreen/config.json:/etc/nginx/html/arktouros-bigscreen/config.json --memory=8g arktouros-all-in-one:0.1 /usr/sbin/init"
-        echo "如若arktouros未正常启动，请执行docker exec -it arktouros-all-in-one systemctl start elasticsearch 以及 docker exec -it arktouros-all-in-one systemctl start arktouros"
+        echo "docker run -d --name arktouros-all-in-one --privileged --restart on-failure -p 50049:50049 -p 50050:50050 -p 50051:50051 -p 50052:50052 -p 50053:50053 -v \$(pwd)/arktouros-apm-api/config:/usr/local/arktouros-apm-api/config -v \$(pwd)/arktouros-apm-api/logs:/usr/local/arktouros-apm-api/logs -v \$(pwd)/arktouros-apm-api/input_logs:/usr/local/arktouros-apm-api/input_logs -v \$(pwd)/arktouros-ui/arktourosUiConfig.js:/etc/nginx/html/arktouros-ui/arktourosUiConfig.js -v \$(pwd)/arktouros-bigscreen/config.json:/etc/nginx/html/arktouros-bigscreen/config.json --memory=8g $IMAGE_NAME:$IMAGE_TAG /usr/sbin/init"
+        echo "如若arktouros未正常启动，请执行 docker exec -it arktouros-all-in-one systemctl start arktouros"
         exit 1
     fi
 }
