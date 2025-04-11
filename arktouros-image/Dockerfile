@@ -62,6 +62,7 @@ RUN rm -rf elasticsearch-8.15.5-x86_64.rpm elasticsearch-8.15.5-x86_64.rpm.sha51
 WORKDIR /usr/local
 COPY build/arktouros-apm-api-leaves.tar.gz /usr/local/arktouros-apm-api-leaves.tar.gz
 RUN tar -zxvf arktouros-apm-api-leaves.tar.gz
+RUN rm -rf arktouros-apm-api-leaves.tar.gz
 COPY arktouros-image/arktouros.service /usr/lib/systemd/system/arktouros.service
 
 # --------image配置 包括文件映射 entrypoint--------
