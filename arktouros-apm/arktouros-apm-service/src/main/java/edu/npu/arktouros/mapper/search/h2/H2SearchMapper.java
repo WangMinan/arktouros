@@ -27,7 +27,7 @@ public class H2SearchMapper extends SearchMapper {
     }
 
     @Override
-    public List<Service> getServiceListFromNamespace(String namespace) {
+    public List<Service> getServiceListFromTopologyQuery(String namespace) {
         return List.of();
     }
 
@@ -114,6 +114,11 @@ public class H2SearchMapper extends SearchMapper {
     @Override
     public SpanTimesVo getSpanTimesVoBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public R getTimeRange() {
+        return null;
     }
 
     ;

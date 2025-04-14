@@ -11,6 +11,8 @@ import co.elastic.clients.elasticsearch._types.aggregations.CompositeAggregation
 import co.elastic.clients.elasticsearch._types.aggregations.CompositeAggregationSource;
 import co.elastic.clients.elasticsearch._types.aggregations.CompositeBucket;
 import co.elastic.clients.elasticsearch._types.aggregations.CompositeDateHistogramAggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.MaxAggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.MinAggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch._types.aggregations.TermsAggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.TopHitsAggregation;
@@ -46,6 +48,7 @@ import edu.npu.arktouros.model.otel.structure.EndPoint;
 import edu.npu.arktouros.model.otel.structure.Service;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.model.vo.EndPointTraceIdVo;
+import edu.npu.arktouros.model.vo.NamespaceTopoTimeRangeVo;
 import edu.npu.arktouros.model.vo.PageResultVo;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.model.vo.SpanTimesVo;
@@ -54,6 +57,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +105,7 @@ public class ElasticsearchMapper extends SearchMapper {
     }
 
     @Override
-    public List<Service> getServiceListFromNamespace(String namespace) {
+    public List<Service> getServiceListFromTopologyQuery(String namespace) {
         MatchQuery.Builder queryBuilder = new MatchQuery.Builder();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
         queryBuilder.field(NAMESPACE).query(namespace);
@@ -315,6 +319,35 @@ public class ElasticsearchMapper extends SearchMapper {
         SpanTimesVo spanTimesVo = new SpanTimesVo();
         spanList.forEach(spanTimesVo::addSpan);
         return spanTimesVo;
+    }
+
+    @Override
+    public R getTimeRange() {
+        Map<String, Aggregation> aggMaps = new HashMap<>();
+        aggMaps.put("minStartTimeAgg", new Aggregation.Builder()
+                        .min(new MinAggregation.Builder()
+                                .field("startTime")
+                                .build())
+                .build());
+        aggMaps.put("maxEndTimeAgg", new Aggregation.Builder()
+                        .max(new MaxAggregation.Builder()
+                                .field("endTime")
+                                .build())
+                .build());
+        // 对符合namespace条件的span求startTime的最小值和endTime的最大值
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
+                .aggregations(aggMaps);
+        SearchResponse<Span> searchResponse =
+                ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
+        Aggregate minStartTimeAgg = searchResponse.aggregations().get("minStartTimeAgg");
+        Aggregate maxEndTimeAgg = searchResponse.aggregations().get("maxEndTimeAgg");
+        Long minStartTime = (long) minStartTimeAgg.min().value();
+        Long maxEndTime = (long) maxEndTimeAgg.max().value();
+        NamespaceTopoTimeRangeVo spanTimesVo = new NamespaceTopoTimeRangeVo(minStartTime, maxEndTime);
+        R r = new R();
+        r.put(RESULT, spanTimesVo);
+        return r;
     }
 
     @Override

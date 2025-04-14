@@ -27,7 +27,7 @@ var:
 instance:
   active:
     # 选择数据接收器
-    dataReceiver: arktourosTcp # otelGrpc/arktourosGrpc/arktourosTcp(在线)/jsonFile(离线)
+    dataReceiver: jsonFile # otelGrpc/arktourosGrpc/arktourosTcp(在线)/jsonFile(离线)
     sinker: elasticsearch # elasticsearch/h2
     searchMapper: elasticsearch # elasticsearch/h2
     scheduledJob: elasticsearch # elasticsearch/h2
@@ -52,20 +52,23 @@ receiver:
   # 文件导入器端口 用于离线接入
   file:
     json:
-      type: sytel # otel/arktouros/sytel
+      type: arktouros # otel/arktouros/sytel
       # logDir: /usr/local/arktouros-apm-api/input_logs # 使用该配置文件来指定输入的文件夹路径 所有日志文件都应该保存在该文件夹下 使用离线模式时请确保该文件夹不空 然后再启动
-      logDir: D:\code\arktouros-main\sytel-logs
+      logDir: D:\code\arktouros-main\arktouros-image\arktouros-apm-api\input_logs
       # indexFilePath: /usr/local/arktouros-apm-api/input_logs/index.txt # apm 将在这个文件的URL上创建一个索引文件
-      indexFilePath: D:\code\arktouros-main\sytel-logs\index.txt
+      indexFilePath: D:\code\arktouros-main\arktouros-image\arktouros-apm-api\input_logs\index.txt
 
 # 数据存储模块-外部扩展存储 的有关配置
 elasticsearch:
-  serverUrl: https://localhost:9200 # 不要动这个URL 除非你修改了Elasticsearch的配置或者打算用别的Elasticsearch
-  # 暂不支持apiKey模式
+  # serverUrl: https://localhost:9200 # 不要动这个URL 除非你修改了Elasticsearch的配置或者打算用别的Elasticsearch
+  serverUrl: http://10.68.20.38:9200
+  # 暂不支持apiKey模式d
   username: elastic # 不要懂这个用户名
-  password: elasticsearch@631 # 不要动这个密码 除非你手动重新配置了镜像里带的Elasticsearch的密码 或者打算用别的Elasticsearch
+  # password: elasticsearch@631 # 不要动这个密码 除非你手动重新配置了镜像里带的Elasticsearch的密码 或者打算用别的Elasticsearch
+  password: Lab418Server!
   # ca: /etc/elasticsearch/certs/http_ca.crt # 证书位置 留空或文件不存在则不开启SSL 默认情况下不要动它 除非你改动了https证书的位置
-  ca: D:\code\arktouros-main\docs\http_ca.crt
+  # ca: D:\code\arktouros-main\docs\http_ca.crt
+  ca:
   pool:
     # 连接池给大一点，给小了会炸
     maxTotal: 50

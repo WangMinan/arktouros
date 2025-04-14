@@ -53,7 +53,7 @@ public class SearchServiceImpl implements SearchService {
         Topology<Service> topology = new Topology<>();
         // 拿到namespace下的所有服务
         List<Service> serviceList =
-                searchMapper.getServiceListFromNamespace(namespace);
+                searchMapper.getServiceListFromTopologyQuery(namespace);
         // 根据服务搜索span
         List<String> serviceNames = serviceList.stream()
                 .map(Service::getName)
@@ -139,12 +139,14 @@ public class SearchServiceImpl implements SearchService {
         return r;
     }
 
+    /**
+     * 生成span树
+     * @param rootSpan 根节点Span
+     * @param originalSpanList 在同一TraceId下的Span列表
+     * @return Span树节点
+     */
     private SpanTreeNode generateSpanTree(Span rootSpan, List<Span> originalSpanList) {
-        // 对当前Span做均方差统计
-        List<Span> spansWithSameName = searchMapper.getSpanListBySpanNameAndServiceName(
-                new SpanTimesQueryDto(rootSpan.getName(), rootSpan.getServiceName(), null, null)
-        );
-        markLongDurationSpans(rootSpan, spansWithSameName);
+        markLongDurationSpans(rootSpan);
         SpanTreeNode.SpanTreeNodeBuilder rootBuilder = SpanTreeNode.builder();
         rootBuilder.span(rootSpan);
         SpanTreeNode rootTreeNode = rootBuilder.build();
@@ -157,36 +159,40 @@ public class SearchServiceImpl implements SearchService {
     /**
      * 使用均方差统计标记长时间跨度的span
      *
-     * @param rootSpan 根span
-     * @param spans    符合spanName一致条件的所有span
+     * @param currentSpan 当前span
      */
-    private void markLongDurationSpans(Span rootSpan, List<Span> spans) {
-        if (spans.isEmpty()) {
+    private void markLongDurationSpans(Span currentSpan) {
+        // 对当前Span做均方差统计
+        List<Span> spansWithSameName = searchMapper.getSpanListBySpanNameAndServiceName(
+                new SpanTimesQueryDto(currentSpan.getName(), currentSpan.getServiceName(), null, null));
+        if (spansWithSameName.isEmpty()) {
             return;
         }
 
         // Step 1: Compute mean duration
         double sum = 0;
-        for (Span span : spans) {
+        for (Span span : spansWithSameName) {
             sum += span.getEndTime() - span.getStartTime();
         }
-        double mean = sum / spans.size();
+        double mean = sum / spansWithSameName.size();
 
         // Step 2: Compute standard deviation
         double varianceSum = 0;
-        for (Span span : spans) {
+        for (Span span : spansWithSameName) {
             double diff = span.getEndTime() - span.getStartTime() - mean;
             varianceSum += diff * diff;
         }
-        double standardDeviation = Math.sqrt(varianceSum / spans.size());
+        double standardDeviation = Math.sqrt(varianceSum / spansWithSameName.size());
 
-        // Step 3: Mark spans that deviate significantly (e.g., > mean + 2 * stddev)
-        if (rootSpan.getTags() == null) {
-            rootSpan.setTags(new ArrayList<>());
+        // Step 3: Mark spansWithSameName that deviate significantly (e.g., > mean + 2 * stddev)
+        if (currentSpan.getTags() == null) {
+            currentSpan.setTags(new ArrayList<>());
         }
-        double duration = rootSpan.getEndTime() - rootSpan.getStartTime();
+
+        double duration = currentSpan.getEndTime() - currentSpan.getStartTime();
         if (duration > mean + 2 * standardDeviation) {
-            rootSpan.getTags().add(new Tag(
+            // 打tag
+            currentSpan.getTags().add(new Tag(
                     Span.SpanTagKey.LONG_DURATION.getKey(),
                     Span.SpanTagValue.TRUE.getValue()
             ));
@@ -215,6 +221,8 @@ public class SearchServiceImpl implements SearchService {
         List<SpanTreeNode> currentLayerNodes = new ArrayList<>();
         formerLayerSpans.forEach(formerSpan -> otherSpans.forEach(otherSpan -> {
             if (otherSpan.getParentSpanId().equals(formerSpan.getSpan().getId())) {
+                // 均方差打标
+                markLongDurationSpans(otherSpan);
                 SpanTreeNode.SpanTreeNodeBuilder otherBuilder =
                         SpanTreeNode.builder().span(otherSpan);
                 SpanTreeNode spanTreeNode = otherBuilder.build();
@@ -320,5 +328,10 @@ public class SearchServiceImpl implements SearchService {
     public R getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
         SpanTimesVo spanTimesVoList = searchMapper.getSpanTimesVoBySpanName(spanTimesQueryDto);
         return R.ok().put(RESULT, spanTimesVoList);
+    }
+
+    @Override
+    public R getTimeRange() {
+        return searchMapper.getTimeRange();
     }
 }

@@ -22,7 +22,7 @@ import java.util.List;
 public abstract class SearchMapper {
     public abstract R getServiceList(ServiceQueryDto queryDto);
 
-    public abstract List<Service> getServiceListFromNamespace(String namespace);
+    public abstract List<Service> getServiceListFromTopologyQuery(String namespace);
 
     public abstract List<Span> getSpanListByServiceNames(List<String> serviceNames);
 
@@ -58,4 +58,6 @@ public abstract class SearchMapper {
     public abstract R getSpanNamesByServiceName(SpanNamesQueryDto spanNamesQueryDto);
 
     public abstract SpanTimesVo getSpanTimesVoBySpanName(SpanTimesQueryDto spanTimesQueryDto);
+
+    public abstract R getTimeRange();
 }

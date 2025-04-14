@@ -45,4 +45,6 @@ public interface SearchService {
     R getSpanNamesByServiceName(SpanNamesQueryDto spanNamesQueryDto);
 
     R getSpanTimesBySpanName(SpanTimesQueryDto spanTimesQueryDto);
+
+    R getTimeRange();
 }

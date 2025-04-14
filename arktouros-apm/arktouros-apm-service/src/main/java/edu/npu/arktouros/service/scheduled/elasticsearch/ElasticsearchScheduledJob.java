@@ -133,7 +133,10 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
             // 1. CPU usage
             Gauge cpuUsage = Gauge.builder()
                     .name("cpu_usage")
-                    .description("Average CPU usage per 5 minutes in percentage.")
+                    .description("Average CPU usage per %d minutes in percentage."
+                            .formatted(Integer.parseInt(PropertiesProvider.getProperty(
+                            "elasticsearch.schedule.metric",
+                            "5"))))
                     // 0-10 小数点后1位
                     .value(random.nextInt(101) / 10.0)
                     .timestamp(System.currentTimeMillis())
@@ -143,7 +146,9 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
             // 2. Memory usage
             Gauge memoryUsage = Gauge.builder()
                     .name("memory_usage")
-                    .description("Average memory usage per 5 minutes in MB.")
+                    .description("Average memory usage per %s minutes in MB."
+                            .formatted(Integer.parseInt(PropertiesProvider.getProperty(
+                                            "elasticsearch.schedule.metric"))))
                     // 50-150 小数点后1位
                     .value(50 + (random.nextInt(1001) / 10.0))
                     .timestamp(System.currentTimeMillis())
@@ -220,7 +225,10 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
             List<SpanTreeNode> spanTreeNodeVos = searchService
                     .getSpanTreeInMinutes(service.getName(),
                             traceId,
-                            System.currentTimeMillis() - 5 * 60 * 1000,
+                            System.currentTimeMillis() -
+                                    (long) Integer.parseInt(PropertiesProvider.getProperty(
+                                    "elasticsearch.schedule.errorRate",
+                                    "5")) * 60 * 1000,
                             System.currentTimeMillis());
             costTimes.addAll(spanTreeNodeVos.stream()
                     .map(this::getCostTimeForSpanTree)
@@ -235,7 +243,10 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         // 写入gauge
         Gauge responseTime = Gauge.builder()
                 .name("response_time")
-                .description("Average response time per 5 minutes.")
+                .description("Average response time per %d minutes.".formatted(
+                        Integer.parseInt(PropertiesProvider.getProperty(
+                                "elasticsearch.schedule.errorRate",
+                                "5"))))
                 .value(avgCostTime)
                 .timestamp(System.currentTimeMillis())
                 .labels(new HashMap<>())
@@ -256,15 +267,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
     protected void calculateErrorRate() {
         // 获取所有service
         List<Service> services = searchService.getAllServices();
-        services.forEach(service -> {
-            UpdateServiceGauge updateServiceGauge = sinkErrorRate(service);
-            if (updateServiceGauge.isShouldUpdate() &&
-                    ((service.isStatus() && updateServiceGauge.value > 0) ||
-                            (!service.isStatus() && updateServiceGauge.value == 0))) {
-                // 有请求发生才更新
-                updateServiceStatus(service, updateServiceGauge.value);
-            }
-        });
+        services.forEach(this::sinkErrorRate);
     }
 
     private void updateServiceStatus(Service service, double errorRate) {
@@ -326,7 +329,7 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         ElasticsearchUtil.sink(ElasticsearchIndex.SERVICE_INDEX.getIndexName(), service);
     }
 
-    private UpdateServiceGauge sinkErrorRate(Service service) {
+    private void sinkErrorRate(Service service) {
         log.info("Calculate error rate start for service:{}.", service.getName());
         // 开始时间 头五分钟
         long startTime = System.currentTimeMillis() - 5 * 60 * 1000;
@@ -353,7 +356,10 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
         // 4. 写入gauge
         Gauge errorRate = Gauge.builder()
                 .name("error_rate")
-                .description("Error rate per 5 minutes.")
+                .description("Error rate per %d minutes.".formatted(
+                        Integer.parseInt(PropertiesProvider.getProperty(
+                                "elasticsearch.schedule.errorRate",
+                                "5"))))
                 .value(value)
                 .timestamp(endTime)
                 .labels(new HashMap<>())
@@ -367,7 +373,6 @@ public class ElasticsearchScheduledJob extends ScheduledJob {
                     service.getName(), e);
         }
         log.info("Calculate error rate for service:{} complete. Error rate: {}.", service.getName(), value);
-        return new UpdateServiceGauge(!allSpans.isEmpty(), value);
     }
 
     @Data

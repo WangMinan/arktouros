@@ -60,7 +60,7 @@ public class SearchServiceImplTest {
     void testGetServiceTopology() {
         Service service1 = Service.builder().name("service1").build();
         Service service2 = Service.builder().name("service2").build();
-        Mockito.when(searchMapper.getServiceListFromNamespace(any()))
+        Mockito.when(searchMapper.getServiceListFromTopologyQuery(any()))
                 .thenReturn(List.of(service1, service2));
         // 造一条3个span组成的trace
         Span father = Span.builder()
@@ -90,7 +90,7 @@ public class SearchServiceImplTest {
                 .thenReturn(service1);
         Mockito.when(searchMapper.getServiceByName(eq("service2")))
                 .thenReturn(service2);
-        Assertions.assertDoesNotThrow(() -> service.getServiceTopology("namespace"));
+        Assertions.assertDoesNotThrow(() -> service.getServiceTopology(new ServiceTopologyDto("default")));
     }
 
     @Test

@@ -88,7 +88,7 @@ public class ElasticsearchMapperTest {
     }
 
     @Test
-    void testGetServiceListFromNamespace() {
+    void testGetServiceListFromTopologyQuery() {
         SearchResponse<Service> searchResponse =
                 Mockito.mock(SearchResponse.class);
         elasticsearchUtil.when(() -> ElasticsearchUtil
@@ -98,7 +98,7 @@ public class ElasticsearchMapperTest {
         Mockito.when(searchResponse.hits()).thenReturn(hits);
         Mockito.when(searchResponse.hits().hits()).thenReturn(new ArrayList<>());
         Assertions.assertNotNull(elasticsearchMapper
-                .getServiceListFromNamespace("default"));
+                .getServiceListFromTopologyQuery("default"));
     }
 
     @Test

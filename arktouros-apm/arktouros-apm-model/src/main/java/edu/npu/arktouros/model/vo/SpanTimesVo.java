@@ -3,7 +3,6 @@ package edu.npu.arktouros.model.vo;
 import edu.npu.arktouros.model.otel.trace.Span;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Singular;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

@@ -33,6 +33,11 @@ public class ServiceController {
         return searchService.getNamespaceList(query);
     }
 
+    @GetMapping("/service/time-range")
+    public R getTimeRange() {
+        return searchService.getTimeRange();
+    }
+
     @GetMapping("/service/topology")
     public R getTopology(@RequestParam(value = "namespace", required = false) String namespace) {
         if (StringUtils.isEmpty(namespace)) {
