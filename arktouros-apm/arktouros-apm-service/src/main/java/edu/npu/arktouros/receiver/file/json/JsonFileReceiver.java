@@ -219,6 +219,7 @@ public class JsonFileReceiver extends DataReceiver {
             initParamsWithEmptyIndexFile();
             return;
         }
+        log.info("Reading file: {}", currentFile.getFile().getName());
         // 如果当前文件读完 尝试切换
         if (currentPos == currentFile.getFile().length()) {
             currentFile.setStatus(FileStatus.READ);
@@ -326,7 +327,6 @@ public class JsonFileReceiver extends DataReceiver {
     private void startReadFile() {
         while (isRunning) {
             try {
-                log.info("Reading file: {}", currentFile.getFile().getName());
                 readFile();
             } catch (InterruptedException | IOException e) {
                 log.warn("JsonLogFileReceiver is interrupted", e);
