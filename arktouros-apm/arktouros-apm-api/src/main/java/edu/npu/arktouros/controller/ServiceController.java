@@ -39,10 +39,14 @@ public class ServiceController {
     }
 
     @GetMapping("/service/topology")
-    public R getTopology(@RequestParam(value = "namespace", required = false) String namespace) {
+    public R getTopology(@RequestParam(value = "namespace", required = false) String namespace,
+                         @RequestParam(value = "timestamp", required = false) Long timestamp) {
         if (StringUtils.isEmpty(namespace)) {
             namespace = "default";
         }
-        return searchService.getServiceTopology(namespace);
+        if (timestamp == null) {
+            timestamp = System.currentTimeMillis();
+        }
+        return searchService.getServiceTopology(namespace, timestamp);
     }
 }

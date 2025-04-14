@@ -18,7 +18,7 @@ import java.util.List;
 public interface SearchService {
     R getServiceList(ServiceQueryDto queryDto);
 
-    R getServiceTopology(String namespace);
+    R getServiceTopology(String namespace, Long timestamp);
 
     R getLogList(LogQueryDto logQueryDto);
 

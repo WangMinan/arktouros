@@ -90,7 +90,7 @@ public class SearchServiceImplTest {
                 .thenReturn(service1);
         Mockito.when(searchMapper.getServiceByName(eq("service2")))
                 .thenReturn(service2);
-        Assertions.assertDoesNotThrow(() -> service.getServiceTopology(new ServiceTopologyDto("default")));
+        Assertions.assertDoesNotThrow(() -> service.getServiceTopology("default", null));
     }
 
     @Test

@@ -49,7 +49,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public R getServiceTopology(String namespace) {
+    public R getServiceTopology(String namespace, Long timestamp) {
         Topology<Service> topology = new Topology<>();
         // 拿到namespace下的所有服务
         List<Service> serviceList =
@@ -60,8 +60,13 @@ public class SearchServiceImpl implements SearchService {
                 // 过滤空串
                 .filter(name -> name != null && !name.isEmpty())
                 .toList();
+        // 截取所有小于等于timestamp的span 也就是说span的产生时间需要早于给定时间戳
         List<Span> originalSpanList =
-                searchMapper.getSpanListByServiceNames(serviceNames);
+                searchMapper.getSpanListByServiceNames(serviceNames)
+                        .stream()
+                        .filter(span -> span.getStartTime() <= timestamp)
+                        .toList();
+        originalSpanList.forEach(this::markLongDurationSpans);
         // 组织成有序的拓扑
         // 注意 可能有多条链路
         List<Span> rootSpans = originalSpanList.stream()
@@ -73,6 +78,7 @@ public class SearchServiceImpl implements SearchService {
         Set<TopologyCall<Service>> topologyCalls = new HashSet<>();
         rootSpans.forEach(rootSpan -> {
             Service rootService = searchMapper.getServiceByName(rootSpan.getServiceName());
+            tagServiceAndRewriteStatus(rootSpan, rootService);
             TopologyNode<Service> rootNode = new TopologyNode<>(rootService);
             topologyNodes.add(rootNode);
             // 递归查找
@@ -100,6 +106,8 @@ public class SearchServiceImpl implements SearchService {
                 Service otherService = searchMapper.getServiceByName(otherSpan.getServiceName());
                 TopologyNode<Service> otherNode = new TopologyNode<>(otherService);
                 if (!formerNode.equals(otherNode)) {
+                    // 对超时service打标
+                    tagServiceAndRewriteStatus(otherSpan, otherService);
                     topologyNodes.add(otherNode);
                     TopologyCall<Service> topologyCall =
                             new TopologyCall<>(formerNode, otherNode);
@@ -109,6 +117,21 @@ public class SearchServiceImpl implements SearchService {
                         otherSpans.stream().filter(span -> !span.equals(otherSpan)).toList(),
                         topologyNodes, topologyCalls);
             }
+        }
+    }
+
+    private void tagServiceAndRewriteStatus(Span span, Service service) {
+        if (span.getTags().stream().anyMatch(tag -> tag.getKey().equals(Span.SpanTagKey.LONG_DURATION.getKey()))) {
+            if (service.getTags() == null) {
+                service.setTags(new ArrayList<>());
+            }
+            service.getTags().add(new Tag(
+                    Span.SpanTagKey.LONG_DURATION.getKey(),
+                    span.getName()
+            ));
+            service.setStatus(false);
+        } else {
+            service.setStatus(true);
         }
     }
 
@@ -141,7 +164,8 @@ public class SearchServiceImpl implements SearchService {
 
     /**
      * 生成span树
-     * @param rootSpan 根节点Span
+     *
+     * @param rootSpan         根节点Span
      * @param originalSpanList 在同一TraceId下的Span列表
      * @return Span树节点
      */
