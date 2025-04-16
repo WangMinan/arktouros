@@ -141,7 +141,7 @@
                 <artifactId>frontend-maven-plugin</artifactId>
                 <configuration>
                     <workingDirectory>${ui.path}</workingDirectory>
-                    <nodeVersion>v22.13.1</nodeVersion>
+                    <nodeVersion>v22.14.0</nodeVersion>
                     <!-- 引入阿里云源 -->
                     <nodeDownloadRoot>https://mirrors.aliyun.com/nodejs-release/</nodeDownloadRoot>
                     <npmDownloadRoot>https://registry.npmmirror.com/npm/-/</npmDownloadRoot>
