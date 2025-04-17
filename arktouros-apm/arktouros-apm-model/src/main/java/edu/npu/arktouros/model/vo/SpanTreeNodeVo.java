@@ -9,6 +9,10 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+import static edu.npu.arktouros.model.common.DiagramColor.COLOR_ERROR_RED_RGB;
+import static edu.npu.arktouros.model.common.DiagramColor.COLOR_ERROR_YELLOW_RGB;
+import static edu.npu.arktouros.model.common.DiagramColor.COLOR_NORMAL_GREEN_RGB;
+
 /**
  * @author : [wangminan]
  * @description : {@link edu.npu.arktouros.model.otel.topology.span.SpanTreeNode} 对应的VO
@@ -22,10 +26,6 @@ public class SpanTreeNodeVo {
     // 我要加这个字段 不然前端看不出来span的实时状态
     private Span span;
 
-    private static final String COLOR_ERROR_RED_RGB = "#FF2700";
-    private static final String COLOR_ERROR_YELLOW_RGB = "#FFEE00";
-    private static final String COLOR_NORMAL_GREEN_RGB = "#6EF780";
-
     // 直接递归
     public SpanTreeNodeVo(SpanTreeNode spanTreeNode) {
         this.span = spanTreeNode.getSpan();
@@ -37,15 +37,15 @@ public class SpanTreeNodeVo {
                                 tag.getValue().equals(Span.SpanTagValue.TRUE.getValue())))) {
             // 橙红色
             this.itemStyle = ItemStyle.builder()
-                    .color(COLOR_ERROR_YELLOW_RGB)
-                    .borderColor(COLOR_ERROR_RED_RGB)
+                    .color(COLOR_ERROR_YELLOW_RGB.getColor())
+                    .borderColor(COLOR_ERROR_RED_RGB.getColor())
                     .borderType("dashed")
                     .build();
         } else {
             // 绿色
             this.itemStyle = ItemStyle.builder()
-                    .color(COLOR_NORMAL_GREEN_RGB)
-                    .borderColor(COLOR_NORMAL_GREEN_RGB)
+                    .color(COLOR_NORMAL_GREEN_RGB.getColor())
+                    .borderColor(COLOR_NORMAL_GREEN_RGB.getColor())
                     .borderType("solid")
                     .build();
         }

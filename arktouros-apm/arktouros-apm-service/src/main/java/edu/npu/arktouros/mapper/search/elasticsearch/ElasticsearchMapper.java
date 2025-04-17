@@ -52,6 +52,7 @@ import edu.npu.arktouros.model.vo.NamespaceTopoTimeRangeVo;
 import edu.npu.arktouros.model.vo.PageResultVo;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.model.vo.SpanTimesVo;
+import edu.npu.arktouros.util.DurationUtil;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -298,8 +299,11 @@ public class ElasticsearchMapper extends SearchMapper {
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(boolQueryBuilder.build()._toQuery())
                 .aggregations("nameAgg",
-                        agg -> agg.terms(term -> term.field("name")))
-                .size(ElasticsearchConstants.MAX_PAGE_SIZE);
+                        agg -> agg.terms(term -> term.field("name")
+                                // 指定聚合桶的数量 不然只能有10个
+                                .size(ElasticsearchConstants.MAX_PAGE_SIZE)))
+                // doc的size设置为0 因为我们只需要聚合结果，不需要文档
+                .size(0);
         // 分析聚合结果
         SearchResponse<Span> searchResponse =
                 ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
@@ -316,6 +320,7 @@ public class ElasticsearchMapper extends SearchMapper {
     @Override
     public SpanTimesVo getSpanTimesVoBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
         List<Span> spanList = getSpanListBySpanNameAndServiceName(spanTimesQueryDto);
+        spanList.forEach(span -> DurationUtil.markLongDurationSpans(this, span));
         SpanTimesVo spanTimesVo = new SpanTimesVo();
         spanList.forEach(spanTimesVo::addSpan);
         return spanTimesVo;
@@ -479,8 +484,9 @@ public class ElasticsearchMapper extends SearchMapper {
                 .index(indexName)
                 .query(matchQueryBuilder.build()._toQuery())
                 .aggregations("nameAgg",
-                        agg -> agg.terms(term -> term.field("name")));
-        searchRequestBuilder.size(ElasticsearchConstants.MAX_PAGE_SIZE);
+                        agg -> agg.terms(term -> term.field("name")
+                                .size(ElasticsearchConstants.MAX_PAGE_SIZE)))
+                .size(0);
         SearchResponse<T> searchResponse = ElasticsearchUtil
                 .simpleSearch(searchRequestBuilder, clazz);
         Aggregate namespaceAgg = searchResponse.aggregations().get("nameAgg");
@@ -547,7 +553,7 @@ public class ElasticsearchMapper extends SearchMapper {
         } else {
             // group by
             searchRequestBuilder.aggregations("namespaceAgg",
-                    agg -> agg.terms(term -> term.field(NAMESPACE)));
+                    agg -> agg.terms(term -> term.field(NAMESPACE).size(ElasticsearchConstants.MAX_PAGE_SIZE)));
         }
         searchRequestBuilder.index(ElasticsearchIndex.SERVICE_INDEX.getIndexName());
         List<String> namespaceList = new ArrayList<>();
@@ -592,7 +598,7 @@ public class ElasticsearchMapper extends SearchMapper {
         } else {
             // group by
             searchRequestBuilder.aggregations("severityAgg",
-                    agg -> agg.terms(term -> term.field(SEVERITY_TEXT)));
+                    agg -> agg.terms(term -> term.field(SEVERITY_TEXT).size(ElasticsearchConstants.MAX_PAGE_SIZE)));
         }
         List<String> severityList = new ArrayList<>();
         searchRequestBuilder.index(ElasticsearchIndex.LOG_INDEX.getIndexName());
@@ -648,8 +654,8 @@ public class ElasticsearchMapper extends SearchMapper {
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(boolQueryBuilder.build()._toQuery())
                 .aggregations("traceIdAgg",
-                        agg -> agg.terms(term -> term.field("traceId")));
-        searchRequestBuilder.size(ElasticsearchConstants.MAX_PAGE_SIZE);
+                        agg -> agg.terms(term -> term.field("traceId").size(ElasticsearchConstants.MAX_PAGE_SIZE)));
+        searchRequestBuilder.size(0);
         SearchResponse<Span> searchResponse =
                 ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
         Aggregate traceIdAgg = searchResponse.aggregations().get("traceIdAgg");
