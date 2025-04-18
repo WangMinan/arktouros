@@ -36,7 +36,7 @@ public class SpanTimesVo {
 
     @Data
     @Builder
-    private static class SpanTimesValue {
+    public static class SpanTimesValue {
         private Long value;
         private Span span;
     }

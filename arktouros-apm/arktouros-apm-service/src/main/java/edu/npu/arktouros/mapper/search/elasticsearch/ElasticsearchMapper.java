@@ -52,12 +52,13 @@ import edu.npu.arktouros.model.vo.NamespaceTopoTimeRangeVo;
 import edu.npu.arktouros.model.vo.PageResultVo;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.model.vo.SpanTimesVo;
-import edu.npu.arktouros.util.DurationUtil;
+import edu.npu.arktouros.util.StandardDeviationUtil;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -251,8 +252,14 @@ public class ElasticsearchMapper extends SearchMapper {
     @Override
     public R getEndPointListByServiceName(EndPointQueryDto endPointQueryDto) {
         List<EndPointTraceIdVo> endPointTraceIdVoList = getEndPointTraceIdVos(endPointQueryDto);
+        // 根据pageNum和pageSize手动分页
+        List<EndPointTraceIdVo> resultList = endPointTraceIdVoList.stream()
+                .skip((long) (endPointQueryDto.pageNum() - 1) * endPointQueryDto.pageSize())
+                .limit(endPointQueryDto.pageSize())
+                .toList();
         R r = new R();
-        r.put(RESULT, endPointTraceIdVoList);
+        r.put(RESULT, resultList);
+        r.put("total", endPointTraceIdVoList.size());
         return r;
     }
 
@@ -272,15 +279,12 @@ public class ElasticsearchMapper extends SearchMapper {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
                 .query(boolQueryBuilder.build()._toQuery())
-                .from(endPointQueryDto.pageSize() * (endPointQueryDto.pageNum() - 1))
-                .size(endPointQueryDto.pageSize());
-        SearchResponse<Span> searchResponse =
-                ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
-        List<Hit<Span>> hits = searchResponse.hits().hits();
+                .size(ElasticsearchConstants.MAX_PAGE_SIZE);
+        List<Span> spans = ElasticsearchUtil.scrollSearch(searchRequestBuilder, Span.class);
         Set<EndPoint> endPointSet = new HashSet<>();
         List<EndPointTraceIdVo> endPointTraceIdVoList = new ArrayList<>();
 
-        hits.forEach(hit -> resolveHit(hit, endPointSet, endPointTraceIdVoList));
+        spans.forEach(span -> resolveEndpointHit(span, endPointSet, endPointTraceIdVoList));
         return endPointTraceIdVoList;
     }
 
@@ -320,7 +324,9 @@ public class ElasticsearchMapper extends SearchMapper {
     @Override
     public SpanTimesVo getSpanTimesVoBySpanName(SpanTimesQueryDto spanTimesQueryDto) {
         List<Span> spanList = getSpanListBySpanNameAndServiceName(spanTimesQueryDto);
-        spanList.forEach(span -> DurationUtil.markLongDurationSpans(this, span));
+        // 按照span.startTime升序
+        spanList.sort(Comparator.comparing(Span::getStartTime));
+        spanList.forEach(span -> StandardDeviationUtil.markLongDurationSpans(this, span));
         SpanTimesVo spanTimesVo = new SpanTimesVo();
         spanList.forEach(spanTimesVo::addSpan);
         return spanTimesVo;
@@ -330,19 +336,20 @@ public class ElasticsearchMapper extends SearchMapper {
     public R getTimeRange() {
         Map<String, Aggregation> aggMaps = new HashMap<>();
         aggMaps.put("minStartTimeAgg", new Aggregation.Builder()
-                        .min(new MinAggregation.Builder()
-                                .field("startTime")
-                                .build())
+                .min(new MinAggregation.Builder()
+                        .field("startTime")
+                        .build())
                 .build());
         aggMaps.put("maxEndTimeAgg", new Aggregation.Builder()
-                        .max(new MaxAggregation.Builder()
-                                .field("endTime")
-                                .build())
+                .max(new MaxAggregation.Builder()
+                        .field("endTime")
+                        .build())
                 .build());
         // 对符合namespace条件的span求startTime的最小值和endTime的最大值
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
-                .aggregations(aggMaps);
+                .aggregations(aggMaps)
+                .size(0);
         SearchResponse<Span> searchResponse =
                 ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
         Aggregate minStartTimeAgg = searchResponse.aggregations().get("minStartTimeAgg");
@@ -359,11 +366,14 @@ public class ElasticsearchMapper extends SearchMapper {
     public List<Span> getSpanListBySpanNameAndServiceName(SpanTimesQueryDto spanTimesQueryDto) {
         // 获取符合条件的Span列表
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
-        TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
-        termQueryBuilder
-                .field("name")
+        TermQuery.Builder termNameBuilder = new TermQuery.Builder();
+        termNameBuilder.field("name")
                 .value(spanTimesQueryDto.spanName());
-        boolQueryBuilder.must(termQueryBuilder.build()._toQuery());
+        boolQueryBuilder.must(termNameBuilder.build()._toQuery());
+        TermQuery.Builder termServiceNameBuilder = new TermQuery.Builder();
+        termServiceNameBuilder.field(SERVICE_NAME)
+                .value(spanTimesQueryDto.serviceName());
+        boolQueryBuilder.must(termServiceNameBuilder.build()._toQuery());
         setSpanBoolQueryWithTimeLimit(boolQueryBuilder, spanTimesQueryDto.startTimestamp(), spanTimesQueryDto.endTimestamp());
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
                 .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
@@ -385,10 +395,10 @@ public class ElasticsearchMapper extends SearchMapper {
         }
     }
 
-    private static void resolveHit(Hit<Span> hit, Set<EndPoint> endPointSet, List<EndPointTraceIdVo> endPointTraceIdVoList) {
-        if (hit.source() != null) {
-            EndPoint localEndPoint = hit.source().getLocalEndPoint();
-            EndPoint remoteEndPoint = hit.source().getRemoteEndPoint();
+    private static void resolveEndpointHit(Span span, Set<EndPoint> endPointSet, List<EndPointTraceIdVo> endPointTraceIdVoList) {
+        if (span != null) {
+            EndPoint localEndPoint = span.getLocalEndPoint();
+            EndPoint remoteEndPoint = span.getRemoteEndPoint();
             if (localEndPoint != null && endPointSet.contains(localEndPoint)) {
                 // endPointTraceIdDtoList中找到对应记录 并在traceIds中做添加
                 for (EndPointTraceIdVo endPointTraceIdVo :
@@ -396,7 +406,7 @@ public class ElasticsearchMapper extends SearchMapper {
                     if (endPointTraceIdVo.endPoint().equals(localEndPoint)) {
                         endPointTraceIdVo
                                 .traceIds()
-                                .add(hit.source().getTraceId());
+                                .add(span.getTraceId());
                         break;
                     }
                 }
@@ -405,7 +415,7 @@ public class ElasticsearchMapper extends SearchMapper {
                 EndPointTraceIdVo endPointTraceIdVo =
                         new EndPointTraceIdVo(localEndPoint,
                                 new HashSet<>());
-                endPointTraceIdVo.traceIds().add(hit.source().getTraceId());
+                endPointTraceIdVo.traceIds().add(span.getTraceId());
                 endPointTraceIdVoList.add(endPointTraceIdVo);
             } else if (remoteEndPoint == null) {
                 // all null
@@ -414,7 +424,7 @@ public class ElasticsearchMapper extends SearchMapper {
                     if (endPointTraceIdVo.endPoint() == null) {
                         endPointTraceIdVo
                                 .traceIds()
-                                .add(hit.source().getTraceId());
+                                .add(span.getTraceId());
                         break;
                     }
                 }

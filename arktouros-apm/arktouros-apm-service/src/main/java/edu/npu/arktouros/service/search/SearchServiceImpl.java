@@ -21,11 +21,12 @@ import edu.npu.arktouros.model.vo.MetricVo;
 import edu.npu.arktouros.model.vo.R;
 import edu.npu.arktouros.model.vo.SpanTimesVo;
 import edu.npu.arktouros.model.vo.SpanTreeNodeVo;
-import edu.npu.arktouros.util.DurationUtil;
+import edu.npu.arktouros.util.StandardDeviationUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -62,14 +63,24 @@ public class SearchServiceImpl implements SearchService {
                 .filter(name -> name != null && !name.isEmpty())
                 .toList();
         // 截取所有小于等于timestamp的span 也就是说span的产生时间需要早于给定时间戳
-        List<Span> originalSpanList =
-                searchMapper.getSpanListByServiceNames(serviceNames)
-                        .stream()
-                        .filter(span -> span.getStartTime() <= timestamp)
-                        .toList();
-        originalSpanList.forEach(span -> DurationUtil.markLongDurationSpans(searchMapper, span));
-        // 组织成有序的拓扑
-        // 注意 可能有多条链路
+        // 对每个serviceName只保留最新的一个span
+        List<Span> originalSpanList = searchMapper.getSpanListByServiceNames(serviceNames)
+                .stream()
+                .filter(span -> span.getEndTime() <= timestamp)
+                // 按serviceName分组，并保留每个组中endTime最大的span
+                .collect(java.util.stream.Collectors.toMap(
+                        Span::getName,
+                        span -> span,
+                        (existingSpan, newSpan) -> existingSpan.getEndTime() > newSpan.getEndTime() ? existingSpan : newSpan
+                ))
+                .values()
+                .stream()
+                .toList();
+
+        // 改为批量处理所有span，而不是逐个处理
+        StandardDeviationUtil.markLongDurationSpansBatch(searchMapper, originalSpanList);
+
+        // 后续代码不变
         List<Span> rootSpans = originalSpanList.stream()
                 .filter(span -> span.isRoot()
                         || span.getParentSpanId() == null
@@ -171,12 +182,12 @@ public class SearchServiceImpl implements SearchService {
      * @return Span树节点
      */
     private SpanTreeNode generateSpanTree(Span rootSpan, List<Span> originalSpanList) {
-        DurationUtil.markLongDurationSpans(searchMapper, rootSpan);
+        StandardDeviationUtil.markLongDurationSpans(searchMapper, rootSpan);
         SpanTreeNode.SpanTreeNodeBuilder rootBuilder = SpanTreeNode.builder();
         rootBuilder.span(rootSpan);
         SpanTreeNode rootTreeNode = rootBuilder.build();
         // 广度优先搜索
-        buildTraceTree(List.of(rootTreeNode),
+        dfsForBuilding(List.of(rootTreeNode),
                 originalSpanList.stream().filter(span -> !span.equals(rootSpan)).toList());
         return rootTreeNode;
     }
@@ -198,13 +209,13 @@ public class SearchServiceImpl implements SearchService {
                 .orElse(null);
     }
 
-    private void buildTraceTree(List<SpanTreeNode> formerLayerSpans, List<Span> otherSpans) {
+    private void dfsForBuilding(List<SpanTreeNode> formerLayerSpans, List<Span> otherSpans) {
         List<Span> currentLayerSpans = new ArrayList<>();
         List<SpanTreeNode> currentLayerNodes = new ArrayList<>();
         formerLayerSpans.forEach(formerSpan -> otherSpans.forEach(otherSpan -> {
             if (otherSpan.getParentSpanId().equals(formerSpan.getSpan().getId())) {
                 // 均方差打标
-                DurationUtil.markLongDurationSpans(searchMapper, otherSpan);
+                StandardDeviationUtil.markLongDurationSpans(searchMapper, otherSpan);
                 SpanTreeNode.SpanTreeNodeBuilder otherBuilder =
                         SpanTreeNode.builder().span(otherSpan);
                 SpanTreeNode spanTreeNode = otherBuilder.build();
@@ -217,7 +228,7 @@ public class SearchServiceImpl implements SearchService {
             }
         }));
         if (!currentLayerSpans.isEmpty()) {
-            buildTraceTree(currentLayerNodes, otherSpans.stream()
+            dfsForBuilding(currentLayerNodes, otherSpans.stream()
                     .filter(span -> !currentLayerSpans.contains(span)).toList());
         }
     }

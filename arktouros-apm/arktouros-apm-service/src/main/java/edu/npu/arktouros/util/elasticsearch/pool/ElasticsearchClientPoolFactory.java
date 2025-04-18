@@ -72,7 +72,7 @@ public class ElasticsearchClientPoolFactory implements PooledObjectFactory<Elast
                 PropertiesProvider.getProperty("elasticsearch.pool.minIdle"));
         Jackson2ObjectMapperBuilder builder = getJackson2ObjectMapperBuilder();
         this.mapper = builder.build();
-        log.info("Initializing ElasticsearchClientPoolFactory, serverUrl:{}", serverUrl);
+        log.info("Initializing Elasticsearch Client Pool Factory, Elasticsearch server Url:{}", serverUrl);
     }
 
     private static Jackson2ObjectMapperBuilder getJackson2ObjectMapperBuilder() {

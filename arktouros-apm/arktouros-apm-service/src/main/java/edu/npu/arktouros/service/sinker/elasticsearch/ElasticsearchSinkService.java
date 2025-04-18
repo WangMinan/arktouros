@@ -5,6 +5,7 @@ import co.elastic.clients.elasticsearch._types.mapping.TypeMapping;
 import co.elastic.clients.elasticsearch.indices.Alias;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import co.elastic.clients.json.JsonData;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
 import edu.npu.arktouros.model.common.PersistentDataConstants;
@@ -81,6 +82,8 @@ public class ElasticsearchSinkService extends SinkService {
         // 关闭init线程池
         createIndexThreadPool.shutdown();
         log.info("ElasticSearch sinker init success.");
+        log.info("Setting scroll context limit to 1000.");
+        configureScrollContextLimit();
     }
 
     public void checkAndCreate(String indexName, CountDownLatch createIndexLatch) throws IOException {
@@ -95,6 +98,29 @@ public class ElasticsearchSinkService extends SinkService {
 
         }
         createIndexLatch.countDown();
+    }
+
+    /**
+     * 配置scroll上下文的最大数量
+     */
+    @Retryable(retryFor = IOException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
+    private void configureScrollContextLimit() {
+        ElasticsearchClient esClient = null;
+        try {
+            esClient = ElasticsearchClientPool.getClient();
+            // 使用PutClusterSettingsRequest设置search.max_open_scroll_context
+            esClient.cluster().putSettings(builder -> builder
+                    .persistent("search.max_open_scroll_context", JsonData.of(1000))
+            );
+            log.info("Successfully configured search.max_open_scroll_context to 1000");
+        } catch (Exception e) {
+            log.error("Failed to configure scroll context limit: {}", e.getMessage());
+            // 这里可以决定是否抛出异常终止启动，或者只是记录错误并继续
+        } finally {
+            if (esClient != null) {
+                ElasticsearchClientPool.returnClient(esClient);
+            }
+        }
     }
 
     /**

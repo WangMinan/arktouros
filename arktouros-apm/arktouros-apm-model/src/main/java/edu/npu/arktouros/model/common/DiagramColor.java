@@ -7,7 +7,7 @@ public enum DiagramColor {
 
     COLOR_ERROR_RED_RGB("#FF2700"),
     COLOR_ERROR_YELLOW_RGB("#FFEE00"),
-    COLOR_NORMAL_GREEN_RGB("#6EF780");
+    COLOR_NORMAL_GREEN_RGB("#C7EDCC");
 
     private final String color;
 

@@ -263,7 +263,7 @@ function init_myChart2(namespace) {
 						symbolSize: [40, 40], // 关系图节点标记的大小，可以设置成诸如 10 这样单一的数字，也可以用数组分开表示宽和高，例如 [20, 10] 表示标记宽为20，高为10。
 						item: node, // 传递给toolTip的附加信息
 						itemStyle: {
-							color: node.nodeObject.status ? "#6EF780" : "#FF2700",
+							color: node.nodeObject.status ? "#C7EDCC" : "#FF2700",
 						},
 						label: {
 							color: '#FFF'
@@ -342,7 +342,7 @@ const drawServiceTopology = (nodes, calls) => {
 					{
 						name: '',
 						itemStyle: {
-							color: "#6EF780"
+							color: "#C7EDCC"
 						}
 					},
 					{

@@ -1,9 +1,9 @@
 package edu.npu.arktouros.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
-import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DataGenerator {
-    private static final ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String[] SERVICE_NAMES = {
             "user-service", "order-service", "payment-service", "inventory-service",
             "notification-service", "auth-service", "shipping-service", "product-service",
@@ -56,16 +56,53 @@ public class DataGenerator {
     private static final int SPAN_PER_TRACE_MAX = 30;
     private static final int LOG_COUNT = 100;
 
+    // 存储每个服务对应的spanName列表
+    private static final Map<String, List<String>> serviceSpanMap = new HashMap<>();
+
     public static void main(String[] args) throws IOException {
+        // 初始化服务和span名称的映射关系
+        initializeServiceSpanMap();
+
         List<Map<String, Object>> spans = generateSpans();
         List<Map<String, Object>> logs = generateLogs(spans);
 
-        // 写入文件
-        objectMapper.writeValue(new File("spans.json"), spans);
-        objectMapper.writeValue(new File("logs.json"), logs);
+        // 写入文件 - 每行一个JSON对象
+        writeToFile("spans.txt", spans);
+        writeToFile("logs.txt", logs);
 
         System.out.println("生成了 " + spans.size() + " 条 Span 记录");
         System.out.println("生成了 " + logs.size() + " 条 Log 记录");
+    }
+
+    private static void initializeServiceSpanMap() {
+        // 确保每个服务有唯一的span名称
+        List<String> allSpanNames = new ArrayList<>(List.of(SPAN_NAMES));
+        Collections.shuffle(allSpanNames); // 随机打乱顺序
+
+        int spansPerService = SPAN_NAMES.length / SERVICE_NAMES.length;
+
+        for (int i = 0; i < SERVICE_NAMES.length; i++) {
+            String service = SERVICE_NAMES[i];
+            int startIdx = i * spansPerService;
+            int endIdx = Math.min(startIdx + spansPerService, allSpanNames.size());
+
+            if (i == SERVICE_NAMES.length - 1) {
+                // 确保最后一个服务获取所有剩余的span名称
+                endIdx = allSpanNames.size();
+            }
+
+            serviceSpanMap.put(service, new ArrayList<>(allSpanNames.subList(startIdx, endIdx)));
+        }
+    }
+
+    private static void writeToFile(String filename, List<Map<String, Object>> records) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            for (Map<String, Object> record : records) {
+                String json = objectMapper.writeValueAsString(record);
+                writer.write(json);
+                writer.newLine();
+            }
+        }
     }
 
     private static List<Map<String, Object>> generateSpans() {
@@ -79,7 +116,7 @@ public class DataGenerator {
             // 为每个trace创建一个根span
             String rootSpanId = UUID.randomUUID().toString().replace("-", "");
             String rootServiceName = randomSelect(SERVICE_NAMES);
-            String rootSpanName = randomSelect(SPAN_NAMES);
+            String rootSpanName = getRandomSpanNameForService(rootServiceName);
 
             long rootStartTime = System.currentTimeMillis() - ThreadLocalRandom.current().nextLong(3600000);
             long rootDuration = ThreadLocalRandom.current().nextLong(50, 200);
@@ -122,7 +159,7 @@ public class DataGenerator {
                     for (int j = 0; j < childCount; j++) {
                         String spanId = UUID.randomUUID().toString().replace("-", "");
                         String serviceName = randomSelect(SERVICE_NAMES);
-                        String spanName = randomSelect(SPAN_NAMES);
+                        String spanName = getRandomSpanNameForService(serviceName);
 
                         // 确保子span的时间范围在父span之内
                         long timeWindow = parentEndTime - parentStartTime;
@@ -169,6 +206,15 @@ public class DataGenerator {
         return allSpans;
     }
 
+    // 为指定服务获取随机spanName
+    private static String getRandomSpanNameForService(String serviceName) {
+        List<String> spanNames = serviceSpanMap.get(serviceName);
+        if (spanNames == null || spanNames.isEmpty()) {
+            return randomSelect(SPAN_NAMES); // 后备方案
+        }
+        return spanNames.get(ThreadLocalRandom.current().nextInt(spanNames.size()));
+    }
+
     private static void addSlowSpans(List<Map<String, Object>> allSpans, Map<String, List<Long>> spanNameDurations) {
         // 计算每种span名称的平均持续时间
         Map<String, Double> avgDurations = new HashMap<>();
@@ -182,17 +228,17 @@ public class DataGenerator {
         Set<String> processedSpanIds = new HashSet<>();
 
         for (int i = 0; i < slowSpanCount; i++) {
-            // 随机选择一个已有span的模式来创建慢span
-            String spanName = randomSelect(SPAN_NAMES);
-            if (!avgDurations.containsKey(spanName)) continue;
+            // 为慢span随机选择服务
+            String serviceName = randomSelect(SERVICE_NAMES);
+            // 为该服务选择一个跨度名称
+            String spanName = getRandomSpanNameForService(serviceName);
 
-            double avgDuration = avgDurations.get(spanName);
+            double avgDuration = avgDurations.getOrDefault(spanName, 50.0);
             long slowDuration = (long) (avgDuration * (1.5 + ThreadLocalRandom.current().nextDouble(1.0)));
 
             // 创建新的trace和span
             String traceId = UUID.randomUUID().toString().replace("-", "");
             String spanId = UUID.randomUUID().toString().replace("-", "");
-            String serviceName = randomSelect(SERVICE_NAMES);
 
             long startTime = System.currentTimeMillis() - ThreadLocalRandom.current().nextLong(3600000);
             long endTime = startTime + slowDuration;
@@ -209,7 +255,7 @@ public class DataGenerator {
             for (int j = 0; j < childCount; j++) {
                 String childSpanId = UUID.randomUUID().toString().replace("-", "");
                 String childServiceName = randomSelect(SERVICE_NAMES);
-                String childSpanName = randomSelect(SPAN_NAMES);
+                String childSpanName = getRandomSpanNameForService(childServiceName);
 
                 long childStartTime = startTime + ThreadLocalRandom.current().nextLong(5, 10);
                 long childDuration = ThreadLocalRandom.current().nextLong(10, 100);
@@ -265,6 +311,7 @@ public class DataGenerator {
         return logs;
     }
 
+    // 其余方法保持不变...
     private static Map<String, Object> createSpan(String id, String serviceName, String name,
                                                   String traceId, String parentSpanId,
                                                   long startTime, long endTime, boolean root) {
