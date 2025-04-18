@@ -31,7 +31,6 @@ import co.elastic.clients.json.JsonData;
 import edu.npu.arktouros.mapper.search.SearchMapper;
 import edu.npu.arktouros.model.common.ElasticsearchConstants;
 import edu.npu.arktouros.model.common.ElasticsearchIndex;
-import edu.npu.arktouros.model.common.ResponseCodeEnum;
 import edu.npu.arktouros.model.dto.EndPointQueryDto;
 import edu.npu.arktouros.model.dto.LogQueryDto;
 import edu.npu.arktouros.model.dto.ServiceQueryDto;
@@ -56,6 +55,7 @@ import edu.npu.arktouros.util.StandardDeviationUtil;
 import edu.npu.arktouros.util.elasticsearch.ElasticsearchUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -103,7 +103,55 @@ public class ElasticsearchMapper extends SearchMapper {
                 .size(pageSize);
         SearchResponse<Service> searchResponse =
                 ElasticsearchUtil.simpleSearch(searchRequestBuilder, Service.class);
-        return transformListResponseToR(searchResponse);
+        MutablePair<Long, List<Service>> totalAndList = getTotalAndList(searchResponse);
+        totalAndList.getRight().forEach(service -> {
+            Integer latestDuration = getLatestSpanDurationByService(service);
+            if (latestDuration != null) {
+                service.setLatency(latestDuration);
+            }
+        });
+        R r = new R();
+        PageResultVo<Service> pageResultVo =
+                new PageResultVo<>(totalAndList.getLeft(), totalAndList.getRight());
+        r.put(RESULT, pageResultVo);
+        return r;
+    }
+
+    private Integer getLatestSpanDurationByService(Service service) {
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        boolQueryBuilder.must(new TermQuery.Builder()
+                .field(SERVICE_NAME)
+                .value(service.getName())
+                .build()._toQuery());
+
+        // 按照startTime降序排序，获取最新的span
+        SortOptions sort = new SortOptions.Builder()
+                .field(new FieldSort.Builder()
+                        .field("startTime")
+                        .order(SortOrder.Desc)
+                        .build())
+                .build();
+
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
+        searchRequestBuilder
+                .index(ElasticsearchIndex.SPAN_INDEX.getIndexName())
+                .query(boolQueryBuilder.build()._toQuery())
+                .sort(sort)
+                // 只获取一条记录
+                .size(1);
+
+        SearchResponse<Span> searchResponse =
+                ElasticsearchUtil.simpleSearch(searchRequestBuilder, Span.class);
+
+        // 无记录返回null
+        if (searchResponse.hits().hits().isEmpty()) {
+            return null;
+        }
+        Span latestSpan = searchResponse.hits().hits().getFirst().source();
+        if (latestSpan != null && latestSpan.getEndTime() != null && latestSpan.getStartTime() != null) {
+            return Math.toIntExact(latestSpan.getEndTime() - latestSpan.getStartTime());
+        }
+        return null;
     }
 
     @Override
@@ -818,16 +866,21 @@ public class ElasticsearchMapper extends SearchMapper {
         return true;
     }
 
-    private <T> R transformListResponseToR(SearchResponse<T> searchResponse) {
-        R r = new R();
-        r.put("code", ResponseCodeEnum.SUCCESS.getValue());
-        List<Hit<T>> hits = searchResponse.hits().hits();
+    private <T> MutablePair<Long, List<T>> getTotalAndList(SearchResponse<T> searchResponse) {
         long total = 0;
         if (searchResponse.hits().total() != null) {
             total = searchResponse.hits().total().value();
         }
-        List<T> list = hits.stream().map(Hit::source).toList();
-        PageResultVo<T> pageResult = new PageResultVo<>(total, list);
+        List<T> list = searchResponse.hits().hits().stream()
+                .map(Hit::source)
+                .toList();
+        return MutablePair.of(total, list);
+    }
+
+    private <T> R transformListResponseToR(SearchResponse<T> searchResponse) {
+        R r = new R();
+        MutablePair<Long, List<T>> totalAndList = getTotalAndList(searchResponse);
+        PageResultVo<T> pageResult = new PageResultVo<>(totalAndList.getLeft(), totalAndList.getRight());
         r.put(RESULT, pageResult);
         return r;
     }

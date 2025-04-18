@@ -42,8 +42,8 @@ public class ApmMain implements CommandLineRunner {
             log.error("APM sink service is not ready, shutting down.");
             return;
         }
-        // 拉起所有定时任务
-        scheduledJob.start();
+        // 拉起所有定时任务 -- 现在不做数值 暂时不需要这个了
+        // scheduledJob.start();
         Thread thread = new Thread(() -> {
             // 停止数据接收器
             dataReceiver.stop();
