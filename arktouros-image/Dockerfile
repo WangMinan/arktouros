@@ -23,10 +23,10 @@ COPY arktouros-image/nginx.conf /etc/nginx/nginx.conf
 # --------配置java--------
 RUN dnf install -y wget tar
 WORKDIR /usr/local
-RUN wget https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz
-RUN tar -zxvf graalvm-jdk-21_linux-x64_bin.tar.gz
-RUN rm -rf graalvm-jdk-21_linux-x64_bin.tar.gz
-RUN mv /usr/local/graalvm-jdk-21.0.6+8.1 /usr/local/jdk-21
+RUN wget https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz && \
+    tar -zxvf graalvm-jdk-21_linux-x64_bin.tar.gz && \
+    rm -rf graalvm-jdk-21_linux-x64_bin.tar.gz && \
+    mv $(find /usr/local -maxdepth 1 -type d -name "graalvm-jdk-21*") /usr/local/jdk-21
 # 环境变量
 ENV JAVA_HOME=/usr/local/jdk-21
 ENV PATH=$JAVA_HOME/bin:$PATH
