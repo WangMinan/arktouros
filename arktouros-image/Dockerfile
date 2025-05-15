@@ -48,9 +48,7 @@ USER elasticsearch
 # 启动elasticsearch 从/tmp/elastic_password读取初始密码，然后通过接口修改密码
 RUN /usr/share/elasticsearch/bin/elasticsearch -d -p /tmp/elasticsearch.pid && \
     curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$(cat /tmp/elastic_password) -X POST "https://localhost:9200/_security/user/elastic/_password" -H "Content-Type: application/json" -d '{"password":"elasticsearch@631"}'
-# 在 /etc/elasticsearch/jvm.options里追加写 -Xms8g -Xmx8g
-RUN echo "-Xms8g" >> /etc/elasticsearch/jvm.options && \
-	echo "-Xmx8g" >> /etc/elasticsearch/jvm.options
+COPY arktouros-image/jvm.options /etc/elasticsearch/jvm.options
 
 USER root
 # 删除.rpm和.sha文件 删除elasticsearch产生的锁

@@ -1,0 +1,32 @@
+############################
+## Core JVM options for ES
+############################
+
+## G1GC tuning
+-XX:+UseG1GC
+-XX:MaxGCPauseMillis=200
+-XX:InitiatingHeapOccupancyPercent=30
+-XX:G1HeapRegionSize=16m
+-XX:ConcGCThreads=4
+
+## Heap size (keep equal, <=32g)
+-Xms6g
+-Xmx6g
+
+## CodeCache & NMT
+-XX:ReservedCodeCacheSize=512m
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:+ExitOnOutOfMemoryError
+-XX:HeapDumpPath=/var/lib/elasticsearch
+-XX:ErrorFile=/var/log/elasticsearch/hs_err_pid%p.log
+#-XX:NativeMemoryTracking=summary
+#-XX:+PrintNMTStatistics
+
+## tmpdir
+-Djava.io.tmpdir=${ES_TMPDIR}
+
+## GC logging (info level)
+-Xlog:gc,heap,exit:file=/var/log/elasticsearch/gc.log:utctime,level,tags:filecount=8,filesize=128m
+
+## (可选) Vector API
+#--add-modules=jdk.incubator.vector

@@ -28,7 +28,7 @@ jobs:
 
       # 我对native构建的要求是不报错就行
       - name: Build with Maven with native env
-        run: mvn -Dmaven.test.skip=true -T 2C -Pnative clean package
+        run: mvn -Dmaven.test.skip=true -Duse.official.source -T 2C -Pnative clean package
 
 #      - name: 传输构建结果到服务器1
 #        run: >
