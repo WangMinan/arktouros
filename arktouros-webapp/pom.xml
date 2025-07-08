@@ -177,6 +177,12 @@
                     <npmDownloadRoot>${npm.download.root}</npmDownloadRoot>
                 </configuration>
                 <executions>
+                    <execution>
+                        <id>install node and npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                    </execution>
                     <!-- 其他执行配置不变 -->
                     <execution>
                         <id>npm install</id>
