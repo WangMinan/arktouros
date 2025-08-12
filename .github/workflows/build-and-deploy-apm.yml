@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: 'recursive'
 
@@ -82,7 +82,7 @@ jobs:
 #    needs: build-and-push-image
 #    steps:
 #      - name: Checkout repository
-#        uses: actions/checkout@v4
+#        uses: actions/checkout@v5
 #        with:
 #          submodules: 'recursive'
 #
@@ -103,7 +103,7 @@ jobs:
 #    needs: build-and-push-image
 #    steps:
 #      - name: Checkout repository
-#        uses: actions/checkout@v4
+#        uses: actions/checkout@v5
 #        with:
 #          submodules: 'recursive'
 #
@@ -134,7 +134,7 @@ jobs:
 #    permissions: read-all
 #    steps:
 #      - name: Checkout repository
-#        uses: actions/checkout@v4
+#        uses: actions/checkout@v5
 #        with:
 #          submodules: 'recursive'
 #
