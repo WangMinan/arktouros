@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.npu.arktouros.model.common.PersistentDataConstants;
 import edu.npu.arktouros.model.config.PropertiesProvider;
 import edu.npu.arktouros.model.otel.log.Log;
-import edu.npu.arktouros.model.otel.metric.Gauge;
+import edu.npu.arktouros.model.otel.basic.Tag;
 import edu.npu.arktouros.model.otel.structure.EndPoint;
 import edu.npu.arktouros.model.otel.trace.Span;
 import edu.npu.arktouros.service.sinker.SinkService;
@@ -22,10 +22,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -81,54 +82,234 @@ public class TestAddSpan {
             log.error("APM sink service is not ready, shutting down.");
             return;
         }
-//        addTrace();
-//        addTreeSpan();
+        addTrace();
+        addTreeSpan();
         addDuplicateCallBetweenTwoServices();
     }
 
     @Test
     void testGetJsonLogs() throws IOException {
-        for(int i = 0; i < 10; i++) {
-            StringBuilder stringBuilder = new StringBuilder();
-            String traceId = UUID.randomUUID().toString();
-            String spanId = UUID.randomUUID().toString();
-            Span span = Span.builder()
-                    .serviceName("test")
-                    .name("test_file_input_" + i)
-                    .id(spanId)
-                    .traceId(traceId)
-                    .parentSpanId("")
-                    .root(false)
-                    .startTime(System.currentTimeMillis())
-                    .endTime(System.currentTimeMillis())
-                    .localEndPoint(endPointA1)
-                    .remoteEndPoint(endPointA1)
-                    .build();
-            stringBuilder.append(objectMapper.writeValueAsString(span));
-            Log spanLog = Log.builder()
-                    .serviceName("test")
-                    .traceId(traceIdA)
-                    .spanId(spanId)
-                    .timestamp(System.currentTimeMillis())
-                    .severityText("INFO")
-                    .content("This is a test log.")
+        Path outputDir = Path.of(logDir);
+        Files.createDirectories(outputDir);
+
+        long baseTime = System.currentTimeMillis();
+
+        List<Object> traceAObjects = new ArrayList<>();
+        String jsonTraceIdA = UUID.randomUUID().toString();
+        Span serviceARoot = buildSpan(jsonTraceIdA, "", true,
+                "service_a_root", "service_a", endPointA1, null,
+                baseTime, baseTime + 1_600, false);
+        appendSpanWithLogs(traceAObjects, serviceARoot,
+                "service_a receives request and prepares a downstream call.", false);
+
+        Span serviceACallB = buildSpan(jsonTraceIdA, serviceARoot.getId(), false,
+                "service_a_call_service_b", "service_a", endPointA2, endPointB,
+                baseTime + 80, baseTime + 1_420, false);
+        appendSpanWithLogs(traceAObjects, serviceACallB,
+                "service_a calls service_b for order enrichment.", false);
+
+        Span serviceBCallC = buildSpan(jsonTraceIdA, serviceACallB.getId(), false,
+                "service_b_call_service_c", "service_b", endPointB, endPointC,
+                baseTime + 190, baseTime + 1_180, false);
+        appendSpanWithLogs(traceAObjects, serviceBCallC,
+                "service_b calls service_c for inventory detail.", false);
+
+        Span serviceCWork = buildSpan(jsonTraceIdA, serviceBCallC.getId(), false,
+                "service_c_query_inventory", "service_c", endPointC, null,
+                baseTime + 330, baseTime + 980, false);
+        appendSpanWithLogs(traceAObjects, serviceCWork,
+                "service_c completes inventory query.", false);
+        writeJsonObjects(outputDir.resolve("sample-topology-service-a-b-c.json").toFile(), traceAObjects);
+
+        List<Object> traceDObjects = new ArrayList<>();
+        String jsonTraceIdB = UUID.randomUUID().toString();
+        long traceBBaseTime = baseTime + 10_000;
+        Span serviceDRoot = buildSpan(jsonTraceIdB, "", true,
+                "service_d_root", "service_d", endPointD, endPointB,
+                traceBBaseTime, traceBBaseTime + 24_000, true);
+        appendSpanWithLogs(traceDObjects, serviceDRoot,
+                "service_d receives a batch request and calls service_b.", true);
+
+        Span serviceBCallE = buildSpan(jsonTraceIdB, serviceDRoot.getId(), false,
+                "service_b_call_service_e", "service_b", endPointB, endPointE,
+                traceBBaseTime + 180, traceBBaseTime + 22_600, true);
+        appendSpanWithLogs(traceDObjects, serviceBCallE,
+                "service_b performs routing and calls service_e.", true);
+
+        Span serviceECallF = buildSpan(jsonTraceIdB, serviceBCallE.getId(), false,
+                "service_e_call_service_f", "service_e", endPointE, endPointF,
+                traceBBaseTime + 360, traceBBaseTime + 21_500, true);
+        appendSpanWithLogs(traceDObjects, serviceECallF,
+                "service_e delegates expensive aggregation to service_f.", true);
+
+        Span serviceFRoot = buildSpan(jsonTraceIdB, serviceECallF.getId(), false,
+                "service_f_aggregation_root", "service_f", endPointF, null,
+                traceBBaseTime + 620, traceBBaseTime + 20_800, true);
+        appendSpanWithLogs(traceDObjects, serviceFRoot,
+                "service_f starts multi-layer aggregation.", true);
+        appendSameNameDurationSamples(traceDObjects, jsonTraceIdB, serviceFRoot);
+        appendServiceFSpanTree(traceDObjects, jsonTraceIdB, serviceFRoot);
+        writeJsonObjects(outputDir.resolve("sample-topology-service-d-b-e-f.json").toFile(), traceDObjects);
+    }
+
+    private Span buildSpan(String traceId, String parentSpanId, boolean root,
+                           String name, String serviceName,
+                           EndPoint localEndPoint, EndPoint remoteEndPoint,
+                           long startTime, long endTime, boolean longDuration) {
+        EndPoint actualRemoteEndPoint = remoteEndPoint == null ? localEndPoint : remoteEndPoint;
+        return Span.builder()
+                .id(UUID.randomUUID().toString())
+                .traceId(traceId)
+                .parentSpanId(parentSpanId)
+                .root(root)
+                .name(name)
+                .serviceName(serviceName)
+                .startTime(startTime)
+                .endTime(endTime)
+                .localEndPoint(localEndPoint)
+                .remoteEndPoint(actualRemoteEndPoint)
+                .tags(buildSpanTags(longDuration))
+                .build();
+    }
+
+    private void appendSpanWithLogs(List<Object> jsonObjects, Span span,
+                                    String content, boolean longDuration) {
+        jsonObjects.add(span);
+        jsonObjects.add(Log.builder()
+                .spanId(span.getId())
+                .serviceName(span.getServiceName())
+                .traceId(span.getTraceId())
+                .severityText("INFO")
+                .content(content + " span=" + span.getName())
+                .tags(new ArrayList<>())
+                .error(false)
+                .timestamp(span.getStartTime() + 10)
+                .build());
+        if (longDuration) {
+            jsonObjects.add(Log.builder()
+                    .spanId(span.getId())
+                    .serviceName(span.getServiceName())
+                    .traceId(span.getTraceId())
+                    .severityText("WARN")
+                    .content("Long duration span detected, duration_ms="
+                            + (span.getEndTime() - span.getStartTime())
+                            + ", span=" + span.getName())
+                    .tags(buildLongDurationTags())
                     .error(false)
-                    .build();
-            stringBuilder.append(objectMapper.writeValueAsString(spanLog));
-            Gauge gauge = Gauge.builder()
-                    .name("test_gauge")
-                    .description("This is a test gauge.")
-                    .timestamp(System.currentTimeMillis())
-                    .labels(new HashMap<>())
-                    .value(1.0)
-                    .build();
-            gauge.setServiceName("test");
-            stringBuilder.append(objectMapper.writeValueAsString(gauge));
-            File file = new File(logDir + "/logs_" + i + ".txt");
-            file.createNewFile();
-            Files.write(file.toPath(), stringBuilder.toString().getBytes(),
-                    StandardOpenOption.APPEND);
+                    .timestamp(span.getEndTime())
+                    .build());
         }
+    }
+
+    private void appendSameNameDurationSamples(List<Object> jsonObjects, String traceId,
+                                               Span parentSpan) {
+        long[] durations = {120, 150, 180, 220, 260, 320, 380, 450, 520, 800, 1_200, 6_200};
+        for (int i = 0; i < durations.length; i++) {
+            long startTime = parentSpan.getStartTime() + 1_000 + i * 130L;
+            boolean longDuration = durations[i] >= 3_000;
+            Span sampleSpan = buildSpan(traceId, parentSpan.getId(), false,
+                    "service_f_hot_path_rpc", "service_f", endPointF2, endPointF2,
+                    startTime, startTime + durations[i], longDuration);
+            appendSpanWithLogs(jsonObjects, sampleSpan,
+                    "service_f same-name duration sample "
+                            + (i + 1) + ", duration_ms=" + durations[i] + ".", longDuration);
+        }
+    }
+
+    private void appendServiceFSpanTree(List<Object> jsonObjects, String traceId,
+                                        Span serviceFRoot) {
+        AtomicInteger spanCounter = new AtomicInteger(1);
+        List<SpanTreeCursor> formerSpanList = new ArrayList<>();
+        formerSpanList.add(new SpanTreeCursor(serviceFRoot.getId(), serviceFRoot.getStartTime()));
+        for (int level = 1; level <= 5; level++) {
+            List<SpanTreeCursor> nextSpanList = new ArrayList<>();
+            for (SpanTreeCursor formerSpan : formerSpanList) {
+                int leaves = random.nextInt(3) + 1;
+                for (int leaf = 0; leaf < leaves; leaf++) {
+                    boolean longDuration = random.nextDouble() > 0.65
+                            || (level % 2 == 0 && leaf == 0);
+                    boolean error = longDuration && random.nextDouble() > 0.78;
+                    long startTime = formerSpan.startTime()
+                            + 90L * level
+                            + 40L * leaf
+                            + random.nextInt(180);
+                    long duration = longDuration
+                            ? 2_500L + random.nextInt(6_500)
+                            : 80L + random.nextInt(620);
+                    Span currentSpan = buildSpan(traceId, formerSpan.spanId(), false,
+                            getServiceFTreeSpanName(level),
+                            "service_f", endPointF2, endPointF2,
+                            startTime, startTime + duration, longDuration);
+                    appendSpanWithLogs(jsonObjects, currentSpan,
+                            "service_f handles tree layer " + level
+                                    + " leaf " + leaf
+                                    + " sample " + spanCounter.getAndIncrement()
+                                    + ", duration_ms=" + duration + ".", longDuration);
+                    if (error) {
+                        jsonObjects.add(Log.builder()
+                                .spanId(currentSpan.getId())
+                                .serviceName(currentSpan.getServiceName())
+                                .traceId(currentSpan.getTraceId())
+                                .severityText("ERROR")
+                                .content("service_f branch returned degraded result, span="
+                                        + currentSpan.getName())
+                                .tags(buildLongDurationTags())
+                                .error(true)
+                                .timestamp(currentSpan.getEndTime())
+                                .build());
+                    } else {
+                        nextSpanList.add(new SpanTreeCursor(currentSpan.getId(), currentSpan.getStartTime()));
+                    }
+                }
+            }
+            formerSpanList = nextSpanList;
+            if (formerSpanList.isEmpty()) {
+                break;
+            }
+        }
+    }
+
+    private String getServiceFTreeSpanName(int level) {
+        return switch (level) {
+            case 1 -> "service_f_prepare_context";
+            case 2 -> "service_f_load_profile";
+            case 3 -> "service_f_merge_feature";
+            case 4 -> "service_f_write_cache";
+            case 5 -> "service_f_finalize_response";
+            default -> "service_f_tree_worker";
+        };
+    }
+
+    private void writeJsonObjects(File file, List<Object> jsonObjects) throws IOException {
+        List<String> lines = new ArrayList<>();
+        for (Object jsonObject : jsonObjects) {
+            lines.add(objectMapper.writeValueAsString(jsonObject));
+        }
+        String content = String.join(System.lineSeparator(), lines);
+        if (content.contains("\"remoteEndPoint\":\"\"")) {
+            throw new IllegalStateException("Invalid json sample, remoteEndPoint must not be serialized as empty string.");
+        }
+        Files.writeString(file.toPath(), content,
+                StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
+    private List<Tag> buildSpanTags(boolean longDuration) {
+        if (longDuration) {
+            return buildLongDurationTags();
+        }
+        return new ArrayList<>();
+    }
+
+    private List<Tag> buildLongDurationTags() {
+        List<Tag> tags = new ArrayList<>();
+        tags.add(Tag.builder()
+                .key(Span.SpanTagKey.LONG_DURATION.getKey())
+                .value(Span.SpanTagValue.TRUE.getValue())
+                .build());
+        return tags;
+    }
+
+    private record SpanTreeCursor(String spanId, long startTime) {
     }
 
     /**
