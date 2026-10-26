@@ -36,3 +36,7 @@ build/
 
 ### H2 ###
 *.db
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+__pycache__/

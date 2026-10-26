@@ -1,5 +1,9 @@
 package edu.npu.arktouros.service.sinker;
 
+import edu.npu.arktouros.service.sinker.sqlite.SqliteSinkService;
+import edu.npu.arktouros.util.sqlite.SqliteStore;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import edu.npu.arktouros.service.sinker.elasticsearch.ElasticsearchSinkService;
 import edu.npu.arktouros.service.sinker.h2.H2SinkService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +21,9 @@ import java.util.Locale;
 @Slf4j
 public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
 
+    @Autowired
+    private ObjectProvider<SqliteStore> sqliteStore;
+
     @Value("${instance.active.sinker}")
     private String activeSinker;
 
@@ -27,6 +34,8 @@ public class SinkServiceFactoryBean implements FactoryBean<SinkService> {
         if (sinkService == null) {
             if (activeSinker.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
                 sinkService = new ElasticsearchSinkService();
+            } else if ("sqlite".equalsIgnoreCase(activeSinker)) {
+                sinkService = new SqliteSinkService(sqliteStore.getObject());
             } else if (activeSinker.toLowerCase(Locale.ROOT).equals("h2")) {
                 sinkService = new H2SinkService();
             } else {

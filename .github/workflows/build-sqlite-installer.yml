@@ -1,0 +1,48 @@
+name: Build SQLite offline installer
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  installer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Test and package backend
+        run: >-
+          mvn -B -pl arktouros-apm/arktouros-apm-api -am package
+          -Dtest=SqliteStorageTest,SqliteApiTest,ElasticsearchMapperTest,ArktourosSpanServiceImplTest
+          -Dinstance.active.dataReceiver=arktourosGrpc -Dreceiver.grpc.port=0
+          -Dsurefire.failIfNoSpecifiedTests=false -DtestFailureIgnore=false -Duse.official.source
+      - uses: docker/setup-buildx-action@v4
+      - name: Build complete image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: arktouros-image/Dockerfile
+          platforms: linux/amd64
+          tags: arktouros-all-in-one:sqlite
+          load: true
+          push: false
+      - name: Create clean installer
+        run: |
+          python3 arktouros-image/generate-example.py
+          docker save -o build/arktouros-all-in-one.tar arktouros-all-in-one:sqlite
+          python3 arktouros-image/package-install.py --image-tar build/arktouros-all-in-one.tar --output build/install-arktouros-image
+      - name: Container integration test
+        run: python3 arktouros-image/test-installer.py build/install-arktouros-image.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: install-arktouros-image-linux-amd64
+          path: build/install-arktouros-image.zip
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error

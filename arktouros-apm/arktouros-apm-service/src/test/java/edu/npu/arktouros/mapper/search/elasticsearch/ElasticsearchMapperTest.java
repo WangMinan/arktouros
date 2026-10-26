@@ -198,9 +198,12 @@ public class ElasticsearchMapperTest {
 
     @Test
     void testGetMetricsNames() {
+        SearchResponse<Object> response = Mockito.mock(SearchResponse.class);
+        Aggregate names = Aggregate.of(a -> a.sterms(s -> s.buckets(b -> b.array(List.of()))));
+        Mockito.when(response.aggregations()).thenReturn(Map.of("nameAgg", names));
         elasticsearchUtil.when(() -> ElasticsearchUtil
-                        .scrollSearch(Mockito.any(), Mockito.any()))
-                .thenReturn(new ArrayList<>());
+                        .simpleSearch(Mockito.any(), Mockito.any()))
+                .thenReturn(response);
         Assertions.assertNotNull(
                 elasticsearchMapper.getMetricsNames("testName", null));
         Assertions.assertNotNull(

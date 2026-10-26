@@ -112,7 +112,7 @@ function init_metricCharts(metric, index) {
 		} else {
 			// 富文本
 			option.series = [{
-				type: 'scatter',
+				type: 'line',
 				symbolSize: 1,
 				data: [
 					{
@@ -123,7 +123,7 @@ function init_metricCharts(metric, index) {
 							fontSize: 20,
 							fontWeight: 'bold',
 							// 红色字体 注意暗黑模式
-							color: checkIsDark.value === 'dark' ? '#ff0000' : '#992233'
+							color: '#ff0000'
 						}
 					}],
 			}]

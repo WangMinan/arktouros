@@ -1,5 +1,6 @@
 package edu.npu.arktouros.service.scheduled;
 
+import edu.npu.arktouros.service.scheduled.sqlite.SqliteScheduledJob;
 import edu.npu.arktouros.service.scheduled.elasticsearch.ElasticsearchScheduledJob;
 import edu.npu.arktouros.service.scheduled.h2.H2ScheduledJob;
 import edu.npu.arktouros.service.search.SearchService;
@@ -41,6 +42,8 @@ public class ScheduledJobFactoryBean implements FactoryBean<ScheduledJob> {
         if (scheduledJob == null) {
             if (activeScheduledJob.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
                 scheduledJob = new ElasticsearchScheduledJob(searchService, sinkService);
+            } else if ("sqlite".equalsIgnoreCase(activeScheduledJob)) {
+                scheduledJob = new SqliteScheduledJob(searchService, sinkService);
             } else if (activeScheduledJob.toLowerCase(Locale.ROOT).equals("h2")) {
                 scheduledJob = new H2ScheduledJob(searchService, sinkService);
             } else {

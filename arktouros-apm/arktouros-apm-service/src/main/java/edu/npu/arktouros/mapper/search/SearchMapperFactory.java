@@ -1,5 +1,9 @@
 package edu.npu.arktouros.mapper.search;
 
+import edu.npu.arktouros.mapper.search.sqlite.SqliteSearchMapper;
+import edu.npu.arktouros.util.sqlite.SqliteStore;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import edu.npu.arktouros.mapper.search.elasticsearch.ElasticsearchMapper;
 import edu.npu.arktouros.mapper.search.h2.H2SearchMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +21,9 @@ import java.util.Locale;
 @Slf4j
 public class SearchMapperFactory implements FactoryBean<SearchMapper> {
 
+    @Autowired
+    private ObjectProvider<SqliteStore> sqliteStore;
+
     @Value("${instance.active.searchMapper}")
     private String activeSearchMapper;
 
@@ -26,6 +33,8 @@ public class SearchMapperFactory implements FactoryBean<SearchMapper> {
     public SearchMapper getObject() {
         if (activeSearchMapper.toLowerCase(Locale.ROOT).equals("elasticsearch")) {
             searchMapper = new ElasticsearchMapper();
+        } else if ("sqlite".equalsIgnoreCase(activeSearchMapper)) {
+            searchMapper = new SqliteSearchMapper(sqliteStore.getObject());
         } else if (activeSearchMapper.toLowerCase(Locale.ROOT).equals("h2")) {
             searchMapper = new H2SearchMapper();
         } else {

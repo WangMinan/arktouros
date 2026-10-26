@@ -76,8 +76,10 @@ public class JsonFileReceiver extends DataReceiver {
         this.objectMapper = objectMapper;
         this.sytelTraceAnalyzerNumber = sytelTraceAnalyzerNumber;
 
-        initMd5FileMap();
         try {
+            Files.createDirectories(logDirFile.toPath());
+            Files.createDirectories(indexFile.toPath().toAbsolutePath().getParent());
+            initMd5FileMap();
             initParamsWithIndexFile();
         } catch (IOException e) {
             throw new ArktourosException(e);

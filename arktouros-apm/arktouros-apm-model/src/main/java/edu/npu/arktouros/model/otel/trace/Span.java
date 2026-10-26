@@ -81,6 +81,7 @@ public class Span implements Source {
         this.endTime = span.getEndTime();
         this.root = span.getRoot();
         this.type = SourceType.SPAN;
+        this.tags = new ArrayList<>();
         span.getTagsList().forEach(tag -> this.tags.add(new Tag(tag)));
     }
 

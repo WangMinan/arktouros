@@ -1,0 +1,13 @@
+.git
+**/.git
+**/node_modules
+**/target
+**/logs
+**/db
+**/dist
+**/node
+build
+!build/arktouros-apm-api-leaves.tar.gz
+.idea
+docs
+*.log

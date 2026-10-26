@@ -1,0 +1,13 @@
+# Tag the imported old image as :legacy before building; keep its UI, nginx and JDK.
+FROM wangminan/arktouros-all-in-one:legacy
+USER root
+COPY build/arktouros-apm-api-leaves.tar.gz /tmp/arktouros-apm-api-leaves.tar.gz
+RUN tar -xzf /tmp/arktouros-apm-api-leaves.tar.gz -C /usr/local && \
+    rm /tmp/arktouros-apm-api-leaves.tar.gz && \
+    mkdir -p /usr/local/arktouros-apm-api/db /usr/local/arktouros-apm-api/input_logs && \
+    systemctl disable elasticsearch
+COPY arktouros-image/arktouros.service /usr/lib/systemd/system/arktouros.service
+COPY arktouros-image/arktouros-apm-api/config/application.yaml /usr/local/arktouros-apm-api/config/application.yaml
+RUN systemctl enable arktouros
+WORKDIR /usr/local/arktouros-apm-api
+ENTRYPOINT ["/usr/sbin/init"]

@@ -1,5 +1,9 @@
 package edu.npu.arktouros.service.operation;
 
+import edu.npu.arktouros.service.operation.sqlite.SqliteOperationService;
+import edu.npu.arktouros.util.sqlite.SqliteStore;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import edu.npu.arktouros.receiver.DataReceiver;
 import edu.npu.arktouros.service.operation.elasticsearch.ElasticsearchOperationService;
 import edu.npu.arktouros.service.operation.h2.H2OperationService;
@@ -17,6 +21,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class DataOperationServiceFactoryBean implements FactoryBean<DataOperationService> {
+
+    @Autowired
+    private ObjectProvider<SqliteStore> sqliteStore;
 
     @Value("${instance.active.operation}")
     private String activeDataOperation;
@@ -39,6 +46,8 @@ public class DataOperationServiceFactoryBean implements FactoryBean<DataOperatio
         if (dataOperationService == null) {
             if (activeDataOperation.equals("elasticsearch")) {
                 dataOperationService = new ElasticsearchOperationService(dataReceiver, scheduledJob);
+            } else if ("sqlite".equalsIgnoreCase(activeDataOperation)) {
+                dataOperationService = new SqliteOperationService(dataReceiver, scheduledJob, sqliteStore.getObject());
             } else if (activeDataOperation.equals("h2")) {
                 dataOperationService = new H2OperationService(dataReceiver, scheduledJob);
             } else {

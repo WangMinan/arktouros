@@ -31,9 +31,15 @@ mvn -Dmaven.test.skip=true clean package -Pnative
 
 编译产出工件将在${project.basedir}/build/下生成，分别是arktouros-collector，arktouros-webapp与arktouros-apm-api的tar包。
 
-解压后的运行命令，您需要在本地运行与elasticsearch-java这一新client版本对应的elasticsearch，建议使用elasticsearch8.7.0及以上版本，使用较低版本的elasticsearch会出现连接问题。
+APM 默认使用 SQLite 保存服务、日志、Span 和指标，无需启动 Elasticsearch 或配置其证书。H2 仍作为采集接收队列，两个数据库文件都保存在工作目录的 `db/` 下。
+
+从旧版一体化镜像升级请阅读 [SQLite 迁移指南](docs/SQLite迁移指南.md)。更改配置不能使旧版 JAR 自动获得 SQLite 支持，必须替换后端发行包或重建镜像。
+
+离线交付可手动运行 GitHub Actions 的 **Build SQLite offline installer** 工作流，下载 `install-arktouros-image-linux-amd64` artifact。其中包含前端、大屏、SQLite 后端的完整镜像、无需 Compose 的一键启动脚本和可手动复制导入的 Arktouros TXT 示例，部署步骤见 [安装与排障指南](arktouros-image/安装与排障指南.md)。
+
+在解压出的 `arktouros-apm-api` 目录运行：
 ```shell
-java -jar -Djava.library.path=lib/ *.jar
+java -Dfile.encoding=UTF-8 -jar arktouros-apm-api-0.0.1.jar
 ```
 
 如有需要可自行改动config目录下的对应配置文件。

@@ -11,6 +11,8 @@ services:
       - /root/arktouros/apm/config:/arktouros/config
       # 日志目录映射出来
       - /root/arktouros/apm/logs:/arktouros/logs
+      - /root/arktouros/apm/db:/arktouros/db
+      - /root/arktouros/apm/input_logs:/arktouros/input_logs
     privileged: true
     restart: on-failure
   arktouros-ui:
