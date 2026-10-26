@@ -1,0 +1,6 @@
+合成树状调用示例，仍为 Arktouros JSON 对象逐行写入的 UTF-8 TXT。
+推荐查看：服务 demo-gateway，TraceId checkout-tree-29，关闭“仅查看属于当前service的span”。
+根请求有鉴权、订单、推荐、通知 4 条分支；最深 6 层，推荐 trace 共 30 个 Span。
+包括同服务内部 Span、并行分支、共享缓存/数据库、支付超时后重试成功、慢定价调用。
+30 个 trace / 873 个 Span / 873 条日志 / 960 个指标点 / 16 个服务。
+复制 arktouros-demo.txt 到 ../arktouros-apm-api/input_logs/ 导入；未清空时不要重复导入。

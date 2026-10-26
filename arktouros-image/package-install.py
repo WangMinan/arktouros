@@ -35,7 +35,7 @@ def package(image, output):
         (output / folder).mkdir(parents=True, exist_ok=True)
     paths = ["docker-compose.yaml", "start-arktouros-all-in-one.sh", "import-example.sh", "安装与排障指南.md",
              "arktouros-apm-api/config/application.yaml", "arktouros-ui/arktourosUiConfig.js",
-             "arktouros-bigscreen/config.json", "examples/arktouros-demo.txt"]
+             "arktouros-bigscreen/config.json", "examples/arktouros-demo.txt", "examples/树状调用示例说明.txt"]
     for relative in paths:
         shutil.copyfile(template / relative, output / relative)
     example = output / "examples/arktouros-demo.txt"
@@ -66,9 +66,10 @@ def package(image, output):
                    includes_uncommitted_changes=dirty,
                    ui_revision=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo / "arktouros-ui", text=True).strip(),
                    backend_package_sha256=sha256(repo / "build/arktouros-apm-api-leaves.tar.gz"),
-                   example_records=420, example_services=4, example_spans=120, example_logs=60, example_metrics=240)
+                   example_records=2706, example_services=16, example_spans=873, example_logs=873, example_metrics=960,
+                   example_traces=30, example_featured_trace="checkout-tree-29", example_sha256=sha256(example))
     (output / "release-manifest.json").write_text(json.dumps(details, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    assert len(records) == 420
+    assert len(records) == 2706
     assert not list((output / "arktouros-apm-api/db").iterdir())
     assert not list((output / "arktouros-apm-api/input_logs").iterdir())
     print(json.dumps(details, ensure_ascii=False, indent=2))

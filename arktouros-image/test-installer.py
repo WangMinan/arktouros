@@ -31,7 +31,7 @@ def api(path):
 def wait_for_data():
     for _ in range(60):
         try:
-            if int(api("/logs?pageNum=1&pageSize=10")["total"]) == 60:
+            if int(api("/logs?pageNum=1&pageSize=10")["total"]) == 873:
                 return
         except (OSError, AssertionError, KeyError, ValueError):
             pass
@@ -86,12 +86,20 @@ def main(bundle):
             inbox = working / "arktouros-apm-api/input_logs/arktouros-demo.txt"
             shutil.copyfile(example, inbox)
             wait_for_data()
-            assert int(api("/services?pageNum=1&pageSize=10")["total"]) == 4
+            assert int(api("/services?pageNum=1&pageSize=10")["total"]) == 16
             topology = api("/service/topology")
-            assert len(topology["nodes"]) == 4 and len(topology["calls"]) == 3, topology
+            assert len(topology["nodes"]) == 16 and len(topology["calls"]) == 26, topology
             assert len(api("/metrics?serviceName=demo-gateway")) == 2
-            assert len(api("/trace/spanNames?serviceName=demo-order")) == 1
-            assert api("/trace/topology?serviceName=demo-gateway&traceId=demo-trace-00&innerService=false")
+            assert len(api("/trace/spanNames?serviceName=demo-order")) == 2
+            tree = api("/trace/topology?serviceName=demo-gateway&traceId=checkout-tree-29&innerService=false")
+            def walk(node, depth=1):
+                yield node, depth
+                for child in node["children"]:
+                    yield from walk(child, depth+1)
+            tree_nodes = list(walk(tree))
+            assert len(tree_nodes) == 30 and len(tree["children"]) == 4
+            assert max(depth for _, depth in tree_nodes) == 6
+            assert any(int(node["span"]["endTime"]) == -1 for node, _ in tree_nodes)
             for port in (80, 50052, 50053):
                 assert b"<html" in get("/", port).lower()
             assert b"http://127.0.0.1:50050" in get("/arktourosUiConfig.js", 50052)
@@ -99,14 +107,14 @@ def main(bundle):
             assert run("docker", "exec", "arktouros-all-in-one", "test", "-d", "/usr/share/elasticsearch", check=False).returncode == 1
             counts = run("docker", "exec", "arktouros-all-in-one", "python3", "-c",
                          "import sqlite3,json; c=sqlite3.connect('/usr/local/arktouros-apm-api/db/arktouros.sqlite'); print(json.dumps(dict(c.execute('select kind,count(*) from telemetry group by kind'))))")
-            assert json.loads(counts.stdout) == {"service": 4, "span": 120, "log": 60, "metric": 240}, counts.stdout
+            assert json.loads(counts.stdout) == {"service": 16, "span": 873, "log": 873, "metric": 960}, counts.stdout
             assert run("bash", "import-example.sh", cwd=working, check=False).returncode != 0
             print(run("docker", "restart", "arktouros-all-in-one").stdout, flush=True)
             wait_for_data()
-            assert int(api("/services?pageNum=1&pageSize=10")["total"]) == 4
+            assert int(api("/services?pageNum=1&pageSize=10")["total"]) == 16
             # Re-running the one-click installer must not remove data or duplicate examples.
             print(run("bash", "start-arktouros-all-in-one.sh", "-i", "127.0.0.1", cwd=working).stdout, flush=True)
-            assert int(api("/logs?pageNum=1&pageSize=10")["total"]) == 60
+            assert int(api("/logs?pageNum=1&pageSize=10")["total"]) == 873
             run("docker", "exec", "arktouros-all-in-one", "curl", "-fsS", "-X", "DELETE", "http://127.0.0.1:50050/api/v0/all")
             assert int(api("/services?pageNum=1&pageSize=10")["total"]) == 0
             assert int(api("/logs?pageNum=1&pageSize=10")["total"]) == 0
